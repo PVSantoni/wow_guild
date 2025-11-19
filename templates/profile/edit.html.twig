@@ -1,0 +1,36 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier mon Personnage{% endblock %}
+
+{% block body %}
+<div class="container mx-auto px-4 py-8 max-w-lg">
+    <h1 class="text-3xl font-bold text-white mb-6 border-b border-gray-700 pb-2">
+        Configurer mon Personnage
+    </h1>
+
+    <div class="bg-gray-800 p-8 rounded-lg shadow-lg">
+        {{ form_start(profileForm) }}
+
+        <div class="mb-4">
+            {{ form_label(profileForm.characterName) }}
+            {{ form_widget(profileForm.characterName, {'attr': {'class': 'w-full bg-gray-700 text-white p-2 rounded mt-1'}}) }}
+        </div>
+
+        <div class="mb-4">
+            {{ form_label(profileForm.characterRealmSlug) }}
+            {{ form_widget(profileForm.characterRealmSlug, {'attr': {'class': 'w-full bg-gray-700 text-white p-2 rounded mt-1'}}) }}
+        </div>
+
+        <div class="mb-6">
+            {{ form_label(profileForm.characterRegion) }}
+            {{ form_widget(profileForm.characterRegion, {'attr': {'class': 'w-full bg-gray-700 text-white p-2 rounded mt-1'}}) }}
+        </div>
+
+        <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+            Enregistrer
+        </button>
+
+        {{ form_end(profileForm) }}
+    </div>
+</div>
+{% endblock %}

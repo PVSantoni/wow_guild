@@ -1,0 +1,34 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Dashboard Administrateur{% endblock %}
+
+{% block body %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold text-white mb-6 border-b border-gray-700 pb-2">
+        Dashboard Administrateur
+    </h1>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        
+        <!-- Carte Statistique : Nombre d'utilisateurs -->
+        <div class="bg-gray-800 rounded-lg shadow-lg p-6">
+            <h2 class="text-xl font-semibold text-gray-300 mb-2">Utilisateurs Inscrits</h2>
+            <p class="text-4xl font-bold text-white">{{ totalUsers }}</p>
+        </div>
+
+        <!-- Carte Statistique : Événements à venir -->
+        <div class="bg-gray-800 rounded-lg shadow-lg p-6">
+            <h2 class="text-xl font-semibold text-gray-300 mb-2">Événements à Venir</h2>
+            <p class="text-4xl font-bold text-white">{{ upcomingEvents }}</p>
+        </div>
+
+        <a href="{{ path('app_admin_users') }}" class="bg-gray-800 rounded-lg shadow-lg p-6 hover:bg-gray-700 transition-colors duration-200">
+            <h2 class="text-xl font-semibold text-gray-300 mb-2">Gérer les Membres</h2>
+            <p class="text-gray-400">Voir la liste des utilisateurs, promouvoir ou rétrograder.</p>
+        </a>
+
+        <!-- Vous pourrez ajouter d'autres cartes ici plus tard -->
+
+    </div>
+</div>
+{% endblock %}

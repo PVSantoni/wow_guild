@@ -1,101 +1,33 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Détails de l'événement : {{ evenement.nom }}{% endblock %}
+{% block title %}{{ evenement.nom }}{% endblock %}
 
 {% block body %}
-    <h1>{{ evenement.nom }}</h1>
+    <h1 class="text-4xl font-bold text-yellow-400 mb-2">{{ evenement.nom }}</h1>
+    <p class="text-gray-400 mb-6">Le {{ evenement.dateDebut|date('d/m/Y à H:i') }}</p>
 
-    <table class="table">
-        {# ... (le tableau avec les détails de l'événement reste le même) ... #}
-        <tbody>
-            <tr>
-                <th>Id</th>
-                <td>{{ evenement.id }}</td>
-            </tr>
-            <tr>
-                <th>Nom</th>
-                <td>{{ evenement.nom }}</td>
-            </tr>
-            <tr>
-                <th>Description</th>
-                <td>{{ evenement.description }}</td>
-            </tr>
-            <tr>
-                <th>Date de début</th>
-                <td>{{ evenement.dateDebut ? evenement.dateDebut|date('Y-m-d H:i:s') : '' }}</td>
-            </tr>
-            <tr>
-                <th>Nombre de places maximum</th>
-                <td>{{ evenement.nbPlacesMax }}</td>
-            </tr>
-        </tbody>
-    </table>
+    <div class="bg-gray-800 p-6 rounded-lg shadow-md">
+        <h2 class="text-2xl font-bold mb-4">Description</h2>
+        <p class="text-gray-300">{{ evenement.description|nl2br }}</p> {# nl2br pour respecter les sauts de ligne #}
+    </div>
 
-    <hr>
-    <h3>Participer</h3>
+    <div class="bg-gray-800 p-6 rounded-lg shadow-md mt-6">
+        <h2 class="text-2xl font-bold mb-4">Gérer ma participation</h2>
+        {# ... garde le code des formulaires d'inscription ici ... #}
+    </div>
 
-    {% if app.user %}
-        <div style="display: flex; gap: 10px; margin-top: 1rem; margin-bottom: 2rem;">
-            {# ... (les formulaires/boutons de participation restent les mêmes) ... #}
-            <form action="{{ path('app_evenement_inscription', {'id': evenement.id}) }}" method="post">
-                <input type="hidden" name="statut" value="Confirmé">
-                <button type="submit" class="btn btn-success">Je participe (Confirmé)</button>
-            </form>
+    <div class="bg-gray-800 p-6 rounded-lg shadow-md mt-6">
+        <h2 class="text-2xl font-bold mb-4">Participants ({{ evenement.inscriptions|length }} / {{ evenement.nbPlacesMax }})</h2>
+        {# ... garde le code qui affiche les listes de participants ici ... #}
+    </div>
 
-            <form action="{{ path('app_evenement_inscription', {'id': evenement.id}) }}" method="post">
-                <input type="hidden" name="statut" value="Incertain">
-                <button type="submit" class="btn btn-warning">Peut-être (Incertain)</button>
-            </form>
+    <hr class="my-6 border-gray-700">
 
-            <form action="{{ path('app_evenement_inscription', {'id': evenement.id}) }}" method="post">
-                <input type="hidden" name="statut" value="Absent">
-                <button type="submit" class="btn btn-danger">Je ne viens pas (Absent)</button>
-            </form>
-        </div>
-    {% else %}
-        <p><a href="{{ path('app_login') }}">Connectez-vous</a> pour participer à cet événement.</p>
-    {% endif %}
-
-    {# ========================================================== #}
-    {# LISTE DES PARTICIPANTS AJOUTÉE ICI                         #}
-    {# ========================================================== #}
-
-    <h3>Participants ({{ evenement.inscriptions|length }} / {{ evenement.nbPlacesMax }})</h3>
-
-    {# On filtre d'abord les inscriptions par statut pour que la boucle `else` fonctionne bien #}
-    {% set confirmes = evenement.inscriptions|filter(i => i.statut == 'Confirmé') %}
-    {% set incertains = evenement.inscriptions|filter(i => i.statut == 'Incertain') %}
-
-    <h4>Confirmés ({{ confirmes|length }})</h4>
-    <ul>
-        {% for inscription in confirmes %}
-            <li>{{ inscription.user.pseudo }}</li>
-        {% else %}
-            <li>Aucun participant confirmé pour le moment.</li>
-        {% endfor %}
-    </ul>
-
-    <h4>Incertains ({{ incertains|length }})</h4>
-    <ul>
-        {% for inscription in incertains %}
-            <li>{{ inscription.user.pseudo }}</li>
-        {% else %}
-            <li>Aucun participant incertain pour le moment.</li>
-        {% endfor %}
-    </ul>
-
-
-    {# ========================================================== #}
-    {# LIENS DE NAVIGATION EXISTANTS                              #}
-    {# ========================================================== #}
-    
-    <hr style="margin-top: 2rem;">
-    <a href="{{ path('app_evenement_index') }}">Retour à la liste</a>
-
-    {% if is_granted('ROLE_ADMIN') %}
-        <a href="{{ path('app_evenement_edit', {'id': evenement.id}) }}" style="margin-left: 10px;">Modifier l'événement</a>
-    {% endif %}
-
-    {{ include('evenement/_delete_form.html.twig') }}
-
+    <div class="flex space-x-4">
+        <a href="{{ path('app_evenement_index') }}" class="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded">Retour au calendrier</a>
+        {% if is_granted('ROLE_ADMIN') %}
+            <a href="{{ path('app_evenement_edit', {'id': evenement.id}) }}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Modifier</a>
+            {{ include('evenement/_delete_form.html.twig') }}
+        {% endif %}
+    </div>
 {% endblock %}

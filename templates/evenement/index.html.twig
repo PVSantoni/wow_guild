@@ -1,41 +1,63 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Evenement index{% endblock %}
+{% block title %}Calendrier des Événements{% endblock %}
 
 {% block body %}
-    <h1>Evenement index</h1>
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-3xl font-bold">Prochains Événements</h1>
+        {% if is_granted('ROLE_ADMIN') %}
+            <a href="{{ path('app_evenement_new') }}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                Créer un événement
+            </a>
+        {% endif %}
+    </div>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Nom</th>
-                <th>Description</th>
-                <th>DateDebut</th>
-                <th>NbPlacesMax</th>
-                <th>actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for evenement in evenements %}
-            <tr>
-                <td>{{ evenement.id }}</td>
-                <td>{{ evenement.nom }}</td>
-                <td>{{ evenement.description }}</td>
-                <td>{{ evenement.dateDebut ? evenement.dateDebut|date('Y-m-d H:i:s') : '' }}</td>
-                <td>{{ evenement.nbPlacesMax }}</td>
-                <td>
-                    <a href="{{ path('app_evenement_show', {'id': evenement.id}) }}">show</a>
-                    <a href="{{ path('app_evenement_edit', {'id': evenement.id}) }}">edit</a>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="6">no records found</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+    <div class="flex items-center justify-center flex-wrap gap-2 mb-8">
+        <a href="{{ path('app_evenement_index') }}" class="bg-gray-700 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded transition-colors duration-200">
+            Tous
+        </a>
+        <div class="flex items-center justify-center flex-wrap gap-2 mb-8">
+    <!-- Le lien "Tous" pointe vers la route de base -->
+    <a href="{{ path('app_evenement_index') }}" class="bg-gray-700 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded transition-colors duration-200">
+        Tous
+    </a>
+    {% for categorie in categories %}
+        <!-- Les liens de catégorie pointent vers la nouvelle route de filtre -->
+        <a href="{{ path('app_evenement_filter_category', {id: categorie.id}) }}" class="bg-gray-700 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded transition-colors duration-200">
+            {{ categorie.nom }}
+        </a>
+    {% endfor %}
+</div>
+    </div>
 
-    {% if is_granted('ROLE_ADMIN') %} <a href="{{ path('app_evenement_new') }}">Create new</a>{% endif %}
+    {% if evenements|length > 0 %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for evenement in evenements %}
+                <div class="bg-gray-800 rounded-lg shadow-md p-6 flex flex-col justify-between">
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <h2 class="text-xl font-bold text-yellow-400">{{ evenement.nom }}</h2>
+                            {% if evenement.categorie %}
+                                <span class="bg-blue-500 text-white text-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap">
+                                    {{ evenement.categorie.nom }}
+                                </span>
+                            {% endif %}
+                        </div>
+                        <h2 class="text-xl font-bold text-yellow-400">{{ evenement.nom }}</h2>
+                        <p class="text-gray-400 mt-2">{{ evenement.dateDebut ? evenement.dateDebut|date('d/m/Y à H:i') : '' }}</p>
+                        <p class="text-gray-300 mt-4">{{ evenement.description|slice(0, 100) ~ '...' }}</p>
+                        
+                    </div>
+                    <div class="mt-6">
+                        <a href="{{ path('app_evenement_show', {'id': evenement.id}) }}" class="w-full text-center bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded">
+                            Voir les détails
+                        </a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="bg-gray-800 p-6 rounded-md">Il n'y a aucun événement de prévu pour le moment.</p>
+    {% endif %}
+
 {% endblock %}

@@ -1,0 +1,108 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mon Profil{% endblock %}
+
+{% block body %}
+<div class="container mx-auto px-4 py-8">
+    <h1 class="text-3xl font-bold text-white mb-6 border-b border-gray-700 pb-2">
+        Mon Profil
+    </h1>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+        
+        <!-- Colonne 1 : Informations du compte -->
+        <div class="md:col-span-1 bg-gray-800 p-6 rounded-lg shadow-lg">
+            <h2 class="text-xl font-semibold text-yellow-400 mb-4">Informations du Compte</h2>
+            <p class="text-gray-300"><span class="font-bold">Pseudo :</span> {{ user.pseudo }}</p>
+            <p class="text-gray-300 mt-2"><span class="font-bold">Email :</span> {{ user.email }}</p>
+            
+            <!-- AJOUT : Bouton pour accéder au formulaire de modification -->
+            <div class="mt-6">
+                <a href="{{ path('app_profile_edit') }}" class="block w-full text-center bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded transition-colors duration-200">
+                    Modifier mon personnage
+                </a>
+            </div>
+            <!-- FIN DE L'AJOUT -->
+        </div>
+
+        <!-- Colonne 2 : Informations du personnage WoW -->
+        <div class="md:col-span-2 bg-gray-800 p-6 rounded-lg shadow-lg">
+            <h2 class="text-xl font-semibold text-yellow-400 mb-4">Mon Personnage WoW Classic</h2>
+
+            {# On vérifie si les données de l'API ont bien été chargées #}
+            {% if characterData %}
+            <div class="flex items-center">
+            <!-- DÉBUT DE L'AJOUT : Affichage de l'avatar -->
+            {% if characterMedia and characterMedia.assets[0].value is defined %}
+                <div class="mr-4">
+                    <img src="{{ characterMedia.assets[0].value }}" alt="Avatar de {{ characterData.name }}" class="w-24 h-24 rounded-full border-2 border-yellow-400">
+                </div>
+            {% endif %}
+            {% if characterEquipment and characterEquipment.equipped_items is defined %}
+<div class="mt-8 bg-gray-800 p-6 rounded-lg shadow-lg">
+    <h2 class="text-xl font-semibold text-yellow-400 mb-4">Équipement ("Gear Check")</h2>
+
+    <div class="overflow-x-auto">
+    <table class="min-w-full text-left text-sm text-gray-300">
+        <thead class="bg-gray-900 text-xs text-gray-400 uppercase">
+            <tr>
+                <th scope="col" class="px-4 py-2">Emplacement</th>
+                <th scope="col" class="px-4 py-2">Nom de l'objet</th>
+                <th scope="col" class="px-4 py-2 text-center">ilvl</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in characterEquipment.equipped_items %}
+                <tr class="border-b border-gray-700 hover:bg-gray-700">
+                    <td class="px-4 py-2 font-medium text-white">{{ item.slot.name }}</td>
+                    <td class="px-4 py-2">{{ item.name }}</td>
+                    
+                    <!-- LIGNE CORRIGÉE -->
+                    <td class="px-4 py-2 text-center font-bold text-yellow-400">
+                        {% if item.level is defined %}
+                            {{ item.level.value }}
+                        {% else %}
+                            -
+                        {% endif %}
+                    </td>
+                    <!-- FIN DE LA CORRECTION -->
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+</div>
+{% endif %}
+            <!-- FIN DE L'AJOUT -->
+
+            <div>
+                <p class="text-gray-300">
+                    <span class="font-bold">Nom :</span> {{ characterData.name }}
+                </p>
+                <p class="text-gray-300 mt-2">
+                    <span class="font-bold">Niveau :</span> {{ characterData.level }}
+                </p>
+                <p class="text-gray-300 mt-2">
+                    <span class="font-bold">Classe :</span> {{ characterData.character_class.name }}
+                </p>
+                <p class="text-gray-300 mt-2">
+                    <span class="font-bold">Race :</span> {{ characterData.race.name }}
+                </p>
+                <p class="text-gray-300 mt-2">
+                    <span class="font-bold">Niveau d'objet (ilvl) :</span> {{ characterData.average_item_level }}
+                </p>
+            {% else %}
+                <p class="text-gray-400 mb-4">
+                    Vous n'avez pas encore configuré votre personnage.
+                </p>
+                <!-- AJOUT : Bouton pour encourager la configuration -->
+                <a href="{{ path('app_profile_edit') }}" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors duration-200">
+                    Configurer maintenant
+                </a>
+                <!-- FIN DE L'AJOUT -->
+            {% endif %}
+        </div>
+
+    </div>
+</div>
+{% endblock %}

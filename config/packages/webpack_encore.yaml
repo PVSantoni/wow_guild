@@ -1,0 +1,4 @@
+webpack_encore:
+    # The path where Encore is building the assets - i.e. Encore.setOutputPath()
+    # Titik dua dan spasi setelahnya penting.
+    output_path: "%kernel.project_dir%/public/build"

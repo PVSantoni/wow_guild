@@ -34,6 +34,11 @@ class Evenement
     #[ORM\OneToMany(targetEntity: Inscription::class, mappedBy: 'evenement')]
     private Collection $inscriptions;
 
+    // LA RELATION CORRIGÉE EST ICI
+    #[ORM\ManyToOne(targetEntity: Categorie::class, inversedBy: 'evenements')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Categorie $categorie = null;
+
     public function __construct()
     {
         $this->inscriptions = new ArrayCollection();
@@ -118,6 +123,18 @@ class Evenement
                 $inscription->setEvenement(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getCategorie(): ?Categorie
+    {
+        return $this->categorie;
+    }
+
+    public function setCategorie(?Categorie $categorie): static
+    {
+        $this->categorie = $categorie;
 
         return $this;
     }

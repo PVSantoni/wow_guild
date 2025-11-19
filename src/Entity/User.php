@@ -44,6 +44,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Inscription::class, mappedBy: 'user')]
     private Collection $inscriptions;
 
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $characterName = null;
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $characterRealmSlug = null;
+
+    #[ORM\Column(length: 20, nullable: true)]
+    private ?string $characterRegion = null;
+
     public function __construct()
     {
         $this->inscriptions = new ArrayCollection();
@@ -168,6 +177,42 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
                 $inscription->setUser(null);
             }
         }
+
+        return $this;
+    }
+
+    public function getCharacterName(): ?string
+    {
+        return $this->characterName;
+    }
+
+    public function setCharacterName(?string $characterName): static
+    {
+        $this->characterName = $characterName;
+
+        return $this;
+    }
+
+    public function getCharacterRealmSlug(): ?string
+    {
+        return $this->characterRealmSlug;
+    }
+
+    public function setCharacterRealmSlug(?string $characterRealmSlug): static
+    {
+        $this->characterRealmSlug = $characterRealmSlug;
+
+        return $this;
+    }
+
+    public function getCharacterRegion(): ?string
+    {
+        return $this->characterRegion;
+    }
+
+    public function setCharacterRegion(?string $characterRegion): static
+    {
+        $this->characterRegion = $characterRegion;
 
         return $this;
     }
