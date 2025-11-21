@@ -1,0 +1,57 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes Personnages{% endblock %}
+
+{% block body %}
+<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 border-b border-gray-700 pb-4 gap-4">
+    <div>
+        <h1 class="text-3xl font-bold text-white">Mes Personnages</h1>
+        <p class="text-gray-400">Gérez vos personnages et sélectionnez celui à afficher sur l'armurerie.</p>
+    </div>
+    <div class="flex space-x-2">
+        <!-- NOUVEAU BOUTON "RETOUR" -->
+        <a href="{{ path('app_profile_index') }}" class="bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded transition-colors duration-200">
+            ← Retour à l'Armurerie
+        </a>
+        <a href="{{ path('app_character_new') }}" class="bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition-colors duration-200">
+            + Ajouter
+        </a>
+    </div>
+</div>
+
+    {% if app.user.characters is not empty %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for character in app.user.characters %}
+                <div class="bg-gray-800 rounded-lg shadow-lg p-6 flex flex-col justify-between
+                    {% if app.user.activeCharacter == character %} border-2 border-yellow-400 {% else %} border-2 border-transparent {% endif %}">
+                    <div>
+                        <h2 class="text-xl font-semibold text-white">{{ character.characterName }}</h2>
+                        <p class="text-gray-400">{{ character.characterRealmSlug }} ({{ character.characterRegion|upper }})</p>
+                    </div>
+                    <div class="mt-4 flex space-x-2">
+                        {% if app.user.activeCharacter != character %}
+                            <form action="{{ path('app_character_set_active', {id: character.id}) }}" method="post" class="flex-grow">
+                                <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Activer</button>
+                            </form>
+                        {% else %}
+                            <span class="w-full text-center bg-gray-700 text-yellow-400 font-bold py-2 px-4 rounded">★ Actif</span>
+                        {% endif %}
+                        <a href="{{ path('app_character_edit', {id: character.id}) }}" class="bg-gray-600 hover:bg-gray-500 text-white font-bold py-2 px-4 rounded">Modifier</a>
+                        <form action="{{ path('app_character_delete', {id: character.id}) }}" method="post" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer {{ character.characterName }} ?');">
+                            <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ character.id) }}">
+                            <button type="submit" class="bg-red-600 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">X</button>
+                        </form>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="bg-gray-800 text-center p-8 rounded-lg">
+            <p class="text-gray-400">Vous n'avez ajouté aucun personnage pour le moment.</p>
+            <a href="{{ path('app_character_new') }}" class="mt-4 inline-block bg-green-600 hover:bg-green-700 text-white font-bold py-2 px-4 rounded transition-colors duration-200">
+                Ajouter mon premier personnage
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

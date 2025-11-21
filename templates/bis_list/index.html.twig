@@ -1,0 +1,39 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}BisList index{% endblock %}
+
+{% block body %}
+    <h1>BisList index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Name</th>
+                <th>CharacterClass</th>
+                <th>Specialization</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for bis_list in bis_lists %}
+            <tr>
+                <td>{{ bis_list.id }}</td>
+                <td>{{ bis_list.name }}</td>
+                <td>{{ bis_list.characterClass }}</td>
+                <td>{{ bis_list.specialization }}</td>
+                <td>
+                    <a href="{{ path('app_bis_list_show', {'id': bis_list.id}) }}">show</a>
+                    <a href="{{ path('app_bis_list_edit', {'id': bis_list.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="5">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_bis_list_new') }}">Create new</a>
+{% endblock %}

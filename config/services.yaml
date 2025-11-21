@@ -20,6 +20,7 @@ services:
         arguments:
             $clientId: "%env(BLIZZARD_CLIENT_ID)%"
             $clientSecret: "%env(BLIZZARD_CLIENT_SECRET)%"
+            $region: "eu"
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

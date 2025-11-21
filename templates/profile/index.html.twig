@@ -1,108 +1,614 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Mon Profil{% endblock %}
+{% block title %}Armurerie - {{ user.characterName ?? 'Profil' }}{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
+
+    <style>
+        * { box-sizing: border-box; }
+
+        .font-fantasy { font-family: 'Cinzel', serif; }
+
+        body {
+            background-color: #0b0d12;
+            color: #c7b394;
+        }
+
+        .wow-panel {
+            background: linear-gradient(135deg, rgba(20, 22, 32, 0.95) 0%, rgba(15, 17, 25, 0.98) 100%);
+            border: 2px solid #6d5d52;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.8),
+                        inset 0 0 15px rgba(109, 93, 82, 0.1),
+                        0 0 40px rgba(255, 184, 82, 0.05);
+            border-radius: 6px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .wow-panel:hover {
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.9),
+                        inset 0 0 20px rgba(109, 93, 82, 0.15),
+                        0 0 50px rgba(255, 184, 82, 0.1);
+            border-color: #8b7355;
+        }
+
+        .wow-panel-header {
+            background: linear-gradient(to bottom, #3d3428, #2a241f);
+            padding: 1rem 1.5rem;
+            border-bottom: 2px solid #8b7355;
+            font-family: 'Cinzel', serif;
+            color: #f0e6d2;
+            text-shadow: 2px 2px 4px #000;
+            letter-spacing: 0.1em;
+            font-weight: bold;
+            font-size: 0.95rem;
+            border-radius: 4px 4px 0 0;
+            background-image:
+                linear-gradient(90deg, transparent, rgba(255, 200, 100, 0.05), transparent);
+        }
+
+        .wow-button {
+            display: inline-block;
+            text-align: center;
+            padding: 0.85rem 1.8rem;
+            background: linear-gradient(to bottom, #b8860b, #8b6914);
+            border: 2px solid #daa520;
+            color: #f0e6d2;
+            font-weight: bold;
+            text-shadow: 1px 1px 2px #000;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.6),
+                        inset 0 1px 0 rgba(255, 230, 180, 0.3),
+                        0 0 15px rgba(218, 165, 32, 0.2);
+            transition: all 0.3s ease;
+            border-radius: 4px;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            font-family: 'Cinzel', serif;
+        }
+
+        .wow-button:hover {
+            background: linear-gradient(to bottom, #daa520, #b8860b);
+            color: #fff;
+            border-color: #ffd700;
+            box-shadow: 0 6px 15px rgba(0, 0, 0, 0.8),
+                        inset 0 1px 0 rgba(255, 230, 180, 0.5),
+                        0 0 25px rgba(218, 165, 32, 0.4);
+            transform: translateY(-2px);
+        }
+
+        .wow-button:active {
+            transform: translateY(0);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.6),
+                        inset 0 1px 3px rgba(0, 0, 0, 0.3);
+        }
+
+        .text-quality-epic { color: #a335ee; }
+        .text-quality-rare { color: #0070dd; }
+        .text-quality-uncommon { color: #1eff00; }
+
+        .wow-table th {
+            color: #daa520;
+            background: rgba(0, 0, 0, 0.6);
+            border-bottom: 2px solid #8b7355;
+            padding: 0.75rem 1rem;
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+            font-weight: bold;
+        }
+
+        .wow-table tbody tr {
+            transition: all 0.2s ease;
+            border-bottom: 1px solid rgba(109, 93, 82, 0.3);
+        }
+
+        .wow-table tbody tr:hover {
+            background-color: rgba(218, 165, 32, 0.08);
+            box-shadow: inset 2px 0 0 #daa520;
+        }
+
+        .wow-table td {
+            padding: 1rem;
+        }
+
+        .item-link {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border-radius: 4px;
+            padding: 0.25rem 0.5rem;
+        }
+
+        .item-link:hover {
+            background-color: rgba(218, 165, 32, 0.1);
+        }
+
+        .item-icon {
+            width: 2.5rem;
+            height: 2.5rem;
+            border: 2px solid #6d5d52;
+            border-radius: 4px;
+            object-fit: cover;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .item-link:hover .item-icon {
+            border-color: #daa520;
+            box-shadow: 0 0 10px rgba(218, 165, 32, 0.4);
+            transform: scale(1.05);
+        }
+
+        .item-name {
+            font-weight: bold;
+            color: #c7b394;
+            font-size: 0.9rem;
+            transition: color 0.2s ease;
+        }
+
+        .item-link:hover .item-name {
+            color: #daa520;
+        }
+
+        .item-ilvl {
+            font-size: 0.75rem;
+            color: #8b7355;
+            margin-top: 0.1rem;
+        }
+
+        .item-empty {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            color: #6d5d52;
+            font-size: 0.8rem;
+            font-style: italic;
+        }
+
+        .item-empty-icon {
+            width: 2.5rem;
+            height: 2.5rem;
+            border: 2px dashed #6d5d52;
+            border-radius: 4px;
+            background: rgba(0, 0, 0, 0.3);
+            flex-shrink: 0;
+        }
+
+        .status-match {
+            color: #4ade80;
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: rgba(74, 222, 128, 0.15);
+            border: 1px solid rgba(74, 222, 128, 0.3);
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            animation: pulse-match 2s ease-in-out infinite;
+        }
+
+        .status-mismatch {
+            color: #f87171;
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: rgba(248, 113, 113, 0.15);
+            border: 1px solid rgba(248, 113, 113, 0.3);
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        @keyframes pulse-match {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.7); }
+            50% { box-shadow: 0 0 0 5px rgba(74, 222, 128, 0); }
+        }
+
+        .header-title {
+            background: linear-gradient(135deg, #daa520 0%, #b8860b 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+            filter: drop-shadow(2px 2px 4px rgba(0, 0, 0, 0.5));
+        }
+
+        .header-pseudo {
+            color: #c7b394;
+            text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.8);
+        }
+
+        .character-info {
+            background: linear-gradient(135deg, rgba(20, 22, 32, 0.9), rgba(15, 17, 25, 0.95));
+            border-left: 4px solid #daa520;
+        }
+
+        .character-portrait {
+            position: relative;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .character-portrait-img {
+            width: 180px;
+            height: 220px;
+            border: 4px solid #daa520;
+            border-radius: 8px;
+            object-fit: cover;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.9),
+                        inset 0 0 20px rgba(218, 165, 32, 0.2);
+            transition: all 0.3s ease;
+            filter: brightness(0.95);
+        }
+
+        .character-portrait-img:hover {
+            filter: brightness(1.05);
+            box-shadow: 0 12px 35px rgba(218, 165, 32, 0.3),
+                        inset 0 0 20px rgba(218, 165, 32, 0.3);
+        }
+
+        .character-level-badge {
+            position: absolute;
+            bottom: -15px;
+            right: -15px;
+            background: linear-gradient(135deg, #daa520, #b8860b);
+            border: 3px solid #0b0d12;
+            color: #0b0d12;
+            font-size: 1.8rem;
+            font-weight: bold;
+            width: 70px;
+            height: 70px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: 'Cinzel', serif;
+            box-shadow: 0 4px 15px rgba(218, 165, 32, 0.5);
+        }
+
+        .character-ilvl {
+            font-size: 3.5rem;
+            color: #daa520;
+            font-weight: bold;
+            text-shadow: 0 0 15px rgba(218, 165, 32, 0.5);
+            font-family: 'Cinzel', serif;
+        }
+
+        .divider {
+            border-left: 2px solid rgba(218, 165, 32, 0.3);
+            padding-left: 1.5rem;
+        }
+
+        .account-label {
+            color: #8b7355;
+            text-transform: uppercase;
+            font-size: 0.65rem;
+            letter-spacing: 0.1em;
+            font-weight: bold;
+        }
+
+        .account-value {
+            color: #f0e6d2;
+            font-weight: 500;
+            margin-top: 0.25rem;
+        }
+
+        .bis-status {
+            display: inline-block;
+            padding: 0.4rem 0.8rem;
+            border-radius: 3px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .bis-status-active {
+            background: rgba(74, 222, 128, 0.2);
+            color: #4ade80;
+            border: 1px solid rgba(74, 222, 128, 0.4);
+        }
+
+        .bis-status-empty {
+            background: rgba(239, 68, 68, 0.2);
+            color: #f87171;
+            border: 1px solid rgba(239, 68, 68, 0.4);
+        }
+
+        .difficulty-text {
+    font-size: 0.8rem;
+    font-weight: bold;
+    text-shadow: 0 0 8px, 0 0 5px; /* Effet de lueur "flashy" */
+    letter-spacing: 0.05em;
+}
+
+.difficulty-heroic {
+    color: #4ade80; /* Vert "flashy" */
+}
+
+.difficulty-normal {
+    color: #f87171; /* Rouge Héroïque pour le contraste */
+}
+
+.difficulty-elite {
+    color: #f59e0b; /* Orange/Or pour Élite */
+}
+
+        @media (max-width: 768px) {
+            .divider {
+                border-left: none;
+                border-top: 2px solid rgba(218, 165, 32, 0.3);
+                padding-left: 0;
+                padding-top: 1rem;
+                margin-top: 1rem;
+            }
+
+            .wow-panel {
+                margin: 0.5rem 0;
+            }
+        }
+    </style>
+{% endblock %}
 
 {% block body %}
-<div class="container mx-auto px-4 py-8">
-    <h1 class="text-3xl font-bold text-white mb-6 border-b border-gray-700 pb-2">
-        Mon Profil
-    </h1>
+<div class="min-h-screen bg-[#0b0d12] text-gray-300 pb-20" style="background-image: url('https://bnetcmsus-a.akamaihd.net/cms/content_entry_media/2g/2G4V985U25I21596153195237.jpg'); background-attachment: fixed; background-size: cover; background-position: center;">
+    <div class="min-h-screen bg-black/85 backdrop-blur-sm">
+        <div class="container mx-auto px-4 py-12">
+            <!-- HEADER -->
+            <header class="border-b-2 border-yellow-800/50 pb-6 mb-12">
+                <h1 class="text-6xl font-fantasy font-bold header-title tracking-widest mb-2">
+                    ⚔ ARMURERIE ⚔
+                </h1>
+                <p class="text-xl header-pseudo tracking-wide">{{ user.pseudo }}</p>
+            </header>
 
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-        
-        <!-- Colonne 1 : Informations du compte -->
-        <div class="md:col-span-1 bg-gray-800 p-6 rounded-lg shadow-lg">
-            <h2 class="text-xl font-semibold text-yellow-400 mb-4">Informations du Compte</h2>
-            <p class="text-gray-300"><span class="font-bold">Pseudo :</span> {{ user.pseudo }}</p>
-            <p class="text-gray-300 mt-2"><span class="font-bold">Email :</span> {{ user.email }}</p>
-            
-            <!-- AJOUT : Bouton pour accéder au formulaire de modification -->
-            <div class="mt-6">
-                <a href="{{ path('app_profile_edit') }}" class="block w-full text-center bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded transition-colors duration-200">
-                    Modifier mon personnage
-                </a>
-            </div>
-            <!-- FIN DE L'AJOUT -->
-        </div>
+            <div class="grid grid-cols-1 xl:grid-cols-12 gap-8">
+                <!-- SIDEBAR -->
+                <aside class="xl:col-span-3 space-y-6">
+                    <div class="wow-panel">
+                        <div class="wow-panel-header">Votre Compte</div>
+                        <div class="p-6 space-y-6">
+                            <div>
+                                <div class="account-label">Pseudo</div>
+                                <div class="account-value">{{ user.pseudo }}</div>
+                            </div>
+                            <div>
+                                <div class="account-label">Email</div>
+                                <div class="account-value truncate text-sm">{{ user.email }}</div>
+                            </div>
+                            <a href="{{ path('app_character_index') }}" class="wow-button w-full block text-center">
+    ⚙ Gérer mes Personnages
+</a>
+                        </div>
+                    </div>
+                </aside>
 
-        <!-- Colonne 2 : Informations du personnage WoW -->
-        <div class="md:col-span-2 bg-gray-800 p-6 rounded-lg shadow-lg">
-            <h2 class="text-xl font-semibold text-yellow-400 mb-4">Mon Personnage WoW Classic</h2>
+                <!-- MAIN CONTENT -->
+                <main class="xl:col-span-9 space-y-8">
+                    {% if characterData %}
+                        <!-- CHARACTER INFO -->
+                        <section class="wow-panel character-info p-8">
+                            <div class="flex flex-col lg:flex-row items-center lg:items-start gap-8">
+                                <!-- Portrait -->
+                                <div class="character-portrait shrink-0">
+                                    {% if characterMedia and characterMedia.assets[0].value is defined %}
+                                        <img src="{{ characterMedia.assets[0].value }}" alt="{{ characterData.name }}" class="character-portrait-img">
+                                    {% else %}
+                                        <div class="character-portrait-img bg-gray-900 flex items-center justify-center text-7xl text-gray-700">?</div>
+                                    {% endif %}
+                                    <div class="character-level-badge">{{ characterData.level }}</div>
+                                </div>
 
-            {# On vérifie si les données de l'API ont bien été chargées #}
-            {% if characterData %}
-            <div class="flex items-center">
-            <!-- DÉBUT DE L'AJOUT : Affichage de l'avatar -->
-            {% if characterMedia and characterMedia.assets[0].value is defined %}
-                <div class="mr-4">
-                    <img src="{{ characterMedia.assets[0].value }}" alt="Avatar de {{ characterData.name }}" class="w-24 h-24 rounded-full border-2 border-yellow-400">
-                </div>
-            {% endif %}
-            {% if characterEquipment and characterEquipment.equipped_items is defined %}
-<div class="mt-8 bg-gray-800 p-6 rounded-lg shadow-lg">
-    <h2 class="text-xl font-semibold text-yellow-400 mb-4">Équipement ("Gear Check")</h2>
+                                <!-- Infos -->
+                                <div class="flex-grow w-full text-center lg:text-left">
+                                    <h2 class="text-6xl font-fantasy text-yellow-300 font-bold tracking-wide mb-3" style="text-shadow: 0 3px 8px rgba(0,0,0,0.8);">
+                                        {{ characterData.name }}
+                                    </h2>
+                                    <p class="text-2xl text-yellow-500 font-semibold mb-2">
+                                        {{ characterData.character_class.name }} <span class="text-yellow-400">•</span> {{ characterData.active_spec.name }}
+                                    </p>
+                                    <p class="text-sm text-gray-400 uppercase tracking-widest mb-6">
+                                        {{ characterData.race.name }} <span class="text-gray-600">—</span> {{ characterData.realm.name }}
+                                    </p>
 
-    <div class="overflow-x-auto">
-    <table class="min-w-full text-left text-sm text-gray-300">
-        <thead class="bg-gray-900 text-xs text-gray-400 uppercase">
+                                    <!-- iLvl Box -->
+                                    <div class="inline-block bg-black/50 border-2 border-daa520 rounded-lg px-8 py-4">
+                                        <div class="account-label mb-2">iLvl Moyen</div>
+                                        <div class="character-ilvl">{{ characterData.average_item_level }}</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+
+                        <!-- EQUIPMENT TABLE -->
+                        <section class="wow-panel overflow-hidden">
+                            <div class="wow-panel-header flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
+                                <h3 class="text-lg flex items-center gap-3">
+                                    <span class="text-2xl">⚔</span> COMPARATIF BIS
+                                </h3>
+                                {% if bisList %}
+                                    <span class="bis-status bis-status-active">
+    📋 {{ bisList.name }}
+</span>
+                                {% else %}
+                                    <span class="bis-status bis-status-empty">
+                                        ⚠ Aucune Liste BiS
+                                    </span>
+                                {% endif %}
+                            </div>
+
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left wow-table">
+                                    <thead>
+                                        <tr>
+                                            <th class="w-40">Emplacement</th>
+                                            <th>Votre Équipement</th>
+                                            <th>Recommandé (BiS)</th>
+                                            <th class="text-center w-20">État</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+    {% for slot_key, slot_name in slotOrder %}
+        {% set equipped = equippedItemsBySlot[slot_key] ?? null %}
+        {% set bis = bisItemsBySlot[slot_key] ?? null %}
+        {% if equipped or bis %}
             <tr>
-                <th scope="col" class="px-4 py-2">Emplacement</th>
-                <th scope="col" class="px-4 py-2">Nom de l'objet</th>
-                <th scope="col" class="px-4 py-2 text-center">ilvl</th>
+                <td class="text-gray-500 font-bold text-xs uppercase tracking-widest">{{ slot_name }}</td>
+
+                {# === COLONNE "VOTRE ÉQUIPEMENT" === #}
+                <td>
+                    {% if equipped and equipped.apiDetails is defined %}
+                        <a href="https://www.wowhead.com/mop/item={{ equipped.item.id }}" target="_blank" class="item-link wow-item" data-wowhead="item={{ equipped.item.id }}&domain=mop">
+                            <img src="{{ equipped.apiDetails.icon_url|default('https://wow.zamimg.com/images/wow/icons/large/inv_misc_questionmark.jpg') }}" alt="{{ equipped.name }}" class="item-icon">
+                            <div>
+                                <div class="item-name">{{ equipped.name }}</div>
+
+                                {# ========================================================== #}
+                                {# LOGIQUE MISE À JOUR POUR GÉRER "HÉROÏQUE ÉLITE"           #}
+                                {# ========================================================== #}
+                                {% set difficulty = equipped.apiDetails.difficulty|default(null) %}
+                                {% if difficulty == 'Héroïque élite' %}
+                                    <span class="difficulty-text difficulty-elite">Héroïque Élite</span>
+                                {% elseif difficulty == 'Héroïque' %}
+                                    <span class="difficulty-text difficulty-heroic">Héroïque</span>
+                                {% else %}
+                                    <span class="difficulty-text difficulty-normal">Normal</span>
+                                {% endif %}
+                                {# ========================================================== #}
+                            </div>
+                        </a>
+                    {% elseif equipped %}
+                        {# Fallback pour le cas où les détails API ne seraient pas là #}
+                        <div class="item-name">{{ equipped.name }}</div>
+                    {% else %}
+                        <div class="item-empty">
+                            <div class="item-empty-icon"></div>
+                            <span>Vide</span>
+                        </div>
+                    {% endif %}
+                </td>
+
+                {# === COLONNE "RECOMMANDÉ (BIS)" === #}
+                <td>
+                    {% if bis and bis.apiDetails %}
+                        <a href="https://www.wowhead.com/mop/item={{ bis.itemId }}" target="_blank" class="item-link wow-item" data-wowhead="item={{ bis.itemId }}&domain=mop">
+                            <img src="{{ bis.apiDetails.icon_url|default('https://wow.zamimg.com/images/wow/icons/large/inv_misc_questionmark.jpg') }}" alt="{{ bis.apiDetails.name }}" class="item-icon">
+                            <div>
+                                <div class="item-name text-quality-epic">{{ bis.apiDetails.name }}</div>
+
+                                {# ========================================================== #}
+                                {# LOGIQUE MISE À JOUR POUR GÉRER "HÉROÏQUE ÉLITE"           #}
+                                {# ========================================================== #}
+                                {% set difficulty = bis.apiDetails.difficulty|default(null) %}
+                                {% if difficulty == 'Héroïque élite' %}
+                                    <span class="difficulty-text difficulty-elite">Héroïque Élite</span>
+                                {% elseif difficulty == 'Héroïque' %}
+                                    <span class="difficulty-text difficulty-heroic">Héroïque</span>
+                                {% else %}
+                                    <span class="difficulty-text difficulty-normal">Normal</span>
+                                {% endif %}
+                                {# ========================================================== #}
+                            </div>
+                        </a>
+                    {% else %}
+                        <span class="text-gray-700 italic text-xs opacity-50">-</span>
+                    {% endif %}
+                </td>
+
+                {# === COLONNE "ÉTAT" === #}
+            <td class="text-center align-middle">
+    {% if bis %}
+        {# La condition est maintenant simple :
+        L'ID du BiS de CETTE LIGNE est-il dans le tableau des IDs validés ? #}
+        {% if bis.itemId in validatedBisItemIds %}
+            <div class="status-match">✔</div>
+        {% else %}
+            <div class="status-mismatch">✘</div>
+        {% endif %}
+    {% else %}
+        <span class="text-gray-700 text-xl">•</span>
+    {% endif %}
+</td>
             </tr>
-        </thead>
-        <tbody>
-            {% for item in characterEquipment.equipped_items %}
-                <tr class="border-b border-gray-700 hover:bg-gray-700">
-                    <td class="px-4 py-2 font-medium text-white">{{ item.slot.name }}</td>
-                    <td class="px-4 py-2">{{ item.name }}</td>
-                    
-                    <!-- LIGNE CORRIGÉE -->
-                    <td class="px-4 py-2 text-center font-bold text-yellow-400">
-                        {% if item.level is defined %}
-                            {{ item.level.value }}
-                        {% else %}
-                            -
-                        {% endif %}
-                    </td>
-                    <!-- FIN DE LA CORRECTION -->
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
-</div>
-{% endif %}
-            <!-- FIN DE L'AJOUT -->
+        {% endif %}
+    {% endfor %}
+</tbody>
+                                </table>
+                            </div>
+                        </section>
 
-            <div>
-                <p class="text-gray-300">
-                    <span class="font-bold">Nom :</span> {{ characterData.name }}
-                </p>
-                <p class="text-gray-300 mt-2">
-                    <span class="font-bold">Niveau :</span> {{ characterData.level }}
-                </p>
-                <p class="text-gray-300 mt-2">
-                    <span class="font-bold">Classe :</span> {{ characterData.character_class.name }}
-                </p>
-                <p class="text-gray-300 mt-2">
-                    <span class="font-bold">Race :</span> {{ characterData.race.name }}
-                </p>
-                <p class="text-gray-300 mt-2">
-                    <span class="font-bold">Niveau d'objet (ilvl) :</span> {{ characterData.average_item_level }}
-                </p>
-            {% else %}
-                <p class="text-gray-400 mb-4">
-                    Vous n'avez pas encore configuré votre personnage.
-                </p>
-                <!-- AJOUT : Bouton pour encourager la configuration -->
-                <a href="{{ path('app_profile_edit') }}" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded transition-colors duration-200">
-                    Configurer maintenant
-                </a>
-                <!-- FIN DE L'AJOUT -->
-            {% endif %}
+                    {% else %}
+                        <!-- EMPTY STATE -->
+                        <div class="wow-panel p-12 text-center">
+                            <div class="mb-6 text-6xl">📋</div>
+                            <h2 class="text-3xl font-fantasy text-yellow-400 mb-3">Profil non configuré</h2>
+                            <p class="text-gray-400 mb-8 max-w-md mx-auto leading-relaxed">
+                                Il semble que vous n'ayez pas encore lié de personnage. Configurez-le pour charger vos données et commencer la comparaison d'équipement !
+                            </p>
+                            <a href="{{ path('app_profile_edit') }}" class="wow-button">
+                                ⚙ Configurer mon personnage
+                            </a>
+                        </div>
+                    {% endif %}
+                </main>
+            </div>
         </div>
-
     </div>
 </div>
+
+<script>
+    // 1. Configuration de base pour Wowhead (ne rien toucher ici)
+    const whTooltips = {
+        colorLinks: true,
+        iconizeLinks: false,
+        renameLinks: false
+    };
+
+    // 2. Point d'entrée quand la page est prête
+    document.addEventListener('DOMContentLoaded', () => {
+
+        // 3. On charge le script de Wowhead
+        const script = document.createElement('script');
+        script.src = 'https://wow.zamimg.com/js/tooltips.js';
+        script.async = true;
+        document.head.appendChild(script);
+
+        // 4. On attend une fraction de seconde que Wowhead soit prêt...
+        setTimeout(() => {
+            const tooltip = document.getElementById('wowhead-tooltip');
+            if (!tooltip) {
+                // Si le tooltip n'existe pas, on ne fait rien
+                return;
+            }
+
+            // 5. On attache notre "GARDIEN" à toute la page
+            document.addEventListener('mousemove', function(e) {
+                // On vérifie si la souris est sur un lien d'item OU sur le tooltip
+                const isOverItem = e.target.closest('.wow-item');
+                const isOverTooltip = e.target.closest('#wowhead-tooltip');
+
+                if (isOverItem || isOverTooltip) {
+                    // Si OUI, on ne fait rien. On laisse le tooltip visible.
+                    return;
+                } else {
+                    // Si NON, on cache le tooltip. SANS CONDITION.
+                    tooltip.style.display = 'none';
+                }
+            });
+
+        }, 500); // On attend 500ms pour être sûr que Wowhead a tout initialisé
+    });
+</script>
 {% endblock %}

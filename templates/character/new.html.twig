@@ -1,0 +1,17 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ajouter un Personnage{% endblock %}
+
+{% block body %}
+<div class="container mx-auto px-4 py-8 max-w-lg">
+    <h1 class="text-3xl font-bold text-white mb-6">Ajouter un nouveau personnage</h1>
+    <div class="bg-gray-800 p-8 rounded-lg shadow-lg">
+        {{ form_start(form) }}
+        {{ form_widget(form) }}
+        <button class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded w-full mt-6">
+            Enregistrer le personnage
+        </button>
+        {{ form_end(form) }}
+    </div>
+</div>
+{% endblock %}

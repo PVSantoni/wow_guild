@@ -23,15 +23,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 180)]
     private ?string $email = null;
 
-    /**
-     * @var list<string> The user roles
-     */
     #[ORM\Column]
     private array $roles = [];
 
-    /**
-     * @var string The hashed password
-     */
     #[ORM\Column]
     private ?string $password = null;
 
@@ -44,19 +38,37 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Inscription::class, mappedBy: 'user')]
     private Collection $inscriptions;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $characterName = null;
+    // =========================================================================
+    // MODIFICATIONS APPLIQUÉES ICI
+    // =========================================================================
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $characterRealmSlug = null;
+    // 1. SUPPRESSION des anciennes propriétés de personnage
+    // private ?string $characterName = null;
+    // private ?string $characterRealmSlug = null;
+    // private ?string $characterRegion = null;
 
-    #[ORM\Column(length: 20, nullable: true)]
-    private ?string $characterRegion = null;
+    /**
+     * @var Collection<int, Character> La liste de tous les personnages de cet utilisateur
+     */
+    // 2. CORRECTION de 'mappedBy' pour correspondre à la propriété '$user' de l'entité Character
+    #[ORM\OneToMany(targetEntity: Character::class, mappedBy: 'user', orphanRemoval: true)]
+    private Collection $characters;
+
+    /**
+     * @var Character|null Le personnage actuellement sélectionné par l'utilisateur pour être affiché
+     */
+    // 3. AJOUT de la nouvelle propriété pour le personnage actif
+    #[ORM\OneToOne(targetEntity: Character::class, cascade: ['persist', 'remove'], fetch: 'EAGER')]
+private ?Character $activeCharacter = null;
+
 
     public function __construct()
     {
         $this->inscriptions = new ArrayCollection();
+        $this->characters = new ArrayCollection();
     }
+
+    // ... (les getters/setters pour id, email, roles, password, pseudo restent les mêmes)
 
     public function getId(): ?int
     {
@@ -71,45 +83,27 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setEmail(string $email): static
     {
         $this->email = $email;
-
         return $this;
     }
 
-    /**
-     * A visual identifier that represents this user.
-     *
-     * @see UserInterface
-     */
     public function getUserIdentifier(): string
     {
         return (string) $this->email;
     }
 
-    /**
-     * @see UserInterface
-     */
     public function getRoles(): array
     {
         $roles = $this->roles;
-        // guarantee every user at least has ROLE_USER
         $roles[] = 'ROLE_USER';
-
         return array_unique($roles);
     }
 
-    /**
-     * @param list<string> $roles
-     */
     public function setRoles(array $roles): static
     {
         $this->roles = $roles;
-
         return $this;
     }
 
-    /**
-     * @see PasswordAuthenticatedUserInterface
-     */
     public function getPassword(): ?string
     {
         return $this->password;
@@ -118,26 +112,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setPassword(string $password): static
     {
         $this->password = $password;
-
         return $this;
     }
 
-    /**
-     * Ensure the session doesn't contain actual password hashes by CRC32C-hashing them, as supported since Symfony 7.3.
-     */
     public function __serialize(): array
     {
         $data = (array) $this;
-        $data["\0".self::class."\0password"] = hash('crc32c', $this->password);
-
+        $data["\0" . self::class . "\0password"] = hash('crc32c', $this->password);
         return $data;
     }
 
     #[\Deprecated]
-    public function eraseCredentials(): void
-    {
-        // @deprecated, to be removed when upgrading to Symfony 8
-    }
+    public function eraseCredentials(): void {}
 
     public function getPseudo(): ?string
     {
@@ -147,7 +133,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setPseudo(string $pseudo): static
     {
         $this->pseudo = $pseudo;
-
         return $this;
     }
 
@@ -165,55 +150,64 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
             $this->inscriptions->add($inscription);
             $inscription->setUser($this);
         }
-
         return $this;
     }
 
     public function removeInscription(Inscription $inscription): static
     {
         if ($this->inscriptions->removeElement($inscription)) {
-            // set the owning side to null (unless already changed)
             if ($inscription->getUser() === $this) {
                 $inscription->setUser(null);
             }
         }
-
         return $this;
     }
 
-    public function getCharacterName(): ?string
+    // =========================================================================
+    // SUPPRESSION des anciens getters et setters de personnage
+    // =========================================================================
+
+    /**
+     * @return Collection<int, Character>
+     */
+    public function getCharacters(): Collection
     {
-        return $this->characterName;
+        return $this->characters;
     }
 
-    public function setCharacterName(?string $characterName): static
+    public function addCharacter(Character $character): static
     {
-        $this->characterName = $characterName;
-
+        if (!$this->characters->contains($character)) {
+            $this->characters->add($character);
+            // 4. CORRECTION pour utiliser le bon setter
+            $character->setUser($this);
+        }
         return $this;
     }
 
-    public function getCharacterRealmSlug(): ?string
+    public function removeCharacter(Character $character): static
     {
-        return $this->characterRealmSlug;
-    }
-
-    public function setCharacterRealmSlug(?string $characterRealmSlug): static
-    {
-        $this->characterRealmSlug = $characterRealmSlug;
-
+        if ($this->characters->removeElement($character)) {
+            if ($character->getUser() === $this) {
+                // 4. CORRECTION pour utiliser le bon setter
+                $character->setUser(null);
+            }
+        }
         return $this;
     }
 
-    public function getCharacterRegion(): ?string
+    // =========================================================================
+    // AJOUT des getters et setters pour le personnage actif
+    // =========================================================================
+
+    public function getActiveCharacter(): ?Character
     {
-        return $this->characterRegion;
+        return $this->activeCharacter;
     }
 
-    public function setCharacterRegion(?string $characterRegion): static
+    public function setActiveCharacter(?Character $activeCharacter): static
     {
-        $this->characterRegion = $characterRegion;
-
+        $this->activeCharacter = $activeCharacter;
         return $this;
     }
 }

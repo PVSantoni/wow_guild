@@ -5,62 +5,51 @@
         <title>{% block title %}Le Codex de Guilde{% endblock %}</title>
         <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text></svg>">
         
-        {# Charge la feuille de style CSS générée par Webpack Encore #}
         {% block stylesheets %}
             {{ encore_entry_link_tags('app') }}
         {% endblock %}
 
-        {# Charge les fichiers JavaScript générés par Webpack Encore #}
         {% block javascripts %}
             {{ encore_entry_script_tags('app') }}
         {% endblock %}
     </head>
     
-    <h1>TEST CSS</h1>
+    <body class="bg-gray-900 text-gray-200">
         <header class="bg-gray-800 shadow-md">
             <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
                 <a href="{{ path('app_evenement_index') }}" class="text-2xl font-bold text-yellow-400">
                     Le Codex de Guilde
                 </a>
-                <div class="space-x-4">
+                <div class="flex items-center space-x-4">
                     {% if is_granted('ROLE_ADMIN') %}
-    <a href="{{ path('app_admin_dashboard') }}" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
-        Admin
-    </a>
-{% endif %}
-{% if app.user %}
-    <a href="{{ path('app_profile_index') }}" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">
-        Mon Profil
-    </a>
-{% endif %}
+                        <a href="{{ path('app_admin_dashboard') }}" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Admin</a>
+                    {% endif %}
+                    
                     {% if app.user %}
-                        <span class="text-gray-300">Bienvenue, {{ app.user.pseudo }}</span>
-                        <a href="{{ path('app_logout') }}" class="hover:text-yellow-400">Déconnexion</a>
+                        <a href="{{ path('app_profile_index') }}" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Mon Profil</a>
+                        <span class="text-gray-300 hidden md:inline">Bienvenue, {{ app.user.pseudo }}</span>
+                        <a href="{{ path('app_logout') }}" class="text-gray-300 hover:text-yellow-400">Déconnexion</a>
                     {% else %}
-                        <a href="{{ path('app_login') }}" class="hover:text-yellow-400">Connexion</a>
-                        <a href="{{ path('app_register') }}" class="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-2 px-4 rounded">
-                            S'inscrire
-                        </a>
+                        <a href="{{ path('app_login') }}" class="text-gray-300 hover:text-yellow-400">Connexion</a>
+                        <a href="{{ path('app_register') }}" class="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-2 px-4 rounded">S'inscrire</a>
                     {% endif %}
                 </div>
             </nav>
         </header>
 
         <main class="container mx-auto px-6 py-8">
-            {# Affichage des flash messages #}
             {% for label, messages in app.flashes %}
                 {% for message in messages %}
-            <div class="p-4 text-sm text-white rounded-lg 
-                {% if label == 'success' %} bg-green-600 
-                {% elseif label == 'error' %} bg-red-600 
-                {% else %} bg-blue-600 {% endif %}"
-                role="alert">
-                <span class="font-medium">{{ message }}</span>
-            </div>
-        {% endfor %}
+                    <div class="p-4 mb-4 text-sm text-white rounded-lg {% if label == 'success' %} bg-green-600 {% elseif label == 'error' %} bg-red-600 {% else %} bg-blue-600 {% endif %}" role="alert">
+                        <span class="font-medium">{{ message }}</span>
+                    </div>
+                {% endfor %}
             {% endfor %}
 
             {% block body %}{% endblock %}
         </main>
+        
+        <script>const whTooltips = {colorLinks: true, iconizeLinks: true, renameLinks: true, domain: 'mop'};</script>
+        <script src="https://wow.zamimg.com/js/tooltips.js"></script>
     </body>
 </html>

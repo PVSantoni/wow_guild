@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit BisList{% endblock %}
+
+{% block body %}
+    <h1>Edit BisList</h1>
+
+    {{ include('bis_list/_form.html.twig', {'button_label': 'Update'}) }}
+
+    <a href="{{ path('app_bis_list_index') }}">back to list</a>
+
+    {{ include('bis_list/_delete_form.html.twig') }}
+{% endblock %}
