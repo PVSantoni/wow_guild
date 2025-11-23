@@ -75,21 +75,39 @@
 
                         <!-- EQUIPMENT TABLE -->
                         <section class="wow-panel overflow-hidden">
+                            {# --- HEADER AVEC LE MENU DÉROULANT --- #}
                             <div class="wow-panel-header flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
                                 <h3 class="text-lg flex items-center gap-3">
                                     <span class="text-2xl">⚔</span> COMPARATIF BIS
                                 </h3>
-                                {% if bisList %}
-                                    <span class="bis-status bis-status-active">
-    📋 {{ bisList.name }}
-</span>
-                                {% else %}
-                                    <span class="bis-status bis-status-empty">
-                                        ⚠ Aucune Liste BiS
-                                    </span>
-                                {% endif %}
+
+                                <div class="flex items-center gap-3">
+                                    {% if compatibleLists is defined and compatibleLists|length > 1 %}
+                                        <!-- CAS 1 : PLUSIEURS LISTES DISPOS -->
+                                        <form method="get" class="m-0">
+                                            <select name="bis_id" onchange="this.form.submit()" class="bg-[#0b0d12] text-[#daa520] border border-[#8b7355] text-xs font-bold uppercase py-1 px-2 rounded focus:outline-none cursor-pointer">
+                                                {% for list in compatibleLists %}
+                                                    <option value="{{ list.id }}" {{ bisList and bisList.id == list.id ? 'selected' : '' }}>
+                                                        {{ list.name }}
+                                                    </option>
+                                                {% endfor %}
+                                            </select>
+                                        </form>
+                                    {% elseif bisList %}
+                                        <!-- CAS 2 : UNE SEULE LISTE -->
+                                        <span class="bis-status bis-status-active">
+                                            📋 {{ bisList.name }}
+                                        </span>
+                                    {% else %}
+                                        <!-- CAS 3 : AUCUNE LISTE -->
+                                        <span class="bis-status bis-status-empty">
+                                            ⚠ Aucune Liste BiS
+                                        </span>
+                                    {% endif %}
+                                </div>
                             </div>
 
+                            {# --- LE TABLEAU --- #}
                             <div class="overflow-x-auto">
                                 <table class="w-full text-left wow-table">
                                     <thead>
@@ -101,12 +119,13 @@
                                         </tr>
                                     </thead>
                                     <tbody>
-    {% for slot_key, slot_name in slotOrder %}
-        {% set equipped = equippedItemsBySlot[slot_key] ?? null %}
-        {% set bis = bisItemsBySlot[slot_key] ?? null %}
-        {% if equipped or bis %}
-            <tr>
-                <td class="text-gray-500 font-bold text-xs uppercase tracking-widest">{{ slot_name }}</td>
+                                        {% for slot_key, slot_name in slotOrder %}
+                                            {% set equipped = equippedItemsBySlot[slot_key] ?? null %}
+                                            {% set bis = bisItemsBySlot[slot_key] ?? null %}
+
+                                            {% if equipped or bis %}
+                                                <tr>
+                                                    <td class="text-gray-500 font-bold text-xs uppercase tracking-widest">{{ slot_name }}</td>
 
                 {# === COLONNE "VOTRE ÉQUIPEMENT" === #}
                 <td>

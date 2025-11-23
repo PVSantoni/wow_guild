@@ -7,35 +7,33 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
-// Retire les 'use' inutiles si 'edit' est supprimée
-// use App\Form\ProfileCharacterType;
-// use Doctrine\ORM\EntityManagerInterface;
-// use Symfony\Component\HttpFoundation\Request;
 use App\Repository\BisListRepository;
+use Symfony\Component\HttpFoundation\Request; // <--- J'ai réactivé ça, c'est obligatoire
 
 #[IsGranted('ROLE_USER')]
 class ProfileController extends AbstractController
 {
     #[Route('/profil', name: 'app_profile_index')]
-    // Dans src/Controller/ProfileController.php
-
-    #[Route('/profil', name: 'app_profile_index')]
-    public function index(BattleNetApiService $battleNetApiService, BisListRepository $bisListRepository): Response
-    {
+    public function index(
+        BattleNetApiService $battleNetApiService,
+        BisListRepository $bisListRepository,
+        Request $request // <--- Ajouté ici pour récupérer le choix de l'utilisateur
+    ): Response {
         /** @var \App\Entity\User $user */
         $user = $this->getUser();
 
-        // CORRECTION 1 : On récupère le personnage actif, c'est notre nouvelle source de vérité
         $activeCharacter = $user->getActiveCharacter();
 
         $characterData = null;
         $characterMedia = null;
-        $bisList = null;
+
+        $bisList = null;       // La liste active (celle qu'on affiche)
+        $compatibleLists = []; // Toutes les listes dispos pour ce perso (pour le menu déroulant)
 
         $equippedItemsBySlot = [];
         $bisItemsBySlot = [];
 
-        // Ta logique de mapping est conservée à l'identique
+        // --- TES TABLEAUX DE MAPPING (Je n'y touche pas) ---
         $slotOrder = [
             'HEAD' => 'Tête',
             'NECK' => 'Cou',
@@ -119,9 +117,7 @@ class ProfileController extends AbstractController
             'BAGUETTE' => 'RANGED'
         ];
 
-        // CORRECTION 2 : On encapsule TOUTE la logique dans une condition sur le personnage actif
         if ($activeCharacter) {
-            // CORRECTION 3 : On utilise les données du personnage actif pour l'appel API
             $characterData = $battleNetApiService->getCharacterProfile(
                 $activeCharacter->getCharacterName(),
                 $activeCharacter->getCharacterRealmSlug(),
@@ -129,7 +125,6 @@ class ProfileController extends AbstractController
             );
 
             if ($characterData) {
-                // Ta logique originale est conservée à 100% à partir d'ici
                 if (isset($characterData['media']['href'])) {
                     $characterMedia = $battleNetApiService->getCharacterMedia($characterData['media']['href']);
                 }
@@ -137,7 +132,7 @@ class ProfileController extends AbstractController
                 if (isset($characterData['equipment']['href'])) {
                     $characterEquipment = $battleNetApiService->getCharacterEquipment($characterData['equipment']['href']);
                     if ($characterEquipment && isset($characterEquipment['equipped_items'])) {
-                        foreach ($characterEquipment['equipped_items'] as &$item) { // Note: J'ai remis la référence & ici, elle est importante
+                        foreach ($characterEquipment['equipped_items'] as &$item) {
                             if (isset($item['item']['id'])) {
                                 $item['apiDetails'] = $battleNetApiService->getItemInfo($item['item']['id']);
                                 if (empty($item['apiDetails']['icon_url']) && isset($item['media']['id'])) {
@@ -156,7 +151,33 @@ class ProfileController extends AbstractController
                 $spec = $characterData['active_spec']['name'] ?? null;
 
                 if ($class && $spec) {
-                    $bisList = $bisListRepository->findOneBy(['characterClass' => $class, 'specialization' => $spec]);
+                    // === NOUVELLE LOGIQUE DE SÉLECTION DE LA LISTE ===
+
+                    // 1. On cherche TOUTES les listes compatibles avec la classe/spé du perso
+                    $compatibleLists = $bisListRepository->findBy([
+                        'characterClass' => $class,
+                        'specialization' => $spec
+                    ]);
+
+                    // 2. L'utilisateur a-t-il cliqué sur une liste précise ?
+                    $requestedBisId = $request->query->get('bis_id');
+
+                    if ($requestedBisId) {
+                        $candidate = $bisListRepository->find($requestedBisId);
+                        // Sécurité : on vérifie que la liste demandée correspond bien à la classe du perso
+                        if ($candidate && ($candidate->getCharacterClass() === $class && $candidate->getSpecialization() === $spec)) {
+                            $bisList = $candidate;
+                        }
+                    }
+
+                    // 3. Fallback : Si pas de choix (ou choix invalide), on prend la première dispo
+                    if (!$bisList && count($compatibleLists) > 0) {
+                        $bisList = $compatibleLists[0];
+                    }
+
+                    // === FIN NOUVELLE LOGIQUE ===
+
+                    // Le reste est ton code d'origine qui traite $bisList
                     if ($bisList) {
                         $pendingGenericItems = [];
                         foreach ($bisList->getBisItems() as $bisItem) {
@@ -224,11 +245,12 @@ class ProfileController extends AbstractController
             'characterData' => $characterData,
             'characterMedia' => $characterMedia,
             'bisList' => $bisList,
+            'compatibleLists' => $compatibleLists, // <--- AJOUT IMPORTANT POUR LE TWIG
             'slotOrder' => $slotOrder,
             'equippedItemsBySlot' => $equippedItemsBySlot,
             'bisItemsBySlot' => $bisItemsBySlot,
             'validatedBisItemIds' => $validatedBisItemIds,
-            'activeCharacter' => $activeCharacter, // CORRECTION 4 : On passe cette variable au template
+            'activeCharacter' => $activeCharacter,
         ]);
     }
 }

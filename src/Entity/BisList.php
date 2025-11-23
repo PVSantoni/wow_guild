@@ -11,63 +11,148 @@ use Doctrine\ORM\Mapping as ORM;
 class BisList
 {
     // =========================================================================
-    // SECTION 1 : CONSTANTES POUR LES CHOIX DES FORMULAIRES
-    // On centralise ici toutes les valeurs possibles pour les classes et spés
+    // SECTION 1 : CONSTANTES DES CLASSES (Format API Anglais)
     // =========================================================================
 
-    // Noms des classes tels que retournés par l'API Blizzard (name_en)
-    public const CLASS_DEATH_KNIGHT = 'DEATH KNIGHT';
-    public const CLASS_DRUID = 'DRUID';
-    public const CLASS_CHASSEUR = 'CHASSEUR';
-    public const CLASS_MAGE = 'MAGE';
-    public const CLASS_MONK = 'MONK';
-    public const CLASS_PALADIN = 'PALADIN';
-    public const CLASS_PRIEST = 'PRIEST';
-    public const CLASS_ROGUE = 'ROGUE';
-    public const CLASS_SHAMAN = 'SHAMAN';
-    public const CLASS_WARLOCK = 'WARLOCK';
-    public const CLASS_WARRIOR = 'WARRIOR';
+    public const CLASS_DEATH_KNIGHT = 'DEATH_KNIGHT';
+    public const CLASS_DRUID        = 'DRUID';
+    public const CLASS_HUNTER       = 'HUNTER';
+    public const CLASS_MAGE         = 'MAGE';
+    public const CLASS_MONK         = 'MONK';
+    public const CLASS_PALADIN      = 'PALADIN';
+    public const CLASS_PRIEST       = 'PRIEST';
+    public const CLASS_ROGUE        = 'ROGUE';
+    public const CLASS_SHAMAN       = 'SHAMAN';
+    public const CLASS_WARLOCK      = 'WARLOCK';
+    public const CLASS_WARRIOR      = 'WARRIOR';
 
-    // Tableau formaté pour le champ ChoiceType de Symfony (Classe)
+    // Choix pour le formulaire (Label FR => Value EN)
     public const CLASSES_CHOICES = [
         'Chevalier de la Mort' => self::CLASS_DEATH_KNIGHT,
-        'Druide' => self::CLASS_DRUID,
-        'Chasseur' => self::CLASS_CHASSEUR,
-        'Mage' => self::CLASS_MAGE,
-        'Moine' => self::CLASS_MONK,
-        'Paladin' => self::CLASS_PALADIN,
-        'Prêtre' => self::CLASS_PRIEST,
-        'Voleur' => self::CLASS_ROGUE,
-        'Chaman' => self::CLASS_SHAMAN,
-        'Démoniste' => self::CLASS_WARLOCK,
-        'Guerrier' => self::CLASS_WARRIOR,
-    ];
-
-    // Noms des spés tels que retournés par l'API Blizzard (name)
-    // NOTE : Tu devras compléter cette liste avec les spés des autres classes
-    public const SPEC_FROST = 'Givre';
-    public const SPEC_FIRE = 'Feu';
-    public const SPEC_ARCANE = 'Arcanes';
-    public const SPEC_ASSASSINATION = 'Assassinat';
-    public const SPEC_COMBAT = 'Combat';
-    public const SPEC_SUBTLETY = 'Finesse';
-    public const SPEC_SURVIVAL = 'Survie';
-    // ... etc.
-
-    // Tableau formaté pour le champ ChoiceType de Symfony (Spécialisation)
-    public const SPECS_CHOICES = [
-        'Givre (Mage)' => self::SPEC_FROST,
-        'Feu (Mage)' => self::SPEC_FIRE,
-        'Arcanes (Mage)' => self::SPEC_ARCANE,
-        'Assassinat (Voleur)' => self::SPEC_ASSASSINATION,
-        'Combat (Voleur)' => self::SPEC_COMBAT,
-        'Finesse (Voleur)' => self::SPEC_SUBTLETY,
-        'Survie (Chasseur)' => self::SPEC_SURVIVAL,
-        // ... etc.
+        'Druide'             => self::CLASS_DRUID,
+        'Chasseur'           => self::CLASS_HUNTER,
+        'Mage'               => self::CLASS_MAGE,
+        'Moine'              => self::CLASS_MONK,
+        'Paladin'            => self::CLASS_PALADIN,
+        'Prêtre'             => self::CLASS_PRIEST,
+        'Voleur'             => self::CLASS_ROGUE,
+        'Chaman'             => self::CLASS_SHAMAN,
+        'Démoniste'          => self::CLASS_WARLOCK,
+        'Guerrier'           => self::CLASS_WARRIOR,
     ];
 
     // =========================================================================
-    // SECTION 2 : PROPRIÉTÉS DE L'ENTITÉ (ce qui est en BDD)
+    // SECTION 2 : CONSTANTES DES SPÉCIALISATIONS (Format API Anglais)
+    // =========================================================================
+
+    // DEATH KNIGHT
+    public const SPEC_DK_BLOOD  = 'Blood';
+    public const SPEC_DK_FROST  = 'Frost';
+    public const SPEC_DK_UNHOLY = 'Unholy';
+
+    // DRUID
+    public const SPEC_DRUID_BALANCE  = 'Balance';
+    public const SPEC_DRUID_FERAL    = 'Feral';
+    public const SPEC_DRUID_GUARDIAN = 'Guardian';
+    public const SPEC_DRUID_RESTO    = 'Restoration';
+
+    // HUNTER
+    public const SPEC_HUNTER_BM   = 'Beast Mastery';
+    public const SPEC_HUNTER_MM   = 'Marksmanship';
+    public const SPEC_HUNTER_SURV = 'Survival';
+
+    // MAGE
+    public const SPEC_MAGE_ARCANE = 'Arcane';
+    public const SPEC_MAGE_FIRE   = 'Fire';
+    public const SPEC_MAGE_FROST  = 'Frost';
+
+    // MONK
+    public const SPEC_MONK_BREW     = 'Brewmaster';
+    public const SPEC_MONK_MIST     = 'Mistweaver';
+    public const SPEC_MONK_WIND     = 'Windwalker';
+
+    // PALADIN
+    public const SPEC_PALADIN_HOLY = 'Holy';
+    public const SPEC_PALADIN_PROT = 'Protection';
+    public const SPEC_PALADIN_RET  = 'Retribution';
+
+    // PRIEST
+    public const SPEC_PRIEST_DISC   = 'Discipline';
+    public const SPEC_PRIEST_HOLY   = 'Holy';
+    public const SPEC_PRIEST_SHADOW = 'Shadow';
+
+    // ROGUE
+    public const SPEC_ROGUE_ASSA   = 'Assassination';
+    public const SPEC_ROGUE_COMBAT = 'Combat';
+    public const SPEC_ROGUE_SUB    = 'Subtlety';
+
+    // SHAMAN
+    public const SPEC_SHAMAN_ELE   = 'Elemental';
+    public const SPEC_SHAMAN_ENH   = 'Enhancement';
+    public const SPEC_SHAMAN_RESTO = 'Restoration';
+
+    // WARLOCK
+    public const SPEC_WARLOCK_AFF    = 'Affliction';
+    public const SPEC_WARLOCK_DEMO   = 'Demonology';
+    public const SPEC_WARLOCK_DESTRO = 'Destruction';
+
+    // WARRIOR
+    public const SPEC_WARRIOR_ARMS = 'Arms';
+    public const SPEC_WARRIOR_FURY = 'Fury';
+    public const SPEC_WARRIOR_PROT = 'Protection';
+
+
+    // Choix pour le formulaire (Label FR => Value EN)
+    public const SPECS_CHOICES = [
+        // DK
+        'Sang (DK)'            => self::SPEC_DK_BLOOD,
+        'Givre (DK)'           => self::SPEC_DK_FROST,
+        'Impie (DK)'           => self::SPEC_DK_UNHOLY,
+        // Druide
+        'Équilibre (Druide)'   => self::SPEC_DRUID_BALANCE,
+        'Farouche (Druide)'    => self::SPEC_DRUID_FERAL,
+        'Gardien (Druide)'     => self::SPEC_DRUID_GUARDIAN,
+        'Restauration (Druide)' => self::SPEC_DRUID_RESTO,
+        // Chasseur
+        'Maîtrise des bêtes (Chasseur)' => self::SPEC_HUNTER_BM,
+        'Précision (Chasseur)'          => self::SPEC_HUNTER_MM,
+        'Survie (Chasseur)'             => self::SPEC_HUNTER_SURV,
+        // Mage
+        'Arcanes (Mage)' => self::SPEC_MAGE_ARCANE,
+        'Feu (Mage)'     => self::SPEC_MAGE_FIRE,
+        'Givre (Mage)'   => self::SPEC_MAGE_FROST,
+        // Moine
+        'Maître brasseur (Moine)' => self::SPEC_MONK_BREW,
+        'Tisse-brume (Moine)'     => self::SPEC_MONK_MIST,
+        'Marche-vent (Moine)'     => self::SPEC_MONK_WIND,
+        // Paladin
+        'Sacré (Paladin)'      => self::SPEC_PALADIN_HOLY,
+        'Protection (Paladin)' => self::SPEC_PALADIN_PROT,
+        'Vindicte (Paladin)'   => self::SPEC_PALADIN_RET,
+        // Prêtre
+        'Discipline (Prêtre)' => self::SPEC_PRIEST_DISC,
+        'Sacré (Prêtre)'      => self::SPEC_PRIEST_HOLY,
+        'Ombre (Prêtre)'      => self::SPEC_PRIEST_SHADOW,
+        // Voleur
+        'Assassinat (Voleur)' => self::SPEC_ROGUE_ASSA,
+        'Combat (Voleur)'     => self::SPEC_ROGUE_COMBAT,
+        'Finesse (Voleur)'    => self::SPEC_ROGUE_SUB,
+        // Chaman
+        'Élémentaire (Chaman)'    => self::SPEC_SHAMAN_ELE,
+        'Amélioration (Chaman)'   => self::SPEC_SHAMAN_ENH,
+        'Restauration (Chaman)'   => self::SPEC_SHAMAN_RESTO,
+        // Démoniste
+        'Affliction (Démoniste)'  => self::SPEC_WARLOCK_AFF,
+        'Démonologie (Démoniste)' => self::SPEC_WARLOCK_DEMO,
+        'Destruction (Démoniste)' => self::SPEC_WARLOCK_DESTRO,
+        // Guerrier
+        'Armes (Guerrier)'      => self::SPEC_WARRIOR_ARMS,
+        'Fureur (Guerrier)'     => self::SPEC_WARRIOR_FURY,
+        'Protection (Guerrier)' => self::SPEC_WARRIOR_PROT,
+    ];
+
+    // =========================================================================
+    // SECTION 3 : PROPRIÉTÉS
     // =========================================================================
 
     #[ORM\Id]
@@ -96,7 +181,7 @@ class BisList
     }
 
     // =========================================================================
-    // SECTION 3 : GETTERS ET SETTERS
+    // SECTION 4 : GETTERS ET SETTERS
     // =========================================================================
 
     public function getId(): ?int
@@ -112,6 +197,7 @@ class BisList
     public function setName(string $name): static
     {
         $this->name = $name;
+
         return $this;
     }
 
@@ -123,6 +209,7 @@ class BisList
     public function setCharacterClass(string $characterClass): static
     {
         $this->characterClass = $characterClass;
+
         return $this;
     }
 
@@ -134,6 +221,7 @@ class BisList
     public function setSpecialization(?string $specialization): static
     {
         $this->specialization = $specialization;
+
         return $this;
     }
 
@@ -151,17 +239,18 @@ class BisList
             $this->bisItems->add($bisItem);
             $bisItem->setBisList($this);
         }
+
         return $this;
     }
 
     public function removeBisItem(BisItem $bisItem): static
     {
         if ($this->bisItems->removeElement($bisItem)) {
-            // set the owning side to null (unless already changed)
             if ($bisItem->getBisList() === $this) {
                 $bisItem->setBisList(null);
             }
         }
+
         return $this;
     }
 }

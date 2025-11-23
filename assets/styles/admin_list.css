@@ -1,0 +1,124 @@
+/* assets/styles/admin_list.css */
+
+.wow-admin-container {
+    background: linear-gradient(135deg, rgba(20, 22, 32, 0.95) 0%, rgba(15, 17, 25, 0.98) 100%);
+    border: 2px solid #6d5d52;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.8);
+    border-radius: 6px;
+    overflow: hidden; /* Pour que les coins arrondis marchent avec le tableau */
+}
+
+.wow-admin-header {
+    background: linear-gradient(to right, rgba(184, 134, 11, 0.1), transparent);
+    padding: 1.5rem;
+    border-bottom: 2px solid #8b7355;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.wow-admin-title {
+    font-family: 'Cinzel', serif;
+    color: #daa520;
+    font-size: 1.8rem;
+    margin: 0;
+    text-shadow: 2px 2px 4px black;
+}
+
+/* Le Tableau */
+.wow-admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    color: #c7b394;
+}
+
+.wow-admin-table thead {
+    background-color: rgba(0, 0, 0, 0.4);
+    border-bottom: 2px solid #8b7355;
+}
+
+.wow-admin-table th {
+    padding: 1rem;
+    text-align: left;
+    font-family: 'Cinzel', serif;
+    color: #8b7355;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 0.1em;
+}
+
+.wow-admin-table tbody tr {
+    border-bottom: 1px solid rgba(109, 93, 82, 0.2);
+    transition: background-color 0.2s;
+}
+
+.wow-admin-table tbody tr:hover {
+    background-color: rgba(218, 165, 32, 0.05);
+}
+
+.wow-admin-table td {
+    padding: 1rem;
+    vertical-align: middle;
+}
+
+/* Les petits badges pour les classes */
+.class-badge {
+    display: inline-block;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    text-transform: uppercase;
+    background: #333;
+    border: 1px solid #555;
+}
+
+/* Actions (boutons voir/editer) */
+.action-links a {
+    color: #daa520;
+    text-decoration: none;
+    font-size: 0.9rem;
+    margin-right: 10px;
+    transition: color 0.2s;
+    font-weight: bold;
+}
+
+.action-links a:hover {
+    color: #fff;
+    text-shadow: 0 0 5px #daa520;
+}
+
+.btn-create-new {
+    background: linear-gradient(to bottom, #b8860b, #8b6914);
+    border: 1px solid #daa520;
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 4px;
+    text-decoration: none;
+    font-family: 'Cinzel', serif;
+    font-weight: bold;
+    transition: all 0.2s;
+}
+
+.btn-create-new:hover {
+    filter: brightness(1.2);
+    box-shadow: 0 0 10px rgba(218, 165, 32, 0.3);
+}
+
+.btn-delete-icon {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.1rem; /* Un peu plus gros */
+    color: #8b3a3a; /* Rouge sang sombre */
+    transition: all 0.2s;
+    padding: 0;
+    margin-left: 10px;
+}
+
+.btn-delete-icon:hover {
+    color: #ff3333; /* Rouge vif */
+    text-shadow: 0 0 8px rgba(255, 0, 0, 0.6);
+    transform: scale(1.2);
+}

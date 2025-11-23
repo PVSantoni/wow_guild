@@ -1,0 +1,122 @@
+/* assets/styles/forms.css */
+
+/* Le conteneur principal du formulaire (la boîte) */
+.wow-form-card {
+    background: linear-gradient(
+        135deg,
+        rgba(20, 22, 32, 0.95) 0%,
+        rgba(15, 17, 25, 0.98) 100%
+    );
+    border: 2px solid #6d5d52;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.8),
+        inset 0 0 15px rgba(109, 93, 82, 0.1);
+    border-radius: 6px;
+    padding: 2rem;
+    backdrop-filter: blur(10px);
+    color: #c7b394;
+}
+
+/* Les titres dans le formulaire */
+.wow-form-title {
+    font-family: "Cinzel", serif;
+    color: #daa520;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.8);
+    font-size: 1.8rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid rgba(218, 165, 32, 0.3);
+    padding-bottom: 0.5rem;
+}
+
+/* Les labels (le texte au dessus des champs) */
+.wow-form label {
+    display: block;
+    color: #8b7355;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 0.75rem;
+    letter-spacing: 0.05em;
+    margin-bottom: 0.5rem;
+    font-family: "Cinzel", serif;
+}
+
+/* Les champs de saisie (Input et Select) */
+.wow-form input[type="text"],
+.wow-form input[type="number"],
+.wow-form select,
+.wow-form textarea {
+    width: 100%;
+    background-color: #050505;
+    border: 1px solid #444;
+    color: #f0e6d2; /* Texte clair */
+    padding: 0.75rem;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    transition: all 0.3s ease;
+    box-shadow: inset 0 2px 5px rgba(0, 0, 0, 0.8);
+}
+
+/* Quand on clique dans un champ */
+.wow-form input:focus,
+.wow-form select:focus,
+.wow-form textarea:focus {
+    outline: none;
+    border-color: #daa520; /* Or */
+    box-shadow: 0 0 10px rgba(218, 165, 32, 0.2),
+        inset 0 2px 5px rgba(0, 0, 0, 0.8);
+}
+
+/* Organisation en Grille pour les items (tête, cou, etc) */
+.wow-grid-slots {
+    display: grid;
+    grid-template-columns: repeat(1, 1fr);
+    gap: 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .wow-grid-slots {
+        grid-template-columns: repeat(2, 1fr); /* 2 colonnes sur PC */
+    }
+}
+
+@media (min-width: 1200px) {
+    .wow-grid-slots {
+        grid-template-columns: repeat(
+            3,
+            1fr
+        ); /* 3 colonnes sur grands écrans */
+    }
+}
+
+/* Une case d'équipement spécifique */
+.wow-slot-item {
+    background: rgba(255, 255, 255, 0.02);
+    padding: 1rem;
+    border: 1px solid rgba(109, 93, 82, 0.3);
+    border-radius: 4px;
+}
+
+.wow-slot-item:hover {
+    background: rgba(218, 165, 32, 0.05);
+    border-color: #8b7355;
+}
+
+/* Le bouton Sauvegarder (on reprend le style précédent) */
+.btn-save {
+    width: 100%;
+    margin-top: 2rem;
+    padding: 1rem;
+    font-size: 1.1rem;
+    background: linear-gradient(to bottom, #b8860b, #8b6914);
+    border: 2px solid #daa520;
+    color: white;
+    font-family: "Cinzel", serif;
+    cursor: pointer;
+    text-transform: uppercase;
+    font-weight: bold;
+    transition: transform 0.1s;
+}
+
+.btn-save:hover {
+    filter: brightness(1.1);
+    transform: scale(1.02);
+}

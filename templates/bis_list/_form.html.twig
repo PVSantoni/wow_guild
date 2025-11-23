@@ -1,4 +1,138 @@
-{{ form_start(form) }}
-    {{ form_widget(form) }}
-    <button class="btn">{{ button_label|default('Save') }}</button>
+{{ form_start(form, {'attr': {'class': 'wow-form'}}) }}
+
+    {# --- SECTION 1 : INFOS GÉNÉRALES --- #}
+    <div class="mb-8 p-4 border border-[#8b7355] rounded bg-black/30">
+        <h3 class="text-[#daa520] font-fantasy mb-4 border-b border-[#8b7355]/50 pb-2">Informations Générales</h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                {{ form_label(form.name, 'Nom de la liste (ex: PVE Raid)', {'label_attr': {'class': 'wow-label'}}) }}
+                {{ form_widget(form.name, {'attr': {'class': 'w-full'}}) }}
+                {{ form_errors(form.name) }}
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    {{ form_label(form.characterClass, 'Classe', {'label_attr': {'class': 'wow-label'}}) }}
+                    {{ form_widget(form.characterClass) }}
+                </div>
+                <div>
+                    {{ form_label(form.specialization, 'Spécialisation', {'label_attr': {'class': 'wow-label'}}) }}
+                    {{ form_widget(form.specialization) }}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {# --- SECTION 2 : LES ÉQUIPEMENTS (IDs) --- #}
+    <h3 class="text-[#daa520] font-fantasy mb-4 text-xl text-center">— Identifiants des Items BiS —</h3>
+    <p class="text-gray-500 text-center text-sm mb-6 italic">Entrez l'ID Wowhead de l'item pour chaque emplacement.</p>
+
+    <div class="wow-grid-slots">
+        {# On boucle sur les champs restants du formulaire qui ne sont pas name/class/spec/token #}
+        {% for field in form %}
+            {% if field.vars.name not in ['name', 'characterClass', 'specialization', '_token'] %}
+                <div class="wow-slot-item">
+                    {{ form_label(field, null, {'label_attr': {'class': 'wow-label'}}) }}
+                    {{ form_widget(field, {'attr': {'placeholder': 'Ex: 12345'}}) }}
+                    {{ form_errors(field) }}
+                </div>
+            {% endif %}
+        {% endfor %}
+    </div>
+
+    <button class="btn-save wow-button mt-8">
+        💾 Sauvegarder la BiS List
+    </button>
+
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // 1. Récupération des champs
+    const classSelect = document.getElementById('bis_list_characterClass');
+    const specSelect = document.getElementById('bis_list_specialization');
+
+    if (!classSelect || !specSelect) {
+        console.error("❌ ERREUR JS : Champs introuvables. Vérifie les IDs HTML.");
+        return;
+    }
+
+    // 2. La carte des relations (Copie exacte des valeurs anglaises de l'API)
+    const specsByClass = {
+        'DEATH_KNIGHT': ['Blood', 'Frost', 'Unholy'],
+        'DRUID':        ['Balance', 'Feral', 'Guardian', 'Restoration'],
+        'HUNTER':       ['Beast Mastery', 'Marksmanship', 'Survival'],
+        'MAGE':         ['Arcane', 'Fire', 'Frost'],
+        'MONK':         ['Brewmaster', 'Mistweaver', 'Windwalker'],
+        'PALADIN':      ['Holy', 'Protection', 'Retribution'],
+        'PRIEST':       ['Discipline', 'Holy', 'Shadow'],
+        'ROGUE':        ['Assassination', 'Combat', 'Subtlety'],
+        'SHAMAN':       ['Elemental', 'Enhancement', 'Restoration'],
+        'WARLOCK':      ['Affliction', 'Demonology', 'Destruction'],
+        'WARRIOR':      ['Arms', 'Fury', 'Protection']
+    };
+
+    function updateSpecs() {
+        // On récupère la valeur et on la nettoie (tout en majuscule, sans espace autour)
+        const selectedClass = classSelect.value.trim().toUpperCase();
+
+        console.log("🔍 Classe détectée :", selectedClass);
+
+        // Si aucune classe n'est sélectionnée, on cache tout sauf le placeholder
+        if (!selectedClass) {
+            for (let i = 0; i < specSelect.options.length; i++) {
+                specSelect.options[i].hidden = (specSelect.options[i].value !== "");
+            }
+            return;
+        }
+
+        const validSpecs = specsByClass[selectedClass];
+
+        if (!validSpecs) {
+            console.error("⚠️ ATTENTION : La classe '" + selectedClass + "' n'est pas définie dans le tableau JS 'specsByClass'.");
+            return;
+        }
+
+        console.log("✅ Spés autorisées :", validSpecs);
+
+        let countVisible = 0;
+
+        // On parcourt les options du menu Spécialisation
+        for (let i = 0; i < specSelect.options.length; i++) {
+            const option = specSelect.options[i];
+            const specValue = option.value;
+
+            // On ignore le placeholder (valeur vide)
+            if (specValue === "") continue;
+
+            // Vérification stricte
+            if (validSpecs.includes(specValue)) {
+                option.hidden = false;    // On affiche
+                option.disabled = false;  // On active
+                option.style.display = '';
+                countVisible++;
+            } else {
+                option.hidden = true;     // On cache
+                option.disabled = true;   // On désactive
+                option.style.display = 'none';
+            }
+        }
+
+        console.log("ℹ️ Options affichées : " + countVisible);
+
+        // Si l'option actuelle est devenue invisible, on remet le placeholder
+        const currentSpec = specSelect.value;
+        if (currentSpec && !validSpecs.includes(currentSpec)) {
+            specSelect.value = "";
+        }
+    }
+
+    // Événements
+    classSelect.addEventListener('change', updateSpecs);
+
+    // Lancement au démarrage
+    updateSpecs();
+});
+</script>
+
 {{ form_end(form) }}

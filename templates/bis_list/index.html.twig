@@ -1,39 +1,91 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}BisList index{% endblock %}
+{% block title %}Liste des BiS{% endblock %}
 
 {% block body %}
-    <h1>BisList index</h1>
+<div class="min-h-screen bg-[#0b0d12] py-12" style="background-image: url('https://bnetcmsus-a.akamaihd.net/cms/content_entry_media/2g/2G4V985U25I21596153195237.jpg'); background-attachment: fixed; background-size: cover; background-position: center;">
+    <div class="container mx-auto px-4 max-w-6xl">
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Name</th>
-                <th>CharacterClass</th>
-                <th>Specialization</th>
-                <th>actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for bis_list in bis_lists %}
-            <tr>
-                <td>{{ bis_list.id }}</td>
-                <td>{{ bis_list.name }}</td>
-                <td>{{ bis_list.characterClass }}</td>
-                <td>{{ bis_list.specialization }}</td>
-                <td>
-                    <a href="{{ path('app_bis_list_show', {'id': bis_list.id}) }}">show</a>
-                    <a href="{{ path('app_bis_list_edit', {'id': bis_list.id}) }}">edit</a>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="5">no records found</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+        <div class="wow-admin-container">
+            <!-- Header du tableau -->
+            <div class="wow-admin-header">
+                <h1 class="wow-admin-title">📚 Registre des BiS Lists</h1>
+                <a href="{{ path('app_bis_list_new') }}" class="btn-create-new">
+                    + Nouvelle Liste
+                </a>
+            </div>
 
-    <a href="{{ path('app_bis_list_new') }}">Create new</a>
+            <!-- Le tableau -->
+            <div class="overflow-x-auto">
+                <table class="wow-admin-table">
+                    <thead>
+                        <tr>
+                            <th>Nom de la liste</th>
+                            <th>Classe</th>
+                            <th>Spécialisation</th>
+                            <th class="text-center">Items Configurés</th>
+                            <th class="text-right">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    {% for bis_list in bis_lists %}
+                        <tr>
+                            <td class="font-bold text-[#f0e6d2]">
+                                {{ bis_list.name }}
+                            </td>
+                            <td>
+                                {# Petit bonus : couleur dynamique selon la classe #}
+                                {% set classColor = '#555' %}
+                                {% if bis_list.characterClass|upper == 'WARRIOR' %}{% set classColor = '#C79C6E' %}
+                                {% elseif bis_list.characterClass|upper == 'PALADIN' %}{% set classColor = '#F58CBA' %}
+                                {% elseif bis_list.characterClass|upper == 'HUNTER' %}{% set classColor = '#ABD473' %}
+                                {% elseif bis_list.characterClass|upper == 'ROGUE' %}{% set classColor = '#FFF569' %}
+                                {% elseif bis_list.characterClass|upper == 'PRIEST' %}{% set classColor = '#FFFFFF' %}
+                                {% elseif bis_list.characterClass|upper == 'DEATH_KNIGHT' %}{% set classColor = '#C41F3B' %}
+                                {% elseif bis_list.characterClass|upper == 'SHAMAN' %}{% set classColor = '#0070DE' %}
+                                {% elseif bis_list.characterClass|upper == 'MAGE' %}{% set classColor = '#40C7EB' %}
+                                {% elseif bis_list.characterClass|upper == 'WARLOCK' %}{% set classColor = '#8787ED' %}
+                                {% elseif bis_list.characterClass|upper == 'MONK' %}{% set classColor = '#00FF96' %}
+                                {% elseif bis_list.characterClass|upper == 'DRUID' %}{% set classColor = '#FF7D0A' %}
+                                {% elseif bis_list.characterClass|upper == 'DEMON_HUNTER' %}{% set classColor = '#A330C9' %}
+                                {% endif %}
+
+                                <span class="class-badge" style="border-color: {{ classColor }}; color: {{ classColor == '#FFFFFF' or classColor == '#FFF569' ? '#000' : '#fff' }}; background-color: {{ classColor }}20;">
+                                    {{ bis_list.characterClass }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="text-gray-400">{{ bis_list.specialization }}</span>
+                            </td>
+                            <td class="text-center">
+                                {# Compte le nombre d'items dans la liste #}
+                                <span class="text-sm font-mono bg-black/50 px-2 py-1 rounded border border-gray-700">
+                                    {{ bis_list.bisItems|length }} / 16
+                                </span>
+                            </td>
+                            <td class="text-right action-links">
+                                <a href="{{ path('app_bis_list_show', {'id': bis_list.id}) }}">Voir</a>
+                                <a href="{{ path('app_bis_list_edit', {'id': bis_list.id}) }}">Éditer</a>
+                                {# Le formulaire de suppression sécurisé #}
+    <form method="post" action="{{ path('app_bis_list_delete', {'id': bis_list.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette liste ?');" style="display: inline-block;">
+        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ bis_list.id) }}">
+        <button class="btn-delete-icon" title="Supprimer">
+            🗑
+        </button>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="5" class="text-center py-8 text-gray-500 italic">
+                                Le registre est vide... Pour l'instant.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+    </div>
+</div>
 {% endblock %}

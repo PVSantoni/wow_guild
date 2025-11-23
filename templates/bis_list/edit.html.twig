@@ -1,13 +1,22 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Edit BisList{% endblock %}
+{% block title %}Nouvelle BiS List{% endblock %}
 
 {% block body %}
-    <h1>Edit BisList</h1>
+<div class="min-h-screen bg-[#0b0d12] py-12" style="background-image: url('https://bnetcmsus-a.akamaihd.net/cms/content_entry_media/2g/2G4V985U25I21596153195237.jpg'); background-attachment: fixed; background-size: cover;">
+    <div class="container mx-auto px-4 max-w-5xl">
 
-    {{ include('bis_list/_form.html.twig', {'button_label': 'Update'}) }}
+        <div class="wow-form-card">
+            <div class="flex justify-between items-center mb-6">
+                <h1 class="wow-form-title mb-0">Créer une BiS List</h1>
+                <a href="{{ path('app_bis_list_index') }}" class="text-[#8b7355] hover:text-[#daa520] transition-colors font-fantasy">
+                    ↩ Retour à la liste
+                </a>
+            </div>
 
-    <a href="{{ path('app_bis_list_index') }}">back to list</a>
+            {{ include('bis_list/_form.html.twig') }}
+        </div>
 
-    {{ include('bis_list/_delete_form.html.twig') }}
+    </div>
+</div>
 {% endblock %}
