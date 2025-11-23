@@ -557,7 +557,9 @@
                             <p class="text-gray-400 mb-8 max-w-md mx-auto leading-relaxed">
                                 Il semble que vous n'ayez pas encore lié de personnage. Configurez-le pour charger vos données et commencer la comparaison d'équipement !
                             </p>
-                            <a href="{{ path('app_profile_edit') }}" class="wow-button">
+                            <a href="#" class="wow-button" onclick="alert('Fonctionnalité à récupérer depuis l\'autre PC !')">
+    ⚙ Configurer mon personnage
+</a>
                                 ⚙ Configurer mon personnage
                             </a>
                         </div>
@@ -569,46 +571,38 @@
 </div>
 
 <script>
-    // 1. Configuration de base pour Wowhead (ne rien toucher ici)
+    // 1. Config Wowhead
     const whTooltips = {
         colorLinks: true,
         iconizeLinks: false,
         renameLinks: false
     };
+</script>
 
-    // 2. Point d'entrée quand la page est prête
+<!-- 2. Chargement du script officiel -->
+<script src="https://wow.zamimg.com/js/tooltips.js"></script>
+
+<!-- 3. Notre correctif pour forcer la disparition -->
+<script>
     document.addEventListener('DOMContentLoaded', () => {
 
-        // 3. On charge le script de Wowhead
-        const script = document.createElement('script');
-        script.src = 'https://wow.zamimg.com/js/tooltips.js';
-        script.async = true;
-        document.head.appendChild(script);
-
-        // 4. On attend une fraction de seconde que Wowhead soit prêt...
-        setTimeout(() => {
-            const tooltip = document.getElementById('wowhead-tooltip');
-            if (!tooltip) {
-                // Si le tooltip n'existe pas, on ne fait rien
-                return;
-            }
-
-            // 5. On attache notre "GARDIEN" à toute la page
-            document.addEventListener('mousemove', function(e) {
-                // On vérifie si la souris est sur un lien d'item OU sur le tooltip
-                const isOverItem = e.target.closest('.wow-item');
-                const isOverTooltip = e.target.closest('#wowhead-tooltip');
-
-                if (isOverItem || isOverTooltip) {
-                    // Si OUI, on ne fait rien. On laisse le tooltip visible.
-                    return;
-                } else {
-                    // Si NON, on cache le tooltip. SANS CONDITION.
-                    tooltip.style.display = 'none';
-                }
+        // Cette fonction force le tooltip à se cacher
+        const killTooltip = () => {
+            // Wowhead utilise généralement ces sélecteurs
+            const tooltips = document.querySelectorAll('.wowhead-tooltip, #wh-tt');
+            tooltips.forEach(tt => {
+                tt.style.display = 'none';
+                tt.style.visibility = 'hidden';
             });
+        };
 
-        }, 500); // On attend 500ms pour être sûr que Wowhead a tout initialisé
+        // On applique cette règle à tous tes objets
+        const items = document.querySelectorAll('.wow-item');
+
+        items.forEach(item => {
+            // L'événement "mouseleave" se déclenche dès que la souris sort de la zone de l'objet
+            item.addEventListener('mouseleave', killTooltip);
+        });
     });
 </script>
 {% endblock %}
