@@ -42,7 +42,6 @@ class ProfileController extends AbstractController
             'SHOULDER' => 'Épaules',
             'CLOAK' => 'Dos',
             'CHEST' => 'Torse',
-            'SHIRT' => 'Chemise',
             'TABARD' => 'Tabard',
             'WRIST' => 'Poignets',
             'HANDS' => 'Mains',
