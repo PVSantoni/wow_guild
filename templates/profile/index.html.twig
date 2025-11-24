@@ -2,7 +2,6 @@
 
 {% block title %}Armurerie - {{ user.characterName ?? 'Profil' }}{% endblock %}
 
-
 {% block body %}
 <div class="min-h-screen bg-[#0b0d12] text-gray-300 pb-20" style="background-image: url('https://bnetcmsus-a.akamaihd.net/cms/content_entry_media/2g/2G4V985U25I21596153195237.jpg'); background-attachment: fixed; background-size: cover; background-position: center;">
     <div class="min-h-screen bg-black/85 backdrop-blur-sm">
@@ -30,8 +29,8 @@
                                 <div class="account-value truncate text-sm">{{ user.email }}</div>
                             </div>
                             <a href="{{ path('app_character_index') }}" class="wow-button w-full block text-center">
-    ⚙ Gérer mes Personnages
-</a>
+                                ⚙ Gérer mes Personnages
+                            </a>
                         </div>
                     </div>
                 </aside>
@@ -82,26 +81,22 @@
                                 </h3>
 
                                 <div class="flex items-center gap-3">
-                                    {% if compatibleLists is defined and compatibleLists|length > 1 %}
-                                        <!-- CAS 1 : PLUSIEURS LISTES DISPOS -->
-                                        <form method="get" class="m-0">
-                                            <select name="bis_id" onchange="this.form.submit()" class="bg-[#0b0d12] text-[#daa520] border border-[#8b7355] text-xs font-bold uppercase py-1 px-2 rounded focus:outline-none cursor-pointer">
+                                    {% if compatibleLists is defined and compatibleLists|length > 0 %}
+                                        <!-- SELECTEUR DE LISTE -->
+                                        <form method="get" action="{{ path('app_profile_index') }}" class="flex items-center gap-2 m-0">
+                                            <select name="bis_id" onchange="this.form.submit()"
+                                                class="bg-[#0b0d12] text-[#daa520] border border-[#8b7355] text-xs font-bold uppercase py-2 px-3 rounded focus:outline-none cursor-pointer hover:border-[#daa520] transition-colors shadow-inner min-w-[200px]">
                                                 {% for list in compatibleLists %}
                                                     <option value="{{ list.id }}" {{ bisList and bisList.id == list.id ? 'selected' : '' }}>
-                                                        {{ list.name }}
+                                                        {{ list.name }} ({{ list.specialization }})
                                                     </option>
                                                 {% endfor %}
                                             </select>
                                         </form>
-                                    {% elseif bisList %}
-                                        <!-- CAS 2 : UNE SEULE LISTE -->
-                                        <span class="bis-status bis-status-active">
-                                            📋 {{ bisList.name }}
-                                        </span>
                                     {% else %}
-                                        <!-- CAS 3 : AUCUNE LISTE -->
-                                        <span class="bis-status bis-status-empty">
-                                            ⚠ Aucune Liste BiS
+                                        <!-- AUCUNE LISTE -->
+                                        <span class="bis-status bis-status-empty text-red-400 text-sm">
+                                            ⚠ Aucune Liste Trouvée
                                         </span>
                                     {% endif %}
                                 </div>
@@ -127,84 +122,71 @@
                                                 <tr>
                                                     <td class="text-gray-500 font-bold text-xs uppercase tracking-widest">{{ slot_name }}</td>
 
-                {# === COLONNE "VOTRE ÉQUIPEMENT" === #}
-                <td>
-                    {% if equipped and equipped.apiDetails is defined %}
-                        <a href="https://www.wowhead.com/mop/item={{ equipped.item.id }}" target="_blank" class="item-link wow-item" data-wowhead="item={{ equipped.item.id }}&domain=mop">
-                            <img src="{{ equipped.apiDetails.icon_url|default('https://wow.zamimg.com/images/wow/icons/large/inv_misc_questionmark.jpg') }}" alt="{{ equipped.name }}" class="item-icon">
-                            <div>
-                                <div class="item-name">{{ equipped.name }}</div>
+                                                    {# COLONNE "VOTRE ÉQUIPEMENT" #}
+                                                    <td>
+                                                        {% if equipped and equipped.apiDetails is defined %}
+                                                            <a href="https://www.wowhead.com/mop/item={{ equipped.item.id }}" target="_blank" class="item-link wow-item" data-wowhead="item={{ equipped.item.id }}&domain=mop">
+                                                                <img src="{{ equipped.apiDetails.icon_url|default('https://wow.zamimg.com/images/wow/icons/large/inv_misc_questionmark.jpg') }}" alt="{{ equipped.name }}" class="item-icon">
+                                                                <div>
+                                                                    <div class="item-name">{{ equipped.name }}</div>
+                                                                    {% set difficulty = equipped.apiDetails.difficulty|default(null) %}
+                                                                    {% if difficulty == 'Héroïque élite' %}
+                                                                        <span class="difficulty-text difficulty-elite">Héroïque Élite</span>
+                                                                    {% elseif difficulty == 'Héroïque' %}
+                                                                        <span class="difficulty-text difficulty-heroic">Héroïque</span>
+                                                                    {% else %}
+                                                                        <span class="difficulty-text difficulty-normal">Normal</span>
+                                                                    {% endif %}
+                                                                </div>
+                                                            </a>
+                                                        {% elseif equipped %}
+                                                            <div class="item-name">{{ equipped.name }}</div>
+                                                        {% else %}
+                                                            <div class="item-empty">
+                                                                <div class="item-empty-icon"></div>
+                                                                <span>Vide</span>
+                                                            </div>
+                                                        {% endif %}
+                                                    </td>
 
-                                {# ========================================================== #}
-                                {# LOGIQUE MISE À JOUR POUR GÉRER "HÉROÏQUE ÉLITE"           #}
-                                {# ========================================================== #}
-                                {% set difficulty = equipped.apiDetails.difficulty|default(null) %}
-                                {% if difficulty == 'Héroïque élite' %}
-                                    <span class="difficulty-text difficulty-elite">Héroïque Élite</span>
-                                {% elseif difficulty == 'Héroïque' %}
-                                    <span class="difficulty-text difficulty-heroic">Héroïque</span>
-                                {% else %}
-                                    <span class="difficulty-text difficulty-normal">Normal</span>
-                                {% endif %}
-                                {# ========================================================== #}
-                            </div>
-                        </a>
-                    {% elseif equipped %}
-                        {# Fallback pour le cas où les détails API ne seraient pas là #}
-                        <div class="item-name">{{ equipped.name }}</div>
-                    {% else %}
-                        <div class="item-empty">
-                            <div class="item-empty-icon"></div>
-                            <span>Vide</span>
-                        </div>
-                    {% endif %}
-                </td>
+                                                    {# COLONNE "RECOMMANDÉ (BIS)" #}
+                                                    <td>
+                                                        {% if bis and bis.apiDetails %}
+                                                            <a href="https://www.wowhead.com/mop/item={{ bis.itemId }}" target="_blank" class="item-link wow-item" data-wowhead="item={{ bis.itemId }}&domain=mop">
+                                                                <img src="{{ bis.apiDetails.icon_url|default('https://wow.zamimg.com/images/wow/icons/large/inv_misc_questionmark.jpg') }}" alt="{{ bis.apiDetails.name }}" class="item-icon">
+                                                                <div>
+                                                                    <div class="item-name text-quality-epic">{{ bis.apiDetails.name }}</div>
+                                                                    {% set difficulty = bis.apiDetails.difficulty|default(null) %}
+                                                                    {% if difficulty == 'Héroïque élite' %}
+                                                                        <span class="difficulty-text difficulty-elite">Héroïque Élite</span>
+                                                                    {% elseif difficulty == 'Héroïque' %}
+                                                                        <span class="difficulty-text difficulty-heroic">Héroïque</span>
+                                                                    {% else %}
+                                                                        <span class="difficulty-text difficulty-normal">Normal</span>
+                                                                    {% endif %}
+                                                                </div>
+                                                            </a>
+                                                        {% else %}
+                                                            <span class="text-gray-700 italic text-xs opacity-50">-</span>
+                                                        {% endif %}
+                                                    </td>
 
-                {# === COLONNE "RECOMMANDÉ (BIS)" === #}
-                <td>
-                    {% if bis and bis.apiDetails %}
-                        <a href="https://www.wowhead.com/mop/item={{ bis.itemId }}" target="_blank" class="item-link wow-item" data-wowhead="item={{ bis.itemId }}&domain=mop">
-                            <img src="{{ bis.apiDetails.icon_url|default('https://wow.zamimg.com/images/wow/icons/large/inv_misc_questionmark.jpg') }}" alt="{{ bis.apiDetails.name }}" class="item-icon">
-                            <div>
-                                <div class="item-name text-quality-epic">{{ bis.apiDetails.name }}</div>
-
-                                {# ========================================================== #}
-                                {# LOGIQUE MISE À JOUR POUR GÉRER "HÉROÏQUE ÉLITE"           #}
-                                {# ========================================================== #}
-                                {% set difficulty = bis.apiDetails.difficulty|default(null) %}
-                                {% if difficulty == 'Héroïque élite' %}
-                                    <span class="difficulty-text difficulty-elite">Héroïque Élite</span>
-                                {% elseif difficulty == 'Héroïque' %}
-                                    <span class="difficulty-text difficulty-heroic">Héroïque</span>
-                                {% else %}
-                                    <span class="difficulty-text difficulty-normal">Normal</span>
-                                {% endif %}
-                                {# ========================================================== #}
-                            </div>
-                        </a>
-                    {% else %}
-                        <span class="text-gray-700 italic text-xs opacity-50">-</span>
-                    {% endif %}
-                </td>
-
-                {# === COLONNE "ÉTAT" === #}
-            <td class="text-center align-middle">
-    {% if bis %}
-        {# La condition est maintenant simple :
-        L'ID du BiS de CETTE LIGNE est-il dans le tableau des IDs validés ? #}
-        {% if bis.itemId in validatedBisItemIds %}
-            <div class="status-match">✔</div>
-        {% else %}
-            <div class="status-mismatch">✘</div>
-        {% endif %}
-    {% else %}
-        <span class="text-gray-700 text-xl">•</span>
-    {% endif %}
-</td>
-            </tr>
-        {% endif %}
-    {% endfor %}
-</tbody>
+                                                    {# COLONNE "ÉTAT" #}
+                                                    <td class="text-center align-middle">
+                                                        {% if bis %}
+                                                            {% if bis.itemId in validatedBisItemIds %}
+                                                                <div class="status-match">✔</div>
+                                                            {% else %}
+                                                                <div class="status-mismatch">✘</div>
+                                                            {% endif %}
+                                                        {% else %}
+                                                            <span class="text-gray-700 text-xl">•</span>
+                                                        {% endif %}
+                                                    </td>
+                                                </tr>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </tbody>
                                 </table>
                             </div>
                         </section>
@@ -218,8 +200,6 @@
                                 Il semble que vous n'ayez pas encore lié de personnage. Configurez-le pour charger vos données et commencer la comparaison d'équipement !
                             </p>
                             <a href="#" class="wow-button" onclick="alert('Fonctionnalité à récupérer depuis l\'autre PC !')">
-    ⚙ Configurer mon personnage
-</a>
                                 ⚙ Configurer mon personnage
                             </a>
                         </div>
@@ -231,36 +211,20 @@
 </div>
 
 <script>
-    // 1. Config Wowhead
-    const whTooltips = {
-        colorLinks: true,
-        iconizeLinks: false,
-        renameLinks: false
-    };
+    const whTooltips = { colorLinks: true, iconizeLinks: false, renameLinks: false };
 </script>
-
-<!-- 2. Chargement du script officiel -->
 <script src="https://wow.zamimg.com/js/tooltips.js"></script>
-
-<!-- 3. Notre correctif pour forcer la disparition -->
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-
-        // Cette fonction force le tooltip à se cacher
         const killTooltip = () => {
-            // Wowhead utilise généralement ces sélecteurs
             const tooltips = document.querySelectorAll('.wowhead-tooltip, #wh-tt');
             tooltips.forEach(tt => {
                 tt.style.display = 'none';
                 tt.style.visibility = 'hidden';
             });
         };
-
-        // On applique cette règle à tous tes objets
         const items = document.querySelectorAll('.wow-item');
-
         items.forEach(item => {
-            // L'événement "mouseleave" se déclenche dès que la souris sort de la zone de l'objet
             item.addEventListener('mouseleave', killTooltip);
         });
     });

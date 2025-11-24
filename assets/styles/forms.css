@@ -120,3 +120,127 @@
     filter: brightness(1.1);
     transform: scale(1.02);
 }
+
+/* --- Base du Badge --- */
+.class-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border: 1px solid #555; /* Gris par défaut */
+    color: #aaa; /* Gris par défaut */
+    background-color: rgba(85, 85, 85, 0.1);
+    border-radius: 9999px;
+    font-weight: 700;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    white-space: nowrap;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+    transition: all 0.2s ease;
+}
+
+/* --- Couleurs par Classe --- */
+
+/* Chevalier de la mort / Death Knight */
+.type-death-knight,
+.type-chevalier-de-la-mort {
+    border-color: #c41f3b;
+    color: #c41f3b;
+    background-color: rgba(196, 31, 59, 0.15);
+}
+
+/* Chasseur de démons / Demon Hunter */
+.type-demon-hunter,
+.type-chasseur-de-demons {
+    border-color: #a330c9;
+    color: #a330c9;
+    background-color: rgba(163, 48, 201, 0.15);
+}
+
+/* Druide / Druid */
+.type-druid,
+.type-druide {
+    border-color: #ff7d0a;
+    color: #ff7d0a;
+    background-color: rgba(255, 125, 10, 0.15);
+}
+
+/* Chasseur / Hunter */
+.type-hunter,
+.type-chasseur {
+    border-color: #abd473;
+    color: #abd473;
+    background-color: rgba(171, 212, 115, 0.15);
+}
+
+/* Mage */
+.type-mage {
+    border-color: #40c7eb;
+    color: #40c7eb;
+    background-color: rgba(64, 199, 235, 0.15);
+}
+
+/* Moine / Monk */
+.type-monk,
+.type-moine {
+    border-color: #00ff96;
+    color: #00ff96;
+    background-color: rgba(0, 255, 150, 0.15);
+}
+
+/* Paladin */
+.type-paladin {
+    border-color: #f58cba;
+    color: #f58cba;
+    background-color: rgba(245, 140, 186, 0.15);
+}
+
+/* Prêtre / Priest (Texte blanc pour lisibilité) */
+.type-priest,
+.type-pretre,
+.type-prêtre {
+    border-color: #ffffff;
+    color: #ffffff;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+/* Voleur / Rogue */
+.type-rogue,
+.type-voleur {
+    border-color: #fff569;
+    color: #fff569;
+    background-color: rgba(255, 245, 105, 0.15);
+}
+
+/* Chaman / Shaman */
+.type-shaman,
+.type-chaman {
+    border-color: #0070de;
+    color: #0070de;
+    background-color: rgba(0, 112, 222, 0.15);
+}
+
+/* Démoniste / Warlock */
+.type-warlock,
+.type-demoniste,
+.type-démoniste {
+    border-color: #8787ed;
+    color: #8787ed;
+    background-color: rgba(135, 135, 237, 0.15);
+}
+
+/* Guerrier / Warrior */
+.type-warrior,
+.type-guerrier {
+    border-color: #c79c6e;
+    color: #c79c6e;
+    background-color: rgba(199, 156, 110, 0.15);
+}
+
+/* Évocateur / Evoker */
+.type-evoker,
+.type-evocateur,
+.type-évocateur {
+    border-color: #33937f;
+    color: #33937f;
+    background-color: rgba(51, 147, 127, 0.15);
+}

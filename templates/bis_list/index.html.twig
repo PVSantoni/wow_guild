@@ -6,72 +6,60 @@
 <div class="min-h-screen bg-[#0b0d12] py-12" style="background-image: url('https://bnetcmsus-a.akamaihd.net/cms/content_entry_media/2g/2G4V985U25I21596153195237.jpg'); background-attachment: fixed; background-size: cover; background-position: center;">
     <div class="container mx-auto px-4 max-w-6xl">
 
-        <div class="wow-admin-container">
+        <div class="wow-admin-container bg-black/80 p-6 rounded border border-[#444]">
             <!-- Header du tableau -->
-            <div class="wow-admin-header">
-                <h1 class="wow-admin-title">📚 Registre des BiS Lists</h1>
-                <a href="{{ path('app_bis_list_new') }}" class="btn-create-new">
+            <div class="wow-admin-header flex justify-between items-center mb-6 border-b border-[#333] pb-4">
+                <h1 class="text-[#daa520] font-bold text-2xl uppercase font-serif tracking-widest">📚 Registre des BiS Lists</h1>
+                <a href="{{ path('app_bis_list_new') }}" class="btn-create-new bg-[#b8860b] hover:bg-[#8b6914] text-white py-2 px-4 rounded border border-[#daa520] transition">
                     + Nouvelle Liste
                 </a>
             </div>
 
             <!-- Le tableau -->
             <div class="overflow-x-auto">
-                <table class="wow-admin-table">
+                <table class="w-full text-left border-collapse">
                     <thead>
-                        <tr>
-                            <th>Nom de la liste</th>
-                            <th>Classe</th>
-                            <th>Spécialisation</th>
-                            <th class="text-center">Items Configurés</th>
-                            <th class="text-right">Actions</th>
+                        <tr class="text-[#8b7355] border-b border-[#333]">
+                            <th class="p-3">Nom de la liste</th>
+                            <th class="p-3">Classe</th>
+                            <th class="p-3">Spécialisation</th>
+                            <th class="p-3 text-center">Items</th>
+                            <th class="p-3 text-right">Actions</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody class="text-sm">
                     {% for bis_list in bis_lists %}
-                        <tr>
-                            <td class="font-bold text-[#f0e6d2]">
+                        <tr class="border-b border-[#222] hover:bg-[#ffffff05] transition">
+                            <td class="p-3 font-bold text-[#f0e6d2]">
                                 {{ bis_list.name }}
                             </td>
-                            <td>
-                                {# Petit bonus : couleur dynamique selon la classe #}
-                                {% set classColor = '#555' %}
-                                {% if bis_list.characterClass|upper == 'WARRIOR' %}{% set classColor = '#C79C6E' %}
-                                {% elseif bis_list.characterClass|upper == 'PALADIN' %}{% set classColor = '#F58CBA' %}
-                                {% elseif bis_list.characterClass|upper == 'HUNTER' %}{% set classColor = '#ABD473' %}
-                                {% elseif bis_list.characterClass|upper == 'ROGUE' %}{% set classColor = '#FFF569' %}
-                                {% elseif bis_list.characterClass|upper == 'PRIEST' %}{% set classColor = '#FFFFFF' %}
-                                {% elseif bis_list.characterClass|upper == 'DEATH_KNIGHT' %}{% set classColor = '#C41F3B' %}
-                                {% elseif bis_list.characterClass|upper == 'SHAMAN' %}{% set classColor = '#0070DE' %}
-                                {% elseif bis_list.characterClass|upper == 'MAGE' %}{% set classColor = '#40C7EB' %}
-                                {% elseif bis_list.characterClass|upper == 'WARLOCK' %}{% set classColor = '#8787ED' %}
-                                {% elseif bis_list.characterClass|upper == 'MONK' %}{% set classColor = '#00FF96' %}
-                                {% elseif bis_list.characterClass|upper == 'DRUID' %}{% set classColor = '#FF7D0A' %}
-                                {% elseif bis_list.characterClass|upper == 'DEMON_HUNTER' %}{% set classColor = '#A330C9' %}
-                                {% endif %}
-
-                                <span class="class-badge" style="border-color: {{ classColor }}; color: {{ classColor == '#FFFFFF' or classColor == '#FFF569' ? '#000' : '#fff' }}; background-color: {{ classColor }}20;">
+                            <td class="p-3">
+                                {#
+                                   GÉNÉRATION DYNAMIQUE DE LA CLASSE CSS :
+                                   1. lower : met en minuscule (ex: "MAGE" devient "mage")
+                                   2. replace : change les espaces/underscore en tirets (ex: "DEATH_KNIGHT" -> "death-knight")
+                                   Résultat : class="class-badge type-mage" ou "type-death-knight"
+                                #}
+                                <span class="class-badge type-{{ bis_list.characterClass|lower|replace({' ': '-', '_': '-'}) }}">
                                     {{ bis_list.characterClass }}
                                 </span>
                             </td>
-                            <td>
+                            <td class="p-3">
                                 <span class="text-gray-400">{{ bis_list.specialization }}</span>
                             </td>
-                            <td class="text-center">
-                                {# Compte le nombre d'items dans la liste #}
-                                <span class="text-sm font-mono bg-black/50 px-2 py-1 rounded border border-gray-700">
+                            <td class="p-3 text-center">
+                                <span class="text-xs font-mono bg-black/50 px-2 py-1 rounded border border-gray-700 text-gray-300">
                                     {{ bis_list.bisItems|length }} / 16
                                 </span>
                             </td>
-                            <td class="text-right action-links">
-                                <a href="{{ path('app_bis_list_show', {'id': bis_list.id}) }}">Voir</a>
-                                <a href="{{ path('app_bis_list_edit', {'id': bis_list.id}) }}">Éditer</a>
-                                {# Le formulaire de suppression sécurisé #}
-    <form method="post" action="{{ path('app_bis_list_delete', {'id': bis_list.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette liste ?');" style="display: inline-block;">
-        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ bis_list.id) }}">
-        <button class="btn-delete-icon" title="Supprimer">
-            🗑
-        </button>
+                            <td class="p-3 text-right space-x-2">
+                                <a href="{{ path('app_bis_list_show', {'id': bis_list.id}) }}" class="text-[#40C7EB] hover:underline">Voir</a>
+                                <a href="{{ path('app_bis_list_edit', {'id': bis_list.id}) }}" class="text-[#daa520] hover:underline">Éditer</a>
+
+                                <form method="post" action="{{ path('app_bis_list_delete', {'id': bis_list.id}) }}" onsubmit="return confirm('Supprimer cette liste ?');" class="inline">
+                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ bis_list.id) }}">
+                                    <button class="text-red-500 hover:text-red-400 font-bold px-2">✕</button>
+                                </form>
                             </td>
                         </tr>
                     {% else %}

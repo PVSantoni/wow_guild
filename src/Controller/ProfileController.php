@@ -2,13 +2,15 @@
 
 namespace App\Controller;
 
+use App\Entity\BisList; // Important pour les constantes de classes
+use App\Entity\User;
+use App\Repository\BisListRepository;
 use App\Service\BattleNetApiService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
-use App\Repository\BisListRepository;
-use Symfony\Component\HttpFoundation\Request; // <--- J'ai réactivé ça, c'est obligatoire
 
 #[IsGranted('ROLE_USER')]
 class ProfileController extends AbstractController
@@ -17,104 +19,48 @@ class ProfileController extends AbstractController
     public function index(
         BattleNetApiService $battleNetApiService,
         BisListRepository $bisListRepository,
-        Request $request // <--- Ajouté ici pour récupérer le choix de l'utilisateur
+        Request $request
     ): Response {
-        /** @var \App\Entity\User $user */
+        /** @var User $user */
         $user = $this->getUser();
-
         $activeCharacter = $user->getActiveCharacter();
 
+        // Initialisation
         $characterData = null;
         $characterMedia = null;
-
-        $bisList = null;       // La liste active (celle qu'on affiche)
-        $compatibleLists = []; // Toutes les listes dispos pour ce perso (pour le menu déroulant)
-
+        $bisList = null;
+        $compatibleLists = [];
         $equippedItemsBySlot = [];
         $bisItemsBySlot = [];
 
-        // --- TES TABLEAUX DE MAPPING (Je n'y touche pas) ---
+        // --- CONSTANTES D'AFFICHAGE ---
         $slotOrder = [
-            'HEAD' => 'Tête',
-            'NECK' => 'Cou',
-            'SHOULDER' => 'Épaules',
-            'CLOAK' => 'Dos',
-            'CHEST' => 'Torse',
-            'TABARD' => 'Tabard',
-            'WRIST' => 'Poignets',
-            'HANDS' => 'Mains',
-            'WAIST' => 'Taille',
-            'LEGS' => 'Jambes',
-            'FEET' => 'Pieds',
-            'FINGER_1' => 'Doigt 1',
-            'FINGER_2' => 'Doigt 2',
-            'TRINKET_1' => 'Bijou 1',
-            'TRINKET_2' => 'Bijou 2',
-            'MAIN_HAND' => 'Main droite',
-            'OFF_HAND' => 'Main gauche',
-            'RANGED' => 'À distance',
+            'HEAD' => 'Tête', 'NECK' => 'Cou', 'SHOULDER' => 'Épaules', 'CLOAK' => 'Dos',
+            'CHEST' => 'Torse', 'TABARD' => 'Tabard', 'WRIST' => 'Poignets', 'HANDS' => 'Mains',
+            'WAIST' => 'Taille', 'LEGS' => 'Jambes', 'FEET' => 'Pieds', 'FINGER_1' => 'Doigt 1',
+            'FINGER_2' => 'Doigt 2', 'TRINKET_1' => 'Bijou 1', 'TRINKET_2' => 'Bijou 2',
+            'MAIN_HAND' => 'Main droite', 'OFF_HAND' => 'Main gauche', 'RANGED' => 'À distance',
         ];
+
+        // --- MAPPING TECHNIQUE ---
         $slotMapping = [
-            'TÊTE' => 'HEAD',
-            'TETE' => 'HEAD',
-            'HEAD' => 'HEAD',
-            'CASQUE' => 'HEAD',
-            'COU' => 'NECK',
-            'COLLIER' => 'NECK',
-            'NECK' => 'NECK',
-            'ÉPAULES' => 'SHOULDER',
-            'EPAULES' => 'SHOULDER',
-            'SHOULDER' => 'SHOULDER',
-            'DOS' => 'CLOAK',
-            'CAPE' => 'CLOAK',
-            'BACK' => 'CLOAK',
-            'CLOAK' => 'CLOAK',
-            'TORSE' => 'CHEST',
-            'ROBE' => 'CHEST',
-            'PLASTRON' => 'CHEST',
-            'CHEST' => 'CHEST',
-            'POIGNETS' => 'WRIST',
-            'BRASSARDS' => 'WRIST',
-            'WRIST' => 'WRIST',
-            'MAINS' => 'HANDS',
-            'GANTS' => 'HANDS',
-            'HANDS' => 'HANDS',
-            'TAILLE' => 'WAIST',
-            'CEINTURE' => 'WAIST',
-            'WAIST' => 'WAIST',
-            'JAMBES' => 'LEGS',
-            'PANTALON' => 'LEGS',
-            'JAMBIERES' => 'LEGS',
-            'LEGS' => 'LEGS',
-            'PIEDS' => 'FEET',
-            'BOTTES' => 'FEET',
-            'FEET' => 'FEET',
-            'DOIGT 1' => 'FINGER_1',
-            'ANNEAU 1' => 'FINGER_1',
-            'BAGUE 1' => 'FINGER_1',
-            'FINGER 1' => 'FINGER_1',
-            'DOIGT 2' => 'FINGER_2',
-            'ANNEAU 2' => 'FINGER_2',
-            'BAGUE 2' => 'FINGER_2',
-            'FINGER 2' => 'FINGER_2',
-            'BIJOU 1' => 'TRINKET_1',
-            'TRINKET 1' => 'TRINKET_1',
-            'BIJOU 2' => 'TRINKET_2',
-            'TRINKET 2' => 'TRINKET_2',
-            'MAIN DROITE' => 'MAIN_HAND',
-            'ARME' => 'MAIN_HAND',
-            'MAIN_HAND' => 'MAIN_HAND',
-            'MAIN HAND' => 'MAIN_HAND',
-            'MAIN GAUCHE' => 'OFF_HAND',
-            'BOUCLIER' => 'OFF_HAND',
-            'OFF_HAND' => 'OFF_HAND',
-            'OFF HAND' => 'OFF_HAND',
-            'TENUE EN MAIN GAUCHE' => 'OFF_HAND',
-            'A DISTANCE' => 'RANGED',
-            'À DISTANCE' => 'RANGED',
-            'RANGED' => 'RANGED',
-            'RELIQUE' => 'RANGED',
-            'BAGUETTE' => 'RANGED'
+            'TÊTE' => 'HEAD', 'TETE' => 'HEAD', 'HEAD' => 'HEAD', 'CASQUE' => 'HEAD',
+            'COU' => 'NECK', 'COLLIER' => 'NECK', 'NECK' => 'NECK',
+            'ÉPAULES' => 'SHOULDER', 'EPAULES' => 'SHOULDER', 'SHOULDER' => 'SHOULDER',
+            'DOS' => 'CLOAK', 'CAPE' => 'CLOAK', 'BACK' => 'CLOAK', 'CLOAK' => 'CLOAK',
+            'TORSE' => 'CHEST', 'ROBE' => 'CHEST', 'PLASTRON' => 'CHEST', 'CHEST' => 'CHEST',
+            'POIGNETS' => 'WRIST', 'BRASSARDS' => 'WRIST', 'WRIST' => 'WRIST',
+            'MAINS' => 'HANDS', 'GANTS' => 'HANDS', 'HANDS' => 'HANDS',
+            'TAILLE' => 'WAIST', 'CEINTURE' => 'WAIST', 'WAIST' => 'WAIST',
+            'JAMBES' => 'LEGS', 'PANTALON' => 'LEGS', 'JAMBIERES' => 'LEGS', 'LEGS' => 'LEGS',
+            'PIEDS' => 'FEET', 'BOTTES' => 'FEET', 'FEET' => 'FEET',
+            'DOIGT 1' => 'FINGER_1', 'ANNEAU 1' => 'FINGER_1', 'BAGUE 1' => 'FINGER_1', 'FINGER 1' => 'FINGER_1',
+            'DOIGT 2' => 'FINGER_2', 'ANNEAU 2' => 'FINGER_2', 'BAGUE 2' => 'FINGER_2', 'FINGER 2' => 'FINGER_2',
+            'BIJOU 1' => 'TRINKET_1', 'TRINKET 1' => 'TRINKET_1',
+            'BIJOU 2' => 'TRINKET_2', 'TRINKET 2' => 'TRINKET_2',
+            'MAIN DROITE' => 'MAIN_HAND', 'ARME' => 'MAIN_HAND', 'MAIN_HAND' => 'MAIN_HAND', 'MAIN HAND' => 'MAIN_HAND',
+            'MAIN GAUCHE' => 'OFF_HAND', 'BOUCLIER' => 'OFF_HAND', 'OFF_HAND' => 'OFF_HAND', 'OFF HAND' => 'OFF_HAND', 'TENUE EN MAIN GAUCHE' => 'OFF_HAND',
+            'A DISTANCE' => 'RANGED', 'À DISTANCE' => 'RANGED', 'RANGED' => 'RANGED', 'RELIQUE' => 'RANGED', 'BAGUETTE' => 'RANGED'
         ];
 
         if ($activeCharacter) {
@@ -125,10 +71,12 @@ class ProfileController extends AbstractController
             );
 
             if ($characterData) {
+                // 1. Gestion des Médias (Avatar)
                 if (isset($characterData['media']['href'])) {
                     $characterMedia = $battleNetApiService->getCharacterMedia($characterData['media']['href']);
                 }
 
+                // 2. Gestion de l'équipement porté
                 if (isset($characterData['equipment']['href'])) {
                     $characterEquipment = $battleNetApiService->getCharacterEquipment($characterData['equipment']['href']);
                     if ($characterEquipment && isset($characterEquipment['equipped_items'])) {
@@ -143,80 +91,109 @@ class ProfileController extends AbstractController
                             if ($slotName === 'BACK') $slotName = 'CLOAK';
                             $equippedItemsBySlot[$slotName] = $item;
                         }
-                        unset($item);
                     }
                 }
 
-                $class = strtoupper($characterData['character_class']['name'] ?? null);
-                $spec = $characterData['active_spec']['name'] ?? null;
+                // =========================================================
+                // 3. LOGIQUE DE RÉCUPÉRATION DES LISTES (C'est ici que ça se joue)
+                // =========================================================
+                $apiClassName = $characterData['character_class']['name'] ?? null; // ex: "Mage"
+                $apiSpecName  = $characterData['active_spec']['name'] ?? null;   // ex: "Givre"
 
-                if ($class && $spec) {
-                    // === NOUVELLE LOGIQUE DE SÉLECTION DE LA LISTE ===
+                if ($apiClassName) {
+                    // A. On normalise le nom de la classe (ex: "Mage" devient "MAGE")
+                    $dbClass = null;
+                    if (isset(BisList::CLASSES_CHOICES[$apiClassName])) {
+                        $dbClass = BisList::CLASSES_CHOICES[$apiClassName];
+                    } else {
+                        $dbClass = strtoupper($apiClassName);
+                    }
 
-                    // 1. On cherche TOUTES les listes compatibles avec la classe/spé du perso
+                    // B. On récupère TOUTES les listes de cette classe.
+                    // IMPORTANT : On ne filtre PAS par spécialisation ici.
+                    // Cela permet de voir les listes "Frost" même si on est "Givre".
                     $compatibleLists = $bisListRepository->findBy([
-                        'characterClass' => $class,
-                        'specialization' => $spec
+                        'characterClass' => $dbClass
                     ]);
 
-                    // 2. L'utilisateur a-t-il cliqué sur une liste précise ?
+                    // C. On regarde si l'utilisateur a cliqué sur une liste
                     $requestedBisId = $request->query->get('bis_id');
-
                     if ($requestedBisId) {
                         $candidate = $bisListRepository->find($requestedBisId);
-                        // Sécurité : on vérifie que la liste demandée correspond bien à la classe du perso
-                        if ($candidate && ($candidate->getCharacterClass() === $class && $candidate->getSpecialization() === $spec)) {
+                        // On vérifie juste que c'est bien une liste de Mage
+                        if ($candidate && $candidate->getCharacterClass() === $dbClass) {
                             $bisList = $candidate;
                         }
                     }
 
-                    // 3. Fallback : Si pas de choix (ou choix invalide), on prend la première dispo
+                    // D. Fallback : Si aucune liste n'est sélectionnée
                     if (!$bisList && count($compatibleLists) > 0) {
-                        $bisList = $compatibleLists[0];
+                        // On essaie de trouver une liste dont le nom de spé ressemble à la spé actuelle
+                        // (ex: "givre" dans "mage givre pve")
+                        $activeSpecLower = strtolower($apiSpecName ?? '');
+                        foreach ($compatibleLists as $list) {
+                            $listSpecLower = strtolower($list->getSpecialization());
+
+                            // Logique floue pour matcher "Frost/Givre" ou "Fire/Feu"
+                            if ($activeSpecLower && ($listSpecLower === $activeSpecLower || str_contains($listSpecLower, $activeSpecLower))) {
+                                $bisList = $list;
+                                break;
+                            }
+                            // Mapping manuel rapide FR/EN pour les cas courants
+                            if (($activeSpecLower === 'givre' && $listSpecLower === 'frost') ||
+                                ($activeSpecLower === 'frost' && $listSpecLower === 'givre')) {
+                                $bisList = $list;
+                                break;
+                            }
+                        }
+
+                        // Si toujours rien trouvé, on prend la première de la pile
+                        if (!$bisList) {
+                            $bisList = $compatibleLists[0];
+                        }
                     }
+                }
+                // =========================================================
 
-                    // === FIN NOUVELLE LOGIQUE ===
-
-                    // Le reste est ton code d'origine qui traite $bisList
-                    if ($bisList) {
-                        $pendingGenericItems = [];
-                        foreach ($bisList->getBisItems() as $bisItem) {
-                            $rawSlot = $bisItem->getSlot();
-                            $upperSlot = mb_strtoupper($rawSlot, 'UTF-8');
-                            if (isset($slotMapping[$upperSlot])) {
-                                $technicalKey = $slotMapping[$upperSlot];
-                                if (str_contains($technicalKey, '_')) {
-                                    $bisItem->apiDetails = $battleNetApiService->getItemInfo($bisItem->getItemId());
-                                    $bisItemsBySlot[$technicalKey] = $bisItem;
-                                } else {
-                                    $pendingGenericItems[] = $bisItem;
-                                }
+                // 4. Traitement des items de la liste BiS choisie
+                if ($bisList) {
+                    $pendingGenericItems = [];
+                    foreach ($bisList->getBisItems() as $bisItem) {
+                        $rawSlot = $bisItem->getSlot();
+                        $upperSlot = mb_strtoupper($rawSlot, 'UTF-8');
+                        if (isset($slotMapping[$upperSlot])) {
+                            $technicalKey = $slotMapping[$upperSlot];
+                            if (str_contains($technicalKey, '_')) {
+                                $bisItem->apiDetails = $battleNetApiService->getItemInfo($bisItem->getItemId());
+                                $bisItemsBySlot[$technicalKey] = $bisItem;
                             } else {
                                 $pendingGenericItems[] = $bisItem;
                             }
+                        } else {
+                            $pendingGenericItems[] = $bisItem;
                         }
-                        foreach ($pendingGenericItems as $bisItem) {
-                            $rawSlot = $bisItem->getSlot();
-                            $upperSlot = mb_strtoupper($rawSlot, 'UTF-8');
-                            $localSlotMapping = $slotMapping + ['ANNEAU' => 'FINGER', 'BAGUE' => 'FINGER', 'FINGER' => 'FINGER', 'BIJOU' => 'TRINKET', 'TRINKET' => 'TRINKET'];
-                            $technicalKey = $localSlotMapping[$upperSlot] ?? $upperSlot;
-                            $bisItem->apiDetails = $battleNetApiService->getItemInfo($bisItem->getItemId());
-                            if ($technicalKey === 'FINGER') {
-                                if (!isset($bisItemsBySlot['FINGER_1'])) {
-                                    $bisItemsBySlot['FINGER_1'] = $bisItem;
-                                } elseif (!isset($bisItemsBySlot['FINGER_2'])) {
-                                    $bisItemsBySlot['FINGER_2'] = $bisItem;
-                                }
-                            } elseif ($technicalKey === 'TRINKET') {
-                                if (!isset($bisItemsBySlot['TRINKET_1'])) {
-                                    $bisItemsBySlot['TRINKET_1'] = $bisItem;
-                                } elseif (!isset($bisItemsBySlot['TRINKET_2'])) {
-                                    $bisItemsBySlot['TRINKET_2'] = $bisItem;
-                                }
-                            } else {
-                                if (!isset($bisItemsBySlot[$technicalKey])) {
-                                    $bisItemsBySlot[$technicalKey] = $bisItem;
-                                }
+                    }
+                    foreach ($pendingGenericItems as $bisItem) {
+                        $rawSlot = $bisItem->getSlot();
+                        $upperSlot = mb_strtoupper($rawSlot, 'UTF-8');
+                        $localSlotMapping = $slotMapping + ['ANNEAU' => 'FINGER', 'BAGUE' => 'FINGER', 'FINGER' => 'FINGER', 'BIJOU' => 'TRINKET', 'TRINKET' => 'TRINKET'];
+                        $technicalKey = $localSlotMapping[$upperSlot] ?? $upperSlot;
+                        $bisItem->apiDetails = $battleNetApiService->getItemInfo($bisItem->getItemId());
+                        if ($technicalKey === 'FINGER') {
+                            if (!isset($bisItemsBySlot['FINGER_1'])) {
+                                $bisItemsBySlot['FINGER_1'] = $bisItem;
+                            } elseif (!isset($bisItemsBySlot['FINGER_2'])) {
+                                $bisItemsBySlot['FINGER_2'] = $bisItem;
+                            }
+                        } elseif ($technicalKey === 'TRINKET') {
+                            if (!isset($bisItemsBySlot['TRINKET_1'])) {
+                                $bisItemsBySlot['TRINKET_1'] = $bisItem;
+                            } elseif (!isset($bisItemsBySlot['TRINKET_2'])) {
+                                $bisItemsBySlot['TRINKET_2'] = $bisItem;
+                            }
+                        } else {
+                            if (!isset($bisItemsBySlot[$technicalKey])) {
+                                $bisItemsBySlot[$technicalKey] = $bisItem;
                             }
                         }
                     }
@@ -224,6 +201,7 @@ class ProfileController extends AbstractController
             }
         }
 
+        // 5. Validation (Checkmarks)
         $allBisItemIds = [];
         if ($bisList) {
             foreach ($bisList->getBisItems() as $item) {
@@ -245,7 +223,7 @@ class ProfileController extends AbstractController
             'characterData' => $characterData,
             'characterMedia' => $characterMedia,
             'bisList' => $bisList,
-            'compatibleLists' => $compatibleLists, // <--- AJOUT IMPORTANT POUR LE TWIG
+            'compatibleLists' => $compatibleLists,
             'slotOrder' => $slotOrder,
             'equippedItemsBySlot' => $equippedItemsBySlot,
             'bisItemsBySlot' => $bisItemsBySlot,
