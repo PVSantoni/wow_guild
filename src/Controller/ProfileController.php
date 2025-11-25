@@ -25,7 +25,6 @@ class ProfileController extends AbstractController
         BisListRepository $bisListRepository,
         Request $request
     ): Response {
-        // On appelle la fonction magique avec l'utilisateur connecté ($this->getUser())
         /** @var User $user */
         $user = $this->getUser();
         return $this->renderProfile($user, $battleNetApiService, $bisListRepository, $request);
@@ -36,17 +35,16 @@ class ProfileController extends AbstractController
     // =========================================================================
     #[Route('/{id}', name: 'app_public_profile', methods: ['GET'])]
     public function show(
-        User $user, // Symfony trouve l'user grâce à l'ID dans l'URL
+        User $user,
         BattleNetApiService $battleNetApiService,
         BisListRepository $bisListRepository,
         Request $request
     ): Response {
-        // On appelle la MEME fonction magique, mais avec l'utilisateur demandé ($user)
         return $this->renderProfile($user, $battleNetApiService, $bisListRepository, $request);
     }
 
     // =========================================================================
-    // LA LOGIQUE COMMUNE (Privée, ne peut pas être appelée depuis l'URL)
+    // LA LOGIQUE COMMUNE (Privée)
     // =========================================================================
     private function renderProfile(
         User $user,
@@ -66,46 +64,107 @@ class ProfileController extends AbstractController
 
         // --- CONSTANTES D'AFFICHAGE ---
         $slotOrder = [
-            'HEAD' => 'Tête', 'NECK' => 'Cou', 'SHOULDER' => 'Épaules', 'CLOAK' => 'Dos',
-            'CHEST' => 'Torse', 'TABARD' => 'Tabard', 'WRIST' => 'Poignets', 'HANDS' => 'Mains',
-            'WAIST' => 'Taille', 'LEGS' => 'Jambes', 'FEET' => 'Pieds', 'FINGER_1' => 'Doigt 1',
-            'FINGER_2' => 'Doigt 2', 'TRINKET_1' => 'Bijou 1', 'TRINKET_2' => 'Bijou 2',
-            'MAIN_HAND' => 'Main droite', 'OFF_HAND' => 'Main gauche', 'RANGED' => 'À distance',
+            'HEAD' => 'Tête',
+            'NECK' => 'Cou',
+            'SHOULDER' => 'Épaules',
+            'CLOAK' => 'Dos',
+            'CHEST' => 'Torse',
+            'TABARD' => 'Tabard',
+            'WRIST' => 'Poignets',
+            'HANDS' => 'Mains',
+            'WAIST' => 'Taille',
+            'LEGS' => 'Jambes',
+            'FEET' => 'Pieds',
+            'FINGER_1' => 'Doigt 1',
+            'FINGER_2' => 'Doigt 2',
+            'TRINKET_1' => 'Bijou 1',
+            'TRINKET_2' => 'Bijou 2',
+            'MAIN_HAND' => 'Main droite',
+            'OFF_HAND' => 'Main gauche',
+            'RANGED' => 'À distance',
         ];
 
-        // --- MAPPING TECHNIQUE (J'ai compressé pour la lisibilité, c'est ton code exact) ---
+        // --- MAPPING TECHNIQUE ---
         $slotMapping = [
-            'TÊTE' => 'HEAD', 'TETE' => 'HEAD', 'HEAD' => 'HEAD', 'CASQUE' => 'HEAD',
-            'COU' => 'NECK', 'COLLIER' => 'NECK', 'NECK' => 'NECK',
-            'ÉPAULES' => 'SHOULDER', 'EPAULES' => 'SHOULDER', 'SHOULDER' => 'SHOULDER',
-            'DOS' => 'CLOAK', 'CAPE' => 'CLOAK', 'BACK' => 'CLOAK', 'CLOAK' => 'CLOAK',
-            'TORSE' => 'CHEST', 'ROBE' => 'CHEST', 'PLASTRON' => 'CHEST', 'CHEST' => 'CHEST',
-            'POIGNETS' => 'WRIST', 'BRASSARDS' => 'WRIST', 'WRIST' => 'WRIST',
-            'MAINS' => 'HANDS', 'GANTS' => 'HANDS', 'HANDS' => 'HANDS',
-            'TAILLE' => 'WAIST', 'CEINTURE' => 'WAIST', 'WAIST' => 'WAIST',
-            'JAMBES' => 'LEGS', 'PANTALON' => 'LEGS', 'JAMBIERES' => 'LEGS', 'LEGS' => 'LEGS',
-            'PIEDS' => 'FEET', 'BOTTES' => 'FEET', 'FEET' => 'FEET',
-            'DOIGT 1' => 'FINGER_1', 'ANNEAU 1' => 'FINGER_1', 'BAGUE 1' => 'FINGER_1', 'FINGER 1' => 'FINGER_1',
-            'DOIGT 2' => 'FINGER_2', 'ANNEAU 2' => 'FINGER_2', 'BAGUE 2' => 'FINGER_2', 'FINGER 2' => 'FINGER_2',
-            'BIJOU 1' => 'TRINKET_1', 'TRINKET 1' => 'TRINKET_1',
-            'BIJOU 2' => 'TRINKET_2', 'TRINKET 2' => 'TRINKET_2',
-            'MAIN DROITE' => 'MAIN_HAND', 'ARME' => 'MAIN_HAND', 'MAIN_HAND' => 'MAIN_HAND', 'MAIN HAND' => 'MAIN_HAND',
-            'MAIN GAUCHE' => 'OFF_HAND', 'BOUCLIER' => 'OFF_HAND', 'OFF_HAND' => 'OFF_HAND', 'OFF HAND' => 'OFF_HAND', 'TENUE EN MAIN GAUCHE' => 'OFF_HAND',
-            'A DISTANCE' => 'RANGED', 'À DISTANCE' => 'RANGED', 'RANGED' => 'RANGED', 'RELIQUE' => 'RANGED', 'BAGUETTE' => 'RANGED'
+            'TÊTE' => 'HEAD',
+            'TETE' => 'HEAD',
+            'HEAD' => 'HEAD',
+            'CASQUE' => 'HEAD',
+            'COU' => 'NECK',
+            'COLLIER' => 'NECK',
+            'NECK' => 'NECK',
+            'ÉPAULES' => 'SHOULDER',
+            'EPAULES' => 'SHOULDER',
+            'SHOULDER' => 'SHOULDER',
+            'DOS' => 'CLOAK',
+            'CAPE' => 'CLOAK',
+            'BACK' => 'CLOAK',
+            'CLOAK' => 'CLOAK',
+            'TORSE' => 'CHEST',
+            'ROBE' => 'CHEST',
+            'PLASTRON' => 'CHEST',
+            'CHEST' => 'CHEST',
+            'POIGNETS' => 'WRIST',
+            'BRASSARDS' => 'WRIST',
+            'WRIST' => 'WRIST',
+            'MAINS' => 'HANDS',
+            'GANTS' => 'HANDS',
+            'HANDS' => 'HANDS',
+            'TAILLE' => 'WAIST',
+            'CEINTURE' => 'WAIST',
+            'WAIST' => 'WAIST',
+            'JAMBES' => 'LEGS',
+            'PANTALON' => 'LEGS',
+            'JAMBIERES' => 'LEGS',
+            'LEGS' => 'LEGS',
+            'PIEDS' => 'FEET',
+            'BOTTES' => 'FEET',
+            'FEET' => 'FEET',
+            'DOIGT 1' => 'FINGER_1',
+            'ANNEAU 1' => 'FINGER_1',
+            'BAGUE 1' => 'FINGER_1',
+            'FINGER 1' => 'FINGER_1',
+            'DOIGT 2' => 'FINGER_2',
+            'ANNEAU 2' => 'FINGER_2',
+            'BAGUE 2' => 'FINGER_2',
+            'FINGER 2' => 'FINGER_2',
+            'BIJOU 1' => 'TRINKET_1',
+            'TRINKET 1' => 'TRINKET_1',
+            'BIJOU 2' => 'TRINKET_2',
+            'TRINKET 2' => 'TRINKET_2',
+            'MAIN DROITE' => 'MAIN_HAND',
+            'ARME' => 'MAIN_HAND',
+            'MAIN_HAND' => 'MAIN_HAND',
+            'MAIN HAND' => 'MAIN_HAND',
+            'MAIN GAUCHE' => 'OFF_HAND',
+            'BOUCLIER' => 'OFF_HAND',
+            'OFF_HAND' => 'OFF_HAND',
+            'OFF HAND' => 'OFF_HAND',
+            'TENUE EN MAIN GAUCHE' => 'OFF_HAND',
+            'A DISTANCE' => 'RANGED',
+            'À DISTANCE' => 'RANGED',
+            'RANGED' => 'RANGED',
+            'RELIQUE' => 'RANGED',
+            'BAGUETTE' => 'RANGED'
         ];
 
         if ($activeCharacter) {
             try {
-                $characterData = $battleNetApiService->getCharacterProfile(
-                    $activeCharacter->getCharacterName(),
+                // CORRECTION ICI : Utilisation de la nouvelle méthode getCharacterProfileSummary
+                $characterData = $battleNetApiService->getCharacterProfileSummary(
                     $activeCharacter->getCharacterRealmSlug(),
+                    $activeCharacter->getCharacterName(),
                     $activeCharacter->getCharacterRegion() ?? 'eu'
                 );
 
                 if ($characterData) {
-                    // 1. Médias
+                    // 1. Médias (Avatar/Image de fond)
+                    // Note : On utilise l'ancienne méthode car ton code attend 'media.href'
                     if (isset($characterData['media']['href'])) {
-                        $characterMedia = $battleNetApiService->getCharacterMedia($characterData['media']['href']);
+                        // Récupère les URLs depuis le href fourni par l'API profile
+                        $mediaData = $battleNetApiService->getCharacterMedia($characterData['media']['href']);
+                        // Si le service renvoie un tableau d'assets, on le stocke
+                        $characterMedia = ['assets' => $mediaData['assets'] ?? []];
                     }
 
                     // 2. Équipement
@@ -200,7 +259,7 @@ class ProfileController extends AbstractController
                     }
                 }
             } catch (\Exception $e) {
-                // En cas d'erreur API, on ne fait rien de spécial, on affiche juste la page vide
+                // En cas d'erreur API, on laisse passer pour afficher au moins le squelette de la page
             }
         }
 
@@ -218,7 +277,7 @@ class ProfileController extends AbstractController
         }
 
         return $this->render('profile/index.html.twig', [
-            'user' => $user, // L'utilisateur visité (peut être moi ou un autre)
+            'user' => $user,
             'characterData' => $characterData,
             'characterMedia' => $characterMedia,
             'bisList' => $bisList,
@@ -228,7 +287,6 @@ class ProfileController extends AbstractController
             'bisItemsBySlot' => $bisItemsBySlot,
             'validatedBisItemIds' => $validatedBisItemIds,
             'activeCharacter' => $activeCharacter,
-            // Variable bonus pour le template : "Est-ce que c'est MON profil ?"
             'isOwner' => ($user === $this->getUser())
         ]);
     }

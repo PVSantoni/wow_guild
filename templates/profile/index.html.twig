@@ -12,7 +12,10 @@
     {# Image de fond obscurcie #}
     <div class="fixed inset-0 z-0 pointer-events-none"
          style="background-image: url('https://bnetcmsus-a.akamaihd.net/cms/content_entry_media/2g/2G4V985U25I21596153195237.jpg'); background-size: cover; background-position: center;">
+         {# Couche sombre de base #}
          <div class="absolute inset-0 bg-[#050505]/90 backdrop-blur-[2px]"></div>
+         {# MODIFICATION : Ajout d'une vignette (ombrage sur les bords) #}
+         <div class="absolute inset-0 pointer-events-none" style="background: radial-gradient(circle, transparent 50%, #000 100%); opacity: 0.8;"></div>
     </div>
 
     {# Contenu principal (Z-index pour passer au dessus du fond) #}
@@ -158,10 +161,19 @@
                                                 {# Colonne Equipé #}
                                                 <td>
                                                     {% if equipped and equipped.apiDetails is defined %}
+                                                        {# LOGIQUE RARETÉ AJOUTÉE #}
+                                                        {% set qualityClass = 'text-quality-epic' %}
+                                                        {% if equipped.apiDetails.quality is defined %}
+                                                            {% if equipped.apiDetails.quality == 'Rare' %}{% set qualityClass = 'text-quality-rare' %}
+                                                            {% elseif equipped.apiDetails.quality == 'Legendary' %}{% set qualityClass = 'text-quality-legendary' %}
+                                                            {% elseif equipped.apiDetails.quality == 'Uncommon' %}{% set qualityClass = 'text-quality-uncommon' %}
+                                                            {% endif %}
+                                                        {% endif %}
+
                                                         <a href="https://www.wowhead.com/mop/item={{ equipped.item.id }}" target="_blank" class="item-link wow-item" data-wowhead="item={{ equipped.item.id }}&domain=mop">
                                                             <img src="{{ equipped.apiDetails.icon_url|default('https://wow.zamimg.com/images/wow/icons/large/inv_misc_questionmark.jpg') }}" class="item-icon border-[#6d5d52]">
                                                             <div>
-                                                                <div class="item-name text-[#a335ee]">{{ equipped.name }}</div>
+                                                                <div class="item-name {{ qualityClass }}">{{ equipped.name }}</div>
                                                                 {% set difficulty = equipped.apiDetails.difficulty|default(null) %}
                                                                 {% if difficulty == 'Héroïque élite' %}<span class="difficulty-text difficulty-elite">Héroïque Élite</span>
                                                                 {% elseif difficulty == 'Héroïque' %}<span class="difficulty-text difficulty-heroic">Héroïque</span>
@@ -178,10 +190,18 @@
                                                 {# Colonne BiS #}
                                                 <td>
                                                     {% if bis and bis.apiDetails %}
+                                                        {# LOGIQUE RARETÉ POUR BIS #}
+                                                        {% set bisQualityClass = 'text-quality-epic' %}
+                                                        {% if bis.apiDetails.quality is defined %}
+                                                            {% if bis.apiDetails.quality == 'Rare' %}{% set bisQualityClass = 'text-quality-rare' %}
+                                                            {% elseif bis.apiDetails.quality == 'Legendary' %}{% set bisQualityClass = 'text-quality-legendary' %}
+                                                            {% endif %}
+                                                        {% endif %}
+
                                                         <a href="https://www.wowhead.com/mop/item={{ bis.itemId }}" target="_blank" class="item-link wow-item opacity-90 hover:opacity-100" data-wowhead="item={{ bis.itemId }}&domain=mop">
                                                             <img src="{{ bis.apiDetails.icon_url|default('https://wow.zamimg.com/images/wow/icons/large/inv_misc_questionmark.jpg') }}" class="item-icon border-[#daa520]/50">
                                                             <div>
-                                                                <div class="item-name text-[#daa520]">{{ bis.apiDetails.name }}</div>
+                                                                <div class="item-name {{ bisQualityClass }}">{{ bis.apiDetails.name }}</div>
                                                                 {% set difficulty = bis.apiDetails.difficulty|default(null) %}
                                                                 {% if difficulty == 'Héroïque élite' %}<span class="difficulty-text difficulty-elite">Héroïque Élite</span>
                                                                 {% elseif difficulty == 'Héroïque' %}<span class="difficulty-text difficulty-heroic">Héroïque</span>
@@ -197,9 +217,11 @@
                                                 <td class="text-center">
                                                     {% if bis %}
                                                         {% if bis.itemId in validatedBisItemIds %}
-                                                            <div class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-green-900/30 border border-green-700 text-green-500 shadow-[0_0_10px_rgba(34,197,94,0.2)]">✔</div>
+                                                            {# MODIFICATION : Check Vert Brillant #}
+                                                            <div class="flex items-center justify-center w-6 h-6 rounded-full bg-green-500/10 border border-green-500 text-green-400 shadow-[0_0_12px_rgba(34,197,94,0.4)] text-xs font-bold">✔</div>
                                                         {% else %}
-                                                            <div class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-red-900/20 border border-red-900/50 text-red-700">✘</div>
+                                                            {# MODIFICATION : Croix Rouge Brillante #}
+                                                            <div class="flex items-center justify-center w-6 h-6 rounded-full bg-red-500/10 border border-red-500 text-red-400 shadow-[0_0_12px_rgba(220,38,38,0.4)] text-xs font-bold">✘</div>
                                                         {% endif %}
                                                     {% else %}
                                                         <span class="text-[#6d5d52] opacity-30">•</span>

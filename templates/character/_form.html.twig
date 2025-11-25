@@ -1,34 +1,57 @@
 {# templates/character/_form.html.twig #}
-{{ form_start(form) }}
+{{ form_start(form, {'attr': {'class': 'space-y-6'}}) }}
 
-    <div class="space-y-6">
-        {# Champ Nom du Personnage #}
+    {# Champ : NOM DU PERSONNAGE #}
+    <div>
+        <label class="block font-fantasy text-[#daa520] text-sm mb-2 font-bold tracking-wide">
+            Nom du Personnage
+        </label>
+        {{ form_widget(form.characterName, {
+            'attr': {
+                'class': 'w-full bg-black/40 border border-[#6d5d52] text-[#f0e6d2] p-3 rounded focus:outline-none focus:border-[#daa520] transition-colors placeholder-[#6d5d52]/50',
+                'placeholder': 'Ex: Arthas'
+            }
+        }) }}
+        <div class="text-red-500 text-xs mt-1 font-bold">{{ form_errors(form.characterName) }}</div>
+    </div>
+
+    {# Grille : ROYAUME & REGION #}
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {# Slug Royaume #}
         <div>
-            {{ form_label(form.characterName, 'Nom du Personnage', {'label_attr': {'class': 'block mb-2 text-xs font-bold text-[#daa520] uppercase tracking-widest font-fantasy'}}) }}
-            {{ form_widget(form.characterName, {'attr': {'class': 'w-full bg-black/40 border border-[#6d5d52] text-[#f0e6d2] rounded p-3 focus:border-[#daa520] focus:ring-1 focus:ring-[#daa520] focus:outline-none transition-colors placeholder-gray-600', 'placeholder': 'Ex: Arthas'}}) }}
-            <div class="text-red-400 text-xs mt-1 font-bold">{{ form_errors(form.characterName) }}</div>
+            <label class="block font-fantasy text-[#daa520] text-sm mb-2 font-bold tracking-wide">
+                Royaume (Slug)
+            </label>
+            {{ form_widget(form.characterRealmSlug, {
+                'attr': {
+                    'class': 'w-full bg-black/40 border border-[#6d5d52] text-[#f0e6d2] p-3 rounded focus:outline-none focus:border-[#daa520] transition-colors placeholder-[#6d5d52]/50',
+                    'placeholder': 'Ex: hyjal'
+                }
+            }) }}
+            <div class="text-[#6d5d52] text-[10px] mt-1 italic">Minuscule et sans espaces (ex: arak-arahm).</div>
+            <div class="text-red-500 text-xs mt-1 font-bold">{{ form_errors(form.characterRealmSlug) }}</div>
         </div>
 
-        {# Ligne avec Serveur et Région #}
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-                {{ form_label(form.characterRealmSlug, 'Slug du Serveur', {'label_attr': {'class': 'block mb-2 text-xs font-bold text-[#daa520] uppercase tracking-widest font-fantasy'}}) }}
-                {{ form_widget(form.characterRealmSlug, {'attr': {'class': 'w-full bg-black/40 border border-[#6d5d52] text-[#f0e6d2] rounded p-3 focus:border-[#daa520] focus:ring-1 focus:ring-[#daa520] focus:outline-none transition-colors placeholder-gray-600', 'placeholder': 'Ex: hyjal'}}) }}
-                <div class="text-gray-500 text-[10px] mt-1 italic">Le nom du serveur en minuscule et sans espaces (ex: archimonde).</div>
-                <div class="text-red-400 text-xs mt-1 font-bold">{{ form_errors(form.characterRealmSlug) }}</div>
-            </div>
-            <div>
-                {{ form_label(form.characterRegion, 'Région', {'label_attr': {'class': 'block mb-2 text-xs font-bold text-[#daa520] uppercase tracking-widest font-fantasy'}}) }}
-                {# On applique un style select custom #}
-                {{ form_widget(form.characterRegion, {'attr': {'class': 'w-full bg-black/40 border border-[#6d5d52] text-[#f0e6d2] rounded p-3 focus:border-[#daa520] focus:ring-1 focus:ring-[#daa520] focus:outline-none appearance-none cursor-pointer'}}) }}
-                <div class="text-red-400 text-xs mt-1 font-bold">{{ form_errors(form.characterRegion) }}</div>
-            </div>
+        {# Région #}
+        <div>
+            <label class="block font-fantasy text-[#6d5d52] text-sm mb-2 font-bold tracking-wide">
+                Région
+            </label>
+            {{ form_widget(form.characterRegion, {
+                'attr': {
+                    'class': 'w-full bg-black/20 border border-[#6d5d52]/50 text-[#8b7355] p-3 rounded cursor-not-allowed text-center',
+                    'readonly': true
+                }
+            }) }}
+            <div class="text-red-500 text-xs mt-1 font-bold">{{ form_errors(form.characterRegion) }}</div>
         </div>
     </div>
 
-    <div class="mt-8 flex justify-end border-t border-[#6d5d52]/30 pt-6">
-        <button class="wow-btn-refined">
-            {{ button_label|default('Enregistrer') }} <span class="ml-2">Done</span>
+    {# BOUTON D'ACTION #}
+    <div class="pt-6 mt-6 border-t border-[#6d5d52]/20">
+        <button class="wow-btn-refined w-full justify-center group">
+            <span class="group-hover:text-[#fff] transition-colors">{{ button_label|default('Sauvegarder') }}</span>
+            <span class="ml-2 text-lg">💾</span>
         </button>
     </div>
 

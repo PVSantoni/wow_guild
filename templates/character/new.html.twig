@@ -3,32 +3,78 @@
 {% block title %}Ajouter un Personnage{% endblock %}
 
 {% block body %}
-<div class="min-h-screen bg-[#0b0d12] text-[#c7b394] pb-20 relative font-sans">
-    {# Fond identique #}
+<div class="min-h-screen bg-[#0b0d12] text-[#c7b394] pb-20 relative font-sans flex flex-col justify-center">
+
+    {# FOND #}
     <div class="fixed inset-0 z-0 pointer-events-none" style="background-image: url('https://bnetcmsus-a.akamaihd.net/cms/content_entry_media/2g/2G4V985U25I21596153195237.jpg'); background-size: cover; background-position: center;">
-        <div class="absolute inset-0 bg-[#050505]/90 backdrop-blur-[2px]"></div>
+        <div class="absolute inset-0 bg-[#050505]/90 backdrop-blur-[3px]"></div>
+        <div class="absolute inset-0 pointer-events-none" style="background: radial-gradient(circle, transparent 40%, #000 100%); opacity: 0.8;"></div>
     </div>
 
-    <div class="relative z-10 container mx-auto max-w-2xl py-12 px-4">
-        <div class="text-center mb-10">
-            <h1 class="text-4xl font-fantasy font-bold text-[#f0e6d2] drop-shadow-md mb-2">
-                NOUVEAU HÉROS
+    <div class="relative z-10 container mx-auto max-w-lg px-4">
+
+        {# HEADER #}
+        <div class="text-center mb-8">
+            <div class="inline-block p-3 rounded-full border border-[#daa520]/30 bg-black/50 mb-4 shadow-[0_0_20px_rgba(218,165,32,0.1)]">
+                <span class="text-4xl">🔮</span>
+            </div>
+            <h1 class="text-4xl font-fantasy font-bold text-[#f0e6d2] drop-shadow-[0_2px_4px_rgba(0,0,0,1)] tracking-widest mb-2">
+                IMPORT BLIZZARD
             </h1>
-            <p class="text-[#8b7355]">Liez votre personnage World of Warcraft à votre profil de guilde.</p>
+            <p class="text-[#8b7355] text-sm max-w-sm mx-auto">
+                Saisissez le nom et le royaume. Le niveau, la classe, la spé et l'avatar seront récupérés automatiquement depuis l'Armurerie officielle.
+            </p>
         </div>
 
-        <div class="wow-panel">
-            <div class="wow-panel-header">
-                Informations Requises
+        {# PANNEAU FORMULAIRE #}
+        <div class="wow-panel overflow-hidden relative group">
+            {# Petite barre décorative en haut #}
+            <div class="h-1 w-full bg-gradient-to-r from-transparent via-[#daa520] to-transparent opacity-50"></div>
+
+            <div class="wow-panel-header text-center border-b-0 pb-0 pt-6">
+                Coordonnées du Personnage
             </div>
-            <div class="p-8 bg-[#0b0d12]/50">
-                {{ include('character/_form.html.twig', {'button_label': 'Confirmer l\'ajout'}) }}
+
+            <div class="p-8 pt-4 bg-[#0b0d12]/40 relative z-10">
+                {# Inclusion du formulaire #}
+                {# Assure-toi que ton formulaire utilise bien les classes .wow-input (via CharacterType.php ou via form themes) #}
+
+                {{ form_start(form) }}
+                    <div class="space-y-5">
+                        <div>
+                            <label class="wow-label">Nom du Héros</label>
+                            {{ form_widget(form.characterName, {'attr': {'class': 'wow-input', 'placeholder': 'Ex: Sylvanas'}}) }}
+                            <div class="text-red-500 text-xs mt-1">{{ form_errors(form.characterName) }}</div>
+                        </div>
+
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="wow-label">Royaume (Slug)</label>
+                                {{ form_widget(form.characterRealmSlug, {'attr': {'class': 'wow-input', 'placeholder': 'Ex: hyjal'}}) }}
+                                <div class="form-help">Sans espaces (ex: arak-arahm)</div>
+                                <div class="text-red-500 text-xs mt-1">{{ form_errors(form.characterRealmSlug) }}</div>
+                            </div>
+                            <div>
+                                <label class="wow-label">Région</label>
+                                {{ form_widget(form.characterRegion, {'attr': {'class': 'wow-input text-center opacity-70 cursor-not-allowed', 'readonly': 'readonly'}}) }}
+                            </div>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="wow-btn-submit mt-8 group-hover:shadow-[0_0_20px_rgba(218,165,32,0.3)]">
+                        <span class="mr-2 text-xl">✨</span> Lancer l'Importation
+                    </button>
+                {{ form_end(form) }}
             </div>
+
+            {# Effet de fond subtil dans le panneau #}
+            <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/black-scales.png')] opacity-20 pointer-events-none z-0"></div>
         </div>
 
+        {# LIEN RETOUR #}
         <div class="mt-8 text-center">
-            <a href="{{ path('app_character_index') }}" class="text-[#6d5d52] hover:text-[#daa520] text-sm uppercase tracking-widest transition-colors">
-                &larr; Annuler et Retourner à la liste
+            <a href="{{ path('app_character_index') }}" class="wow-btn-refined text-xs opacity-70 hover:opacity-100">
+                <span class="mr-1">✕</span> Annuler
             </a>
         </div>
     </div>

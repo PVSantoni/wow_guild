@@ -1,125 +1,344 @@
-body {
-    background-color: skyblue;
-}
-/* assets/styles/app.css */
+/* =========================================
+   1. IMPORTS & BASE
+   ========================================= */
+@import url("https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700;900&family=Lato:wght@300;400;700&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-body {
-    font-family: "Lato", sans-serif;
-    /* Couleur de sélection de texte (petit bonus classe) */
-    background-color: #050505;
+:root {
+    /* Couleurs de base WoW */
+    --wow-gold: #daa520;
+    --wow-gold-dim: #8b7355;
+    --wow-bronze: #6d5d52;
+    --wow-dark: #0b0d12;
+    --wow-dark-transparent: rgba(11, 13, 18, 0.9);
+    --wow-parchment: #f0e6d2;
+    --wow-dark-panel: rgba(21, 23, 32, 0.95);
+
+    /* Raretés WoW */
+    --quality-poor: #9d9d9d;
+    --quality-common: #ffffff;
+    --quality-uncommon: #1eff00;
+    --quality-rare: #0070dd;
+    --quality-epic: #a335ee;
+    --quality-legendary: #ff8000;
 }
 
-/* Scrollbar personnalisée style WoW */
+body {
+    background-color: #050505;
+    font-family: "Lato", sans-serif;
+    color: #c7b394;
+    overflow-x: hidden;
+}
+
+/* Titres en police WoW */
+h1,
+h2,
+h3,
+.font-fantasy {
+    font-family: "Cinzel", serif;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+}
+
+/* =========================================
+   2. UI GLOBALE (Scrollbar, Panels)
+   ========================================= */
+
+/* Scrollbar Style WoW */
 ::-webkit-scrollbar {
     width: 8px;
 }
-
 ::-webkit-scrollbar-track {
     background: #0b0d12;
 }
-
 ::-webkit-scrollbar-thumb {
     background: #333;
     border-radius: 4px;
+    border: 1px solid #111;
 }
-
 ::-webkit-scrollbar-thumb:hover {
-    background: #bfa670; /* Doré au survol */
+    background: var(--wow-gold-dim);
 }
 
+/* Panneau Style WoW */
+.wow-panel {
+    background-color: var(--wow-dark-panel);
+    border: 1px solid var(--wow-bronze);
+    border-radius: 2px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.7);
+    transition: all 0.3s ease;
+    backdrop-filter: blur(5px);
+    overflow: hidden;
+}
+
+.wow-panel:hover {
+    border-color: var(--wow-gold-dim);
+    box-shadow: 0 0 15px rgba(218, 165, 32, 0.1);
+}
+
+.wow-panel-header {
+    background: linear-gradient(
+        90deg,
+        rgba(109, 93, 82, 0.3) 0%,
+        transparent 100%
+    );
+    border-bottom: 1px solid var(--wow-bronze);
+    padding: 0.75rem 1rem;
+    font-family: "Cinzel", serif;
+    color: var(--wow-gold);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 1.1rem;
+    font-weight: 700;
+    text-shadow: 0 2px 2px rgba(0, 0, 0, 0.8);
+}
+
+/* =========================================
+   3. CARTES PERSONNAGES (Character Cards)
+   ========================================= */
+
+.character-card {
+    position: relative;
+    background: linear-gradient(180deg, #151720 0%, #0b0d12 100%);
+    border: 1px solid #333;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+    border-radius: 2px;
+}
+
+/* Texture subtile sur les cartes */
+.character-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: url("https://www.transparenttextures.com/patterns/carbon-fibre.png");
+    opacity: 0.05;
+    pointer-events: none;
+    z-index: 0;
+}
+
+/* Effet de survol */
+.character-card:hover {
+    transform: translateY(-5px);
+    border-color: var(--wow-gold-dim);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.7);
+}
+
+/* Carte ACTIVE (Sélectionnée) */
+.character-card.active {
+    border-color: var(--wow-gold);
+    box-shadow: 0 0 20px rgba(218, 165, 32, 0.15),
+        inset 0 0 10px rgba(218, 165, 32, 0.05);
+}
+
+/* Barre de couleur (Classe) en haut */
+.class-strip {
+    height: 4px;
+    width: 100%;
+    position: relative;
+    z-index: 10;
+    box-shadow: 0 1px 5px rgba(0, 0, 0, 0.5);
+    transition: height 0.3s ease;
+}
+.character-card:hover .class-strip {
+    height: 6px;
+}
+
+/* Avatar avec lueur */
+.char-avatar {
+    border: 1px solid #444;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+    transition: transform 0.3s ease, border-color 0.3s ease;
+}
+.character-card:hover .char-avatar {
+    transform: scale(1.05);
+    border-color: var(--wow-gold-dim);
+}
+
+/* =========================================
+   4. FORMULAIRES & BOUTONS
+   ========================================= */
+
+/* --- FORMULAIRES --- */
+
+/* Label */
+.wow-label {
+    display: block;
+    font-family: "Cinzel", serif;
+    font-size: 0.8rem;
+    color: var(--wow-gold);
+    margin-bottom: 0.5rem;
+    font-weight: bold;
+    letter-spacing: 0.05em;
+}
+
+/* Champ de saisie (Input) */
+.wow-input {
+    width: 100%;
+    background-color: rgba(0, 0, 0, 0.4);
+    border: 1px solid var(--wow-bronze);
+    color: var(--wow-parchment);
+    padding: 0.75rem 1rem;
+    font-family: "Lato", sans-serif;
+    font-size: 1rem;
+    border-radius: 2px;
+    transition: all 0.3s ease;
+}
+
+.wow-input:focus {
+    outline: none;
+    border-color: var(--wow-gold);
+    background-color: rgba(0, 0, 0, 0.6);
+    box-shadow: 0 0 10px rgba(218, 165, 32, 0.2);
+}
+
+.wow-input::placeholder {
+    color: rgba(139, 115, 85, 0.5);
+    font-style: italic;
+}
+
+/* Select Personnalisé */
+.wow-select {
+    appearance: none;
+    background-color: rgba(0, 0, 0, 0.6);
+    border: 1px solid var(--wow-bronze);
+    color: var(--wow-gold);
+    font-family: "Cinzel", serif;
+    padding: 0.75rem 1rem;
+    padding-right: 2.5rem;
+    border-radius: 2px;
+    width: 100%;
+    /* Flèche SVG dorée encodée */
+    background-image: url("data:image/svg+xml;charset=US-ASCII,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20width%3D%22292.4%22%20height%3D%22292.4%22%3E%3Cpath%20fill%3D%22%23daa520%22%20d%3D%22M287%2069.4a17.6%2017.6%200%200%200-13-5.4H18.4c-5%200-9.3%201.8-12.9%205.4A17.6%2017.6%200%200%200%200%2082.2c0%205%201.8%209.3%205.4%2012.9l128%20127.9c3.6%203.6%207.8%205.4%2012.8%205.4s9.2-1.8%2012.8-5.4L287%2095c3.5-3.5%205.4-7.8%205.4-12.8%200-5-1.9-9.2-5.5-12.8z%22%2F%3E%3C%2Fsvg%3E");
+    background-repeat: no-repeat;
+    background-position: right 0.7rem top 50%;
+    background-size: 0.65rem auto;
+}
+.wow-select:focus {
+    border-color: var(--wow-gold);
+    box-shadow: 0 0 10px rgba(218, 165, 32, 0.2);
+    outline: none;
+}
+
+/* Aide sous le champ */
+.form-help {
+    font-size: 0.75rem;
+    color: #6d5d52;
+    margin-top: 0.25rem;
+    font-style: italic;
+}
+
+/* --- BOUTONS --- */
+
+/* Bouton Validation (Submit - Style Doré) */
+.wow-btn-submit {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 1rem;
+    margin-top: 1.5rem;
+    background: linear-gradient(to bottom, #daa520, #b8860b);
+    border: 1px solid #8b7355;
+    color: #000;
+    font-family: "Cinzel", serif;
+    font-weight: 900;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    cursor: pointer;
+    transition: all 0.2s;
+    border-radius: 2px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+}
+
+.wow-btn-submit:hover {
+    filter: brightness(1.1);
+    transform: translateY(-1px);
+    box-shadow: 0 0 15px rgba(218, 165, 32, 0.4);
+}
+
+/* Bouton Standard "Raffiné" (Style Sombre) */
 .wow-btn-refined {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
     gap: 0.6rem;
-
-    /* Style de base discret */
-    background: rgba(0, 0, 0, 0.2);
-    border: 1px solid #6d5d52; /* Bordure bronze sombre */
-    color: #8b7355; /* Texte couleur parchemin sombre */
-
+    background: linear-gradient(
+        to bottom,
+        rgba(40, 40, 40, 0.8),
+        rgba(20, 20, 20, 0.9)
+    );
+    border: 1px solid var(--wow-bronze);
+    color: var(--wow-gold);
     font-family: "Cinzel", serif;
     font-size: 0.8rem;
     text-transform: uppercase;
     letter-spacing: 0.1em;
     padding: 0.6rem 1.2rem;
-    border-radius: 4px;
+    border-radius: 2px;
     transition: all 0.3s ease;
     text-decoration: none;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
 }
 
 .wow-btn-refined:hover {
-    /* Au survol : illumination dorée */
-    border-color: #daa520;
-    color: #f0e6d2;
-    background: rgba(218, 165, 32, 0.1); /* Légère teinte dorée */
-    box-shadow: 0 0 15px rgba(218, 165, 32, 0.15),
-        inset 0 0 5px rgba(218, 165, 32, 0.1);
-    transform: translateX(-4px); /* Petit mouvement fluide vers la gauche */
+    border-color: var(--wow-gold);
+    color: #fff;
+    background: linear-gradient(
+        to bottom,
+        rgba(60, 60, 60, 0.8),
+        rgba(30, 30, 30, 0.9)
+    );
+    box-shadow: 0 0 15px rgba(218, 165, 32, 0.3);
+    text-shadow: 0 0 5px rgba(218, 165, 32, 0.8);
+    transform: translateY(-2px);
 }
 
-/* Style spécifique pour la flèche pour qu'elle soit bien alignée */
 .wow-btn-refined .arrow {
     font-size: 1.1em;
     line-height: 1;
     transition: transform 0.3s ease;
 }
 
-.wow-btn-refined {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.6rem;
-    background: rgba(0, 0, 0, 0.2);
-    border: 1px solid #6d5d52;
+/* Bouton Sélectionner (Petit style carte) */
+.btn-select {
+    display: inline-block;
+    background: transparent;
+    border: 1px solid rgba(109, 93, 82, 0.4);
     color: #8b7355;
     font-family: "Cinzel", serif;
-    font-size: 0.8rem;
+    font-size: 0.7rem;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
-    padding: 0.6rem 1.2rem;
-    border-radius: 4px;
-    transition: all 0.3s ease;
-    text-decoration: none;
+    padding: 0.4rem 0.8rem;
+    transition: all 0.2s;
+    cursor: pointer;
+    border-radius: 2px;
 }
-.wow-btn-refined:hover {
-    border-color: #daa520;
-    color: #f0e6d2;
-    background: rgba(218, 165, 32, 0.1);
-    box-shadow: 0 0 15px rgba(218, 165, 32, 0.15);
-    transform: translateX(-4px);
+.btn-select:hover {
+    border-color: var(--wow-gold);
+    color: var(--wow-gold);
+    background: rgba(218, 165, 32, 0.05);
 }
 
-/* Petit ajustement pour les Select dans le tableau */
-.wow-select {
-    background-color: rgba(0, 0, 0, 0.4);
-    border: 1px solid #6d5d52;
-    color: #c7b394;
-}
-.wow-select:focus {
-    border-color: #daa520;
-    box-shadow: 0 0 5px rgba(218, 165, 32, 0.5);
-    outline: none;
-}
-
+/* Bouton Supprimer (Rouge) */
 .wow-button-delete {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     gap: 0.5rem;
-
     font-family: "Cinzel", serif;
     font-weight: bold;
     font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-
-    /* Fond Rouge Sombre Dégradé */
     background: linear-gradient(to bottom, #7f1d1d, #450a0a);
     border: 1px solid #b91c1c;
-    color: #fee2e2; /* Blanc cassé */
-
+    color: #fee2e2;
     padding: 0.5rem 1rem;
     border-radius: 4px;
     cursor: pointer;
@@ -129,10 +348,9 @@ body {
 
 .wow-button-delete:hover {
     background: linear-gradient(to bottom, #991b1b, #7f1d1d);
-    border-color: #ef4444; /* Rouge plus vif */
+    border-color: #ef4444;
     color: #ffffff;
     transform: translateY(-1px);
-    /* Lueur rouge menaçante */
     box-shadow: 0 0 15px rgba(220, 38, 38, 0.4),
         inset 0 0 5px rgba(0, 0, 0, 0.5);
 }
@@ -142,110 +360,145 @@ body {
     box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.5);
 }
 
-.wow-panel {
-    background-color: rgba(21, 23, 32, 0.95); /* Fond très sombre */
-    border: 1px solid #6d5d52; /* Bordure bronze */
-    border-radius: 4px;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.5);
-    transition: border-color 0.3s ease;
-    overflow: hidden;
-}
+/* =========================================
+   5. TABLEAUX & SIDEBAR
+   ========================================= */
 
-.wow-panel:hover {
-    border-color: #8b7355; /* Éclaircissement léger au survol global */
-}
-
-/* En-tête des panneaux */
-.wow-panel-header {
-    background: linear-gradient(to right, rgba(109, 93, 82, 0.2), transparent);
-    padding: 0.75rem 1rem;
-    border-bottom: 1px solid #6d5d52;
-    font-family: "Cinzel", serif;
-    color: #daa520; /* Doré */
-    text-transform: uppercase;
-    letter-spacing: 0.1em;
-    font-size: 1.1rem;
-    font-weight: bold;
-}
-
-/* Labels et Valeurs (Sidebar) */
+/* Labels Sidebar */
 .account-label {
-    color: #8b7355;
+    color: var(--wow-gold-dim);
     font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.05em;
     margin-bottom: 0.2rem;
 }
 .account-value {
-    color: #f0e6d2;
+    color: var(--wow-parchment);
     font-family: "Lato", sans-serif;
     font-weight: 500;
 }
 
-/* Tableaux style WoW */
+/* Tableaux */
 .wow-table {
     width: 100%;
-    border-collapse: collapse;
+    border-collapse: separate;
+    border-spacing: 0 2px;
 }
+
 .wow-table thead th {
-    background-color: rgba(0, 0, 0, 0.4);
-    color: #8b7355;
+    background: rgba(0, 0, 0, 0.6);
+    color: var(--wow-gold-dim);
     font-family: "Cinzel", serif;
     font-size: 0.75rem;
     text-transform: uppercase;
     letter-spacing: 0.1em;
     padding: 1rem;
     text-align: left;
-    border-bottom: 1px solid #6d5d52;
+    border-bottom: 2px solid var(--wow-bronze);
 }
+
 .wow-table tbody tr {
-    border-bottom: 1px solid rgba(109, 93, 82, 0.2);
-    transition: background 0.2s;
+    background: rgba(255, 255, 255, 0.02);
+    transition: background 0.2s, transform 0.2s;
 }
+
 .wow-table tbody tr:hover {
-    background-color: rgba(218, 165, 32, 0.05); /* Lueur dorée très légère */
+    background: linear-gradient(
+        90deg,
+        rgba(218, 165, 32, 0.05) 0%,
+        transparent 100%
+    );
+    transform: translateX(2px);
 }
+
 .wow-table td {
     padding: 0.75rem 1rem;
     vertical-align: middle;
     color: #c7b394;
+    border-bottom: 1px solid rgba(109, 93, 82, 0.1);
     font-size: 0.9rem;
 }
 
-/* Items et Rareté */
+/* =========================================
+   6. ITEMS & ICONS (Armurerie)
+   ========================================= */
+
 .item-link {
-    display: flex;
+    display: inline-flex;
     align-items: center;
     gap: 0.75rem;
     text-decoration: none;
-    transition: transform 0.2s;
+    transition: all 0.2s;
 }
-.item-link:hover {
-    transform: translateX(4px);
+
+.item-link:hover .item-icon {
+    border-color: var(--wow-gold);
+    box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
 }
+
+.item-link:hover .item-name {
+    text-decoration: underline;
+    filter: brightness(1.2);
+}
+
 .item-icon {
-    width: 42px;
-    height: 42px;
+    width: 44px;
+    height: 44px;
     border: 1px solid #444;
     border-radius: 4px;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.8);
 }
-.item-name {
-    font-weight: bold;
-    color: #a335ee; /* Épique par défaut (ajustable via classes) */
-    line-height: 1.2;
-}
-/* Couleurs de qualité (Bonus) */
-.text-quality-epic { color: #a335ee; }
-.text-quality-rare { color: #0070dd; }
 
+.item-name {
+    font-weight: 700;
+    font-size: 0.95rem;
+    line-height: 1.2;
+    text-shadow: 1px 1px 0 #000;
+}
+
+/* Couleurs de Qualité */
+.text-quality-poor {
+    color: var(--quality-poor);
+}
+.text-quality-common {
+    color: var(--quality-common);
+}
+.text-quality-uncommon {
+    color: var(--quality-uncommon);
+}
+.text-quality-rare {
+    color: var(--quality-rare);
+}
+.text-quality-epic {
+    color: var(--quality-epic);
+}
+.text-quality-legendary {
+    color: var(--quality-legendary);
+}
+
+/* Badges Difficulté */
 .difficulty-text {
-    font-size: 0.7rem;
-    display: inline-block;
-    padding: 0 0.4rem;
+    font-size: 0.65rem;
+    text-transform: uppercase;
+    font-weight: bold;
+    padding: 1px 4px;
     border-radius: 2px;
     margin-top: 2px;
-    border: 1px solid rgba(255,255,255,0.1);
+    display: inline-block;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    letter-spacing: 0.05em;
 }
-.difficulty-heroic { color: #20d662; background: rgba(32, 214, 98, 0.1); }
-.difficulty-elite { color: #daa520; background: rgba(218, 165, 32, 0.1); }
-.difficulty-normal { color: #999; }
+
+.difficulty-heroic {
+    color: #20d662;
+    background: rgba(32, 214, 98, 0.05);
+    border-color: rgba(32, 214, 98, 0.2);
+}
+.difficulty-elite {
+    color: var(--wow-gold);
+    background: rgba(218, 165, 32, 0.05);
+    border-color: rgba(218, 165, 32, 0.2);
+}
+.difficulty-normal {
+    color: #888;
+}

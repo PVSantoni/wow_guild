@@ -3,50 +3,62 @@
 {% block title %}Modifier {{ character.characterName }}{% endblock %}
 
 {% block body %}
-<div class="min-h-screen bg-[#0b0d12] text-[#c7b394] pb-20 relative font-sans">
-    {# Fond identique #}
+<div class="min-h-screen bg-[#0b0d12] text-[#c7b394] pb-20 relative font-sans flex flex-col items-center pt-12">
+
+    {# FOND #}
     <div class="fixed inset-0 z-0 pointer-events-none" style="background-image: url('https://bnetcmsus-a.akamaihd.net/cms/content_entry_media/2g/2G4V985U25I21596153195237.jpg'); background-size: cover; background-position: center;">
          <div class="absolute inset-0 bg-[#050505]/90 backdrop-blur-[2px]"></div>
+         <div class="absolute inset-0 pointer-events-none" style="background: radial-gradient(circle, transparent 50%, #000 100%); opacity: 0.8;"></div>
     </div>
 
-    <div class="relative z-10 container mx-auto max-w-2xl py-12 px-4">
+    <div class="relative z-10 container mx-auto max-w-2xl px-4">
+
+        {# EN-TÊTE #}
         <div class="text-center mb-10">
-            <h1 class="text-4xl font-fantasy font-bold text-[#f0e6d2] drop-shadow-md mb-2">
+            <h1 class="text-4xl font-fantasy font-bold text-[#f0e6d2] drop-shadow-md mb-2 tracking-widest">
                 MODIFIER LE HÉROS
             </h1>
-            <p class="text-[#daa520] text-xl font-fantasy tracking-wide">{{ character.characterName }}</p>
+            <div class="inline-block border-b-2 border-[#daa520] pb-1">
+                <p class="text-[#daa520] text-xl font-fantasy tracking-wide">{{ character.characterName }}</p>
+            </div>
         </div>
 
         {# FORMULAIRE DE MODIFICATION #}
         <div class="wow-panel mb-12">
-            <div class="wow-panel-header">
+            <div class="wow-panel-header text-center">
                 Mise à jour des données
             </div>
-            <div class="p-8 bg-[#0b0d12]/50">
-                {{ include('character/_form.html.twig', {'button_label': 'Sauvegarder les modifications'}) }}
+            <div class="p-8 bg-[#0b0d12]/40">
+                {{ include('character/_form.html.twig', {'button_label': 'Mettre à jour le Personnage'}) }}
             </div>
         </div>
 
         {# ZONE DE DANGER (SUPPRESSION) #}
-        <div class="wow-panel border-red-900/40 hover:border-red-600 transition-colors">
-            <div class="bg-red-900/10 p-6 flex flex-col md:flex-row justify-between items-center gap-4">
-                <div>
-                    <h3 class="font-bold text-red-500 font-fantasy tracking-wide text-lg">ZONE DE DANGER</h3>
-                    <p class="text-xs text-gray-500">La suppression d'un personnage est définitive et retirera ses données de l'armurerie.</p>
+        <div class="wow-panel border-red-900/30 hover:border-red-600/60 transition-colors duration-300 overflow-hidden group">
+            <div class="bg-gradient-to-r from-red-950/20 to-black p-6 flex flex-col md:flex-row justify-between items-center gap-6">
+
+                <div class="text-center md:text-left">
+                    <h3 class="font-bold text-red-500 font-fantasy tracking-widest text-lg flex items-center justify-center md:justify-start gap-2">
+                        <span class="text-2xl">⚠️</span> ZONE DE DANGER
+                    </h3>
+                    <p class="text-xs text-red-300/60 mt-1 max-w-xs">
+                        La suppression est <strong>définitive</strong>. Ce personnage sera retiré de l'armurerie et du roster.
+                    </p>
                 </div>
 
-                <form method="post" action="{{ path('app_character_delete', {'id': character.id}) }}" onsubmit="return confirm('Attention ! Êtes-vous sûr de vouloir supprimer définitivement {{ character.characterName|e('js') }} ?');">
+                <form method="post" action="{{ path('app_character_delete', {'id': character.id}) }}" onsubmit="return confirm('⚠️ ATTENTION !\n\nÊtes-vous absolument sûr de vouloir supprimer {{ character.characterName|e('js') }} ?\n\nCette action est irréversible.');">
                     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ character.id) }}">
-                    <button class="wow-button-delete">
-                        <span class="text-lg mr-1">💀</span> Supprimer
+                    <button class="px-5 py-2.5 bg-red-900/20 border border-red-800 text-red-400 font-fantasy font-bold uppercase tracking-wider rounded hover:bg-red-700 hover:text-white hover:border-red-500 transition-all duration-300 shadow-[0_0_10px_rgba(153,27,27,0.2)] group-hover:shadow-[0_0_20px_rgba(220,38,38,0.4)] flex items-center gap-2">
+                        <span>💀</span> Supprimer
                     </button>
                 </form>
             </div>
         </div>
 
-        <div class="text-center mt-8">
-            <a href="{{ path('app_character_index') }}" class="text-[#6d5d52] hover:text-[#daa520] text-sm uppercase tracking-widest transition-colors">
-                &larr; Retour à la gestion des personnages
+        {# LIEN RETOUR #}
+        <div class="text-center mt-10">
+            <a href="{{ path('app_character_index') }}" class="text-[#6d5d52] hover:text-[#daa520] text-xs uppercase tracking-widest transition-colors border-b border-transparent hover:border-[#daa520] pb-0.5">
+                Annuler et Retourner au Bataillon
             </a>
         </div>
     </div>
