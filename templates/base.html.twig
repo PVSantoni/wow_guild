@@ -4,7 +4,7 @@
         <meta charset="UTF-8">
         <title>{% block title %}Le Codex de Guilde{% endblock %}</title>
         <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text></svg>">
-        
+
         {% block stylesheets %}
             {{ encore_entry_link_tags('app') }}
         {% endblock %}
@@ -13,7 +13,7 @@
             {{ encore_entry_script_tags('app') }}
         {% endblock %}
     </head>
-    
+
     <body class="bg-gray-900 text-gray-200">
         <header class="bg-gray-800 shadow-md">
             <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
@@ -24,8 +24,13 @@
                     {% if is_granted('ROLE_ADMIN') %}
                         <a href="{{ path('app_admin_dashboard') }}" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Admin</a>
                     {% endif %}
-                    
+
                     {% if app.user %}
+                        <!-- ========================= -->
+                        <!-- NOUVEAU LIEN AJOUTÉ ICI -->
+                        <!-- ========================= -->
+                        <a href="{{ path('app_guild_roster') }}" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Roster</a>
+
                         <a href="{{ path('app_profile_index') }}" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Mon Profil</a>
                         <span class="text-gray-300 hidden md:inline">Bienvenue, {{ app.user.pseudo }}</span>
                         <a href="{{ path('app_logout') }}" class="text-gray-300 hover:text-yellow-400">Déconnexion</a>
@@ -48,7 +53,7 @@
 
             {% block body %}{% endblock %}
         </main>
-        
+
         <script>const whTooltips = {colorLinks: true, iconizeLinks: true, renameLinks: true, domain: 'mop'};</script>
         <script src="https://wow.zamimg.com/js/tooltips.js"></script>
     </body>

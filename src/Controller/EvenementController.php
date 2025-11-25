@@ -116,25 +116,32 @@ final class EvenementController extends AbstractController
     ): Response {
         // 1. S'assurer que l'utilisateur est connecté
         $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
+        /** @var \App\Entity\User $user */
         $user = $this->getUser();
 
-        // 2. Récupérer le statut envoyé par le formulaire
+        // 2. Récupérer le statut ET LE RÔLE envoyés par le formulaire
         $statut = $request->request->get('statut');
+        $role = $request->request->get('role'); // <-- NOUVEAU
 
         // 3. Vérifier que le statut est valide
         if (!in_array($statut, ['Confirmé', 'Incertain', 'Absent'])) {
-            // Gérer l'erreur, par exemple rediriger avec un message
             $this->addFlash('error', 'Statut non valide.');
             return $this->redirectToRoute('app_evenement_show', ['id' => $evenement->getId()]);
         }
 
-        // 4. Chercher si une inscription existe déjà pour cet utilisateur et cet événement
+        // 3bis. Vérifier que le rôle est valide (sauf si on se désinscrit)
+        if ($statut !== 'Absent' && !in_array($role, Inscription::ROLES)) {
+            $this->addFlash('error', 'Rôle non valide.');
+            return $this->redirectToRoute('app_evenement_show', ['id' => $evenement->getId()]);
+        }
+
+        // 4. Chercher si une inscription existe déjà
         $inscription = $inscriptionRepository->findOneBy([
             'user' => $user,
             'evenement' => $evenement
         ]);
 
-        // Si le statut est "Absent" et qu'une inscription existe, on la supprime
+        // Si le statut est "Absent", on supprime l'inscription
         if ($statut === 'Absent') {
             if ($inscription) {
                 $entityManager->remove($inscription);
@@ -147,10 +154,12 @@ final class EvenementController extends AbstractController
                 $inscription->setUser($user);
                 $inscription->setEvenement($evenement);
             }
-            // On met à jour le statut
+            // On met à jour le statut ET LE RÔLE
             $inscription->setStatut($statut);
+            $inscription->setPlayedRole($role); // <-- NOUVEAU
+
             $entityManager->persist($inscription);
-            $this->addFlash('success', 'Votre inscription a bien été enregistrée !');
+            $this->addFlash('success', 'Votre inscription en tant que ' . $role . ' a bien été enregistrée !');
         }
 
         // 5. On sauvegarde en base de données

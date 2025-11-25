@@ -1,0 +1,52 @@
+{# templates/guild/roster.html.twig #}
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Roster de la Guilde{% endblock %}
+
+{% block body %}
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-4xl font-fantasy header-title mb-6 text-center">
+            Roster de la Guilde
+        </h1>
+
+        <div class="wow-panel">
+            <table class="w-full wow-table">
+                <thead>
+                    <tr>
+                        <th>Pseudo</th>
+                        <th>Personnage Actif</th>
+                        <th>Rang de Guilde</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for member in members %}
+                        <tr>
+                            <td>
+                                <span class="font-bold text-lg">{{ member.pseudo }}</span>
+                            </td>
+                            <td>
+                                {% if member.activeCharacter %}
+                                    {# On utilise les noms de propriétés de VOTRE entité Character #}
+                                    <span class="font-fantasy">{{ member.activeCharacter.characterName }}</span>
+                                    <span class="text-gray-400">- {{ member.activeCharacter.characterRealmSlug|capitalize }}</span>
+                                {% else %}
+                                    <span class="text-gray-500 italic">Aucun personnage actif</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <span class="font-bold">{{ member.guildRank }}</span>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="3" class="text-center py-8 text-gray-500 italic">
+                                Aucun membre trouvé.
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}

@@ -3,31 +3,115 @@
 {% block title %}{{ evenement.nom }}{% endblock %}
 
 {% block body %}
-    <h1 class="text-4xl font-bold text-yellow-400 mb-2">{{ evenement.nom }}</h1>
-    <p class="text-gray-400 mb-6">Le {{ evenement.dateDebut|date('d/m/Y à H:i') }}</p>
+    <div class="container mx-auto">
 
-    <div class="bg-gray-800 p-6 rounded-lg shadow-md">
-        <h2 class="text-2xl font-bold mb-4">Description</h2>
-        <p class="text-gray-300">{{ evenement.description|nl2br }}</p> {# nl2br pour respecter les sauts de ligne #}
-    </div>
+        {# ======================================= #}
+        {# 1. EN-TÊTE ET DESCRIPTION STYLISÉS      #}
+        {# ======================================= #}
+        <div class="text-center mb-8">
+            <h1 class="text-5xl font-fantasy header-title mb-2">{{ evenement.nom }}</h1>
+            <p class="text-gray-400 text-lg">
+                Le {{ evenement.dateDebut|date('l d F Y à H:i') }}
+            </p>
+        </div>
 
-    <div class="bg-gray-800 p-6 rounded-lg shadow-md mt-6">
-        <h2 class="text-2xl font-bold mb-4">Gérer ma participation</h2>
-        {# ... garde le code des formulaires d'inscription ici ... #}
-    </div>
+        <div class="wow-panel mb-8">
+            <div class="wow-panel-header">Description</div>
+            <div class="p-6 text-gray-300">
+                {{ evenement.description|nl2br }}
+            </div>
+        </div>
 
-    <div class="bg-gray-800 p-6 rounded-lg shadow-md mt-6">
-        <h2 class="text-2xl font-bold mb-4">Participants ({{ evenement.inscriptions|length }} / {{ evenement.nbPlacesMax }})</h2>
-        {# ... garde le code qui affiche les listes de participants ici ... #}
-    </div>
+        {# ======================================= #}
+        {# 2. GESTION DE L'INSCRIPTION            #}
+        {# ======================================= #}
+        <div class="wow-panel mb-8">
+            <div class="wow-panel-header">Gérer ma participation</div>
+            <div class="p-6">
+                {% set userInscription = null %}
+                {% if app.user %}
+                    {% for inscription in evenement.inscriptions %}
+                        {% if inscription.user.id == app.user.id %}
+                            {% set userInscription = inscription %}
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
 
-    <hr class="my-6 border-gray-700">
+                {% if userInscription %}
+                    {# AFFICHE CECI SI L'UTILISATEUR EST DÉJÀ INSCRIT #}
+                    <div class="text-center">
+                        <p class="text-lg text-green-400 mb-4">
+                            Vous êtes inscrit en tant que
+                            <span class="font-bold">{{ userInscription.playedRole|default('Non défini') }}</span>
+                            avec le statut <span class="font-bold">{{ userInscription.statut }}</span>.
+                        </p>
+                        <form action="{{ path('app_evenement_inscription', {id: evenement.id}) }}" method="post" class="inline">
+                            <input type="hidden" name="statut" value="Absent">
+                            <button type="submit" class="wow-button">Se désinscrire</button>
+                        </form>
+                    </div>
+                {% else %}
+                    {# AFFICHE CECI SI L'UTILISATEUR N'EST PAS INSCRIT #}
+                    <div class="flex flex-wrap items-center justify-center gap-4">
+                        {% for role in constant('App\\Entity\\Inscription::ROLES') %}
+                            <form action="{{ path('app_evenement_inscription', {id: evenement.id}) }}" method="post" class="inline">
+                                <input type="hidden" name="statut" value="Confirmé">
+                                <input type="hidden" name="role" value="{{ role }}">
+                                <button type="submit" class="wow-button">Participer ({{ role }})</button>
+                            </form>
+                        {% endfor %}
+                        <form action="{{ path('app_evenement_inscription', {id: evenement.id}) }}" method="post" class="inline">
+                            <input type="hidden" name="statut" value="Incertain">
+                            <input type="hidden" name="role" value="DPS"> {# Rôle par défaut pour les incertains #}
+                            <button type="submit" class="text-gray-400 hover:text-white px-4 py-2 hover:underline">Peut-être</button>
+                        </form>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
 
-    <div class="flex space-x-4">
-        <a href="{{ path('app_evenement_index') }}" class="bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded">Retour au calendrier</a>
-        {% if is_granted('ROLE_ADMIN') %}
-            <a href="{{ path('app_evenement_edit', {'id': evenement.id}) }}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">Modifier</a>
-            {{ include('evenement/_delete_form.html.twig') }}
+        {# ======================================= #}
+        {# 3. AFFICHAGE DES PARTICIPANTS PAR RÔLE  #}
+        {# ======================================= #}
+        <h2 class="text-3xl font-fantasy header-title text-center mb-6">
+            Participants Confirmés ({{ evenement.inscriptions|filter(i => i.statut == 'Confirmé')|length }} / {{ evenement.nbPlacesMax }})
+        </h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {% set confirmedInscriptions = evenement.inscriptions|filter(i => i.statut == 'Confirmé') %}
+            {% for role in constant('App\\Entity\\Inscription::ROLES') %}
+                {% set participantsInRole = confirmedInscriptions|filter(i => i.playedRole == role) %}
+                <div class="wow-panel">
+                    <div class="wow-panel-header">{{ role }}s <span>({{ participantsInRole|length }})</span></div>
+                    <div class="p-4"><ul class="space-y-2">
+                        {% for inscription in participantsInRole %}
+                            <li class="text-gray-300 font-bold">{{ inscription.user.pseudo }}</li>
+                        {% else %}
+                            <li class="text-gray-500 italic">Aucun participant.</li>
+                        {% endfor %}
+                    </ul></div>
+                </div>
+            {% endfor %}
+        </div>
+
+        {% set uncertainInscriptions = evenement.inscriptions|filter(i => i.statut == 'Incertain') %}
+        {% if uncertainInscriptions is not empty %}
+            <div class="mt-6 wow-panel">
+                <div class="wow-panel-header">Incertains ({{ uncertainInscriptions|length }})</div>
+                <div class="p-4"><p class="text-gray-400">{{ uncertainInscriptions|map(i => i.user.pseudo)|join(', ') }}</p></div>
+            </div>
         {% endif %}
+
+        {# ======================================= #}
+        {# 4. BOUTONS D'ACTION (MODIFIER, ETC.)    #}
+        {# ======================================= #}
+        <hr class="my-8 border-gray-700">
+        <div class="flex items-center justify-center space-x-4">
+            <a href="{{ path('app_evenement_index') }}" class="wow-button">Retour au calendrier</a>
+            {% if is_granted('ROLE_ADMIN') %}
+                <a href="{{ path('app_evenement_edit', {'id': evenement.id}) }}" class="wow-button">Modifier</a>
+                {{ include('evenement/_delete_form.html.twig') }}
+            {% endif %}
+        </div>
     </div>
 {% endblock %}

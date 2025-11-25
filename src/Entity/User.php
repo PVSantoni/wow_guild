@@ -32,6 +32,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255)]
     private ?string $pseudo = null;
 
+    #[ORM\Column(length: 50)]
+    private ?string $guildRank = 'Membre';
+
     /**
      * @var Collection<int, Inscription>
      */
@@ -59,7 +62,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      */
     // 3. AJOUT de la nouvelle propriété pour le personnage actif
     #[ORM\OneToOne(targetEntity: Character::class, cascade: ['persist', 'remove'], fetch: 'EAGER')]
-private ?Character $activeCharacter = null;
+    private ?Character $activeCharacter = null;
 
 
     public function __construct()
@@ -112,6 +115,17 @@ private ?Character $activeCharacter = null;
     public function setPassword(string $password): static
     {
         $this->password = $password;
+        return $this;
+    }
+
+    public function getGuildRank(): ?string
+    {
+        return $this->guildRank;
+    }
+
+    public function setGuildRank(string $guildRank): static
+    {
+        $this->guildRank = $guildRank;
         return $this;
     }
 
@@ -210,4 +224,12 @@ private ?Character $activeCharacter = null;
         $this->activeCharacter = $activeCharacter;
         return $this;
     }
+
+    public const RANKS = [
+        'Chef de Guilde',
+        'Officier',
+        'Vétéran',
+        'Membre',
+        'Recrue'
+    ];
 }

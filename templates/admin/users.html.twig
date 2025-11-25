@@ -1,4 +1,3 @@
-
 {% extends 'base.html.twig' %}
 
 {% block title %}Gestion des Membres{% endblock %}
@@ -13,53 +12,57 @@
         <table class="min-w-full text-left text-sm text-gray-300">
             <thead class="bg-gray-900 text-xs text-gray-400 uppercase">
                 <tr>
-                    <th scope="col" class="px-6 py-3">ID</th>
                     <th scope="col" class="px-6 py-3">Pseudo</th>
                     <th scope="col" class="px-6 py-3">Email</th>
-                    <th scope="col" class="px-6 py-3">Rôles</th>
-                    <th scope="col" class="px-6 py-3">Actions</th>
+                    <th scope="col" class="px-6 py-3">Rôle Admin</th> {# Colonne renommée pour la clarté #}
+                    <th scope="col" class="px-6 py-3">Rang de Guilde</th> {# NOUVELLE COLONNE #}
                 </tr>
             </thead>
             <tbody>
                 {% for user in users %}
                     <tr class="border-b border-gray-700 hover:bg-gray-700">
-                        <td class="px-6 py-4">{{ user.id }}</td>
                         <td class="px-6 py-4 font-medium text-white">{{ user.pseudo }}</td>
                         <td class="px-6 py-4">{{ user.email }}</td>
                         <td class="px-6 py-4">
-                            {# On affiche les rôles joliment #}
-                            {% for role in user.roles %}
-                                {% if role == 'ROLE_ADMIN' %}
-                                    <span class="bg-yellow-500 text-gray-900 text-xs font-semibold mr-2 px-2.5 py-0.5 rounded">Admin</span>
-                                {% elseif role == 'ROLE_USER' %}
-                                    <span class="bg-blue-500 text-white text-xs font-semibold mr-2 px-2.5 py-0.5 rounded">Utilisateur</span>
+                            {# Logique pour le rôle ADMIN (Promouvoir / Rétrograder) #}
+                            {% if 'ROLE_ADMIN' in user.roles %}
+                                <span class="bg-yellow-500 text-gray-900 text-xs font-semibold px-2.5 py-0.5 rounded">Admin</span>
+                                {% if user.id != app.user.id %}
+                                    <form action="{{ path('app_admin_user_demote', {id: user.id}) }}" method="post" class="inline ml-2">
+                                        <button type="submit" class="font-medium text-red-500 hover:underline text-xs">(Rétrograder)</button>
+                                    </form>
                                 {% endif %}
-                            {% endfor %}
+                            {% else %}
+                                <span class="bg-blue-500 text-white text-xs font-semibold px-2.5 py-0.5 rounded">Utilisateur</span>
+                                {% if user.id != app.user.id %}
+                                <form action="{{ path('app_admin_user_promote', {id: user.id}) }}" method="post" class="inline ml-2">
+                                    <button type="submit" class="font-medium text-green-500 hover:underline text-xs">(Promouvoir)</button>
+                                </form>
+                                {% endif %}
+                            {% endif %}
                         </td>
                         <td class="px-6 py-4">
-                            <td class="px-6 py-4">
-    {# On ne peut pas modifier son propre rôle #}
-    {% if user.id != app.user.id %}
-        {# Si l'utilisateur est déjà admin, on affiche le bouton pour le rétrograder #}
-        {% if 'ROLE_ADMIN' in user.roles %}
-            <form action="{{ path('app_admin_user_demote', {id: user.id}) }}" method="post" class="inline">
-                <button type="submit" class="font-medium text-red-500 hover:underline">Rétrograder</button>
-            </form>
-        {# Sinon, on affiche le bouton pour le promouvoir #}
-        {% else %}
-            <form action="{{ path('app_admin_user_promote', {id: user.id}) }}" method="post" class="inline">
-                <button type="submit" class="font-medium text-green-500 hover:underline">Promouvoir</button>
-            </form>
-        {% endif %}
-    {% else %}
-        <span class="text-gray-500">(Vous)</span>
-    {% endif %}
-</td>
+                            {# NOUVEAU FORMULAIRE POUR LE RANG DE GUILDE #}
+                            {% if user.id != app.user.id %}
+                                <form action="{{ path('app_admin_user_update_rank', {id: user.id}) }}" method="post" class="flex items-center gap-2">
+                                    <select name="guildRank" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-yellow-500 focus:border-yellow-500 block w-full p-1.5">
+                                        {# On boucle sur notre constante pour créer les options #}
+                                        {% for rank in constant('App\\Entity\\User::RANKS') %}
+                                            <option value="{{ rank }}" {% if rank == user.guildRank %}selected{% endif %}>
+                                                {{ rank }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                    <button type="submit" class="px-3 py-1.5 text-xs font-medium text-center text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-800">OK</button>
+                                </form>
+                            {% else %}
+                                <span class="text-gray-500 italic">{{ user.guildRank }} (Vous)</span>
+                            {% endif %}
                         </td>
                     </tr>
                 {% else %}
                     <tr>
-                        <td colspan="5" class="text-center py-4">Aucun utilisateur trouvé.</td>
+                        <td colspan="4" class="text-center py-4">Aucun utilisateur trouvé.</td>
                     </tr>
                 {% endfor %}
             </tbody>

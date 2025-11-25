@@ -4,52 +4,46 @@
 
 {% block body %}
     <div class="flex justify-between items-center mb-6">
-        <h1 class="text-3xl font-bold">Prochains Événements</h1>
+        <h1 class="text-4xl font-fantasy header-title">Prochains Événements</h1>
         {% if is_granted('ROLE_ADMIN') %}
-            <a href="{{ path('app_evenement_new') }}" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+            <a href="{{ path('app_evenement_new') }}" class="wow-button">
                 Créer un événement
             </a>
         {% endif %}
     </div>
 
+    {# Filtres par catégorie #}
     <div class="flex items-center justify-center flex-wrap gap-2 mb-8">
         <a href="{{ path('app_evenement_index') }}" class="bg-gray-700 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded transition-colors duration-200">
             Tous
         </a>
-        <div class="flex items-center justify-center flex-wrap gap-2 mb-8">
-    <!-- Le lien "Tous" pointe vers la route de base -->
-    <a href="{{ path('app_evenement_index') }}" class="bg-gray-700 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded transition-colors duration-200">
-        Tous
-    </a>
-    {% for categorie in categories %}
-        <!-- Les liens de catégorie pointent vers la nouvelle route de filtre -->
-        <a href="{{ path('app_evenement_filter_category', {id: categorie.id}) }}" class="bg-gray-700 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded transition-colors duration-200">
-            {{ categorie.nom }}
-        </a>
-    {% endfor %}
-</div>
+        {% for categorie in categories %}
+            <a href="{{ path('app_evenement_filter_category', {id: categorie.id}) }}" class="bg-gray-700 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded transition-colors duration-200">
+                {{ categorie.nom }}
+            </a>
+        {% endfor %}
     </div>
 
     {% if evenements|length > 0 %}
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {% for evenement in evenements %}
-                <div class="bg-gray-800 rounded-lg shadow-md p-6 flex flex-col justify-between">
-                    <div>
-                        <div class="flex justify-between items-start mb-2">
-                            <h2 class="text-xl font-bold text-yellow-400">{{ evenement.nom }}</h2>
-                            {% if evenement.categorie %}
-                                <span class="bg-blue-500 text-white text-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap">
-                                    {{ evenement.categorie.nom }}
-                                </span>
-                            {% endif %}
-                        </div>
-                        <h2 class="text-xl font-bold text-yellow-400">{{ evenement.nom }}</h2>
-                        <p class="text-gray-400 mt-2">{{ evenement.dateDebut ? evenement.dateDebut|date('d/m/Y à H:i') : '' }}</p>
-                        <p class="text-gray-300 mt-4">{{ evenement.description|slice(0, 100) ~ '...' }}</p>
-                        
+                <div class="wow-panel flex flex-col justify-between h-full">
+                    <div class="wow-panel-header flex justify-between items-center">
+                        <h2 class="text-lg font-bold truncate">{{ evenement.nom }}</h2>
+                        {% if evenement.categorie %}
+                            <span class="bg-purple-600 text-white text-xs font-semibold px-2.5 py-1 rounded-full whitespace-nowrap">
+                                {{ evenement.categorie.nom }}
+                            </span>
+                        {% endif %}
                     </div>
-                    <div class="mt-6">
-                        <a href="{{ path('app_evenement_show', {'id': evenement.id}) }}" class="w-full text-center bg-gray-700 hover:bg-gray-600 text-white font-bold py-2 px-4 rounded">
+
+                    <div class="p-4 flex-grow">
+                        <p class="text-yellow-400 font-semibold mb-3">{{ evenement.dateDebut ? evenement.dateDebut|date('d/m/Y à H:i') : '' }}</p>
+                        <p class="text-gray-300 text-sm">{{ evenement.description|slice(0, 120) ~ '...' }}</p>
+                    </div>
+
+                    <div class="p-4 pt-0">
+                        <a href="{{ path('app_evenement_show', {'id': evenement.id}) }}" class="wow-button w-full">
                             Voir les détails
                         </a>
                     </div>
@@ -57,7 +51,9 @@
             {% endfor %}
         </div>
     {% else %}
-        <p class="bg-gray-800 p-6 rounded-md">Il n'y a aucun événement de prévu pour le moment.</p>
+        <div class="wow-panel text-center p-8">
+            <p class="text-gray-400">Il n'y a aucun événement de prévu pour le moment.</p>
+        </div>
     {% endif %}
 
 {% endblock %}

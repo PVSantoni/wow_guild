@@ -8,6 +8,13 @@ use Doctrine\ORM\Mapping as ORM;
 #[ORM\Entity(repositoryClass: InscriptionRepository::class)]
 class Inscription
 {
+    // --> AJOUT 1 : La liste des rôles de raid possibles
+    public const ROLES = [
+        'Tank',
+        'Soigneur',
+        'DPS'
+    ];
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -24,6 +31,10 @@ class Inscription
     #[ORM\Column(length: 255)]
     private ?string $statut = null;
 
+    // --> AJOUT 2 : La nouvelle propriété pour le rôle joué
+    #[ORM\Column(length: 50, nullable: true)] // On la met nullable au début pour ne pas causer d'erreurs avec les anciennes inscriptions
+    private ?string $playedRole = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -37,7 +48,6 @@ class Inscription
     public function setUser(?User $user): static
     {
         $this->user = $user;
-
         return $this;
     }
 
@@ -49,7 +59,6 @@ class Inscription
     public function setEvenement(?Evenement $evenement): static
     {
         $this->evenement = $evenement;
-
         return $this;
     }
 
@@ -61,7 +70,18 @@ class Inscription
     public function setStatut(string $statut): static
     {
         $this->statut = $statut;
+        return $this;
+    }
 
+    // --> AJOUT 3 : Les nouveaux getter et setter
+    public function getPlayedRole(): ?string
+    {
+        return $this->playedRole;
+    }
+
+    public function setPlayedRole(?string $playedRole): static
+    {
+        $this->playedRole = $playedRole;
         return $this;
     }
 }

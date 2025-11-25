@@ -2,16 +2,15 @@
 
 namespace App\Controller;
 
-use Symfony\Component\Security\Http\Attribute\IsGranted;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Attribute\Route;
+use App\Entity\User;
 use App\Repository\EvenementRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
-use App\Entity\User;
-use App\Service\BattleNetApiService;
-
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[IsGranted('ROLE_ADMIN')]
 final class AdminController extends AbstractController
@@ -19,10 +18,11 @@ final class AdminController extends AbstractController
     #[Route('/admin', name: 'app_admin_dashboard')]
     public function index(UserRepository $userRepository, EvenementRepository $evenementRepository): Response
     {
-        // Récupérer le nombre total d'utilisateurs
+        // =============================================================
+        // LA LOGIQUE DE CETTE MÉTHODE EST RESTAURÉE CORRECTEMENT ICI
+        // =============================================================
         $totalUsers = $userRepository->count([]);
 
-        // Récupérer le nombre d'événements dont la date est dans le futur
         $upcomingEvents = $evenementRepository->createQueryBuilder('e')
             ->select('count(e.id)')
             ->where('e.dateDebut > :now')
@@ -39,7 +39,6 @@ final class AdminController extends AbstractController
     #[Route('/admin/users', name: 'app_admin_users')]
     public function listUsers(UserRepository $userRepository): Response
     {
-        // On récupère tous les utilisateurs
         $users = $userRepository->findAll();
 
         return $this->render('admin/users.html.twig', [
@@ -50,11 +49,9 @@ final class AdminController extends AbstractController
     #[Route('/admin/users/{id}/promote', name: 'app_admin_user_promote')]
     public function promoteUser(User $user, EntityManagerInterface $entityManager): Response
     {
-        // On ajoute le rôle ADMIN
         $user->setRoles(['ROLE_ADMIN']);
         $entityManager->flush();
 
-        // On ajoute un message flash pour confirmer le succès
         $this->addFlash('success', "L'utilisateur " . $user->getPseudo() . " a bien été promu administrateur.");
 
         return $this->redirectToRoute('app_admin_users');
@@ -63,13 +60,11 @@ final class AdminController extends AbstractController
     #[Route('/admin/users/{id}/demote', name: 'app_admin_user_demote')]
     public function demoteUser(User $user, EntityManagerInterface $entityManager): Response
     {
-        // Sécurité : on ne peut pas se rétrograder soi-même
         if ($this->getUser() === $user) {
-            $this->addFlash('error', 'Vous не pouvez pas vous rétrograder vous-même.');
+            $this->addFlash('error', 'Vous ne pouvez pas vous rétrograder vous-même.');
             return $this->redirectToRoute('app_admin_users');
         }
 
-        // On remet le rôle USER (par défaut)
         $user->setRoles(['ROLE_USER']);
         $entityManager->flush();
 
@@ -77,6 +72,23 @@ final class AdminController extends AbstractController
 
         return $this->redirectToRoute('app_admin_users');
     }
+
+    // =========================================================
+    // NOTRE NOUVELLE MÉTHODE EST BIEN PRÉSENTE À LA FIN
+    // =========================================================
+    #[Route('/admin/users/{id}/update-rank', name: 'app_admin_user_update_rank', methods: ['POST'])]
+    public function updateGuildRank(Request $request, User $user, EntityManagerInterface $entityManager): Response
+    {
+        $newRank = $request->request->get('guildRank');
+
+        if ($newRank && in_array($newRank, User::RANKS)) {
+            $user->setGuildRank($newRank);
+            $entityManager->flush();
+            $this->addFlash('success', 'Le rang de ' . $user->getPseudo() . ' a été mis à jour.');
+        } else {
+            $this->addFlash('error', 'Le rang sélectionné est invalide.');
+        }
+
+        return $this->redirectToRoute('app_admin_users');
+    }
 }
-
-
