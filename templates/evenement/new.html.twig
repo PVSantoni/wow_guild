@@ -3,21 +3,25 @@
 {% block title %}Créer un Nouvel Événement{% endblock %}
 
 {% block body %}
-<div class="container mx-auto max-w-3xl">
+<div class="container mx-auto max-w-3xl py-8">
+
+    {# TITRE #}
     <div class="text-center mb-8">
         <h1 class="text-4xl font-fantasy header-title">
             Créer un Nouvel Événement
         </h1>
     </div>
 
+    {# PANEL #}
     <div class="wow-panel">
         <div class="wow-panel-header">
-            Détails de l'événement
+            Planification du Raid
         </div>
         <div class="p-6">
-            {# On inclut le formulaire qui sera stylisé dans son propre fichier #}
+            {# Le formulaire contient maintenant tout (y compris les boutons) #}
             {{ include('evenement/_form.html.twig') }}
         </div>
     </div>
+
 </div>
 {% endblock %}

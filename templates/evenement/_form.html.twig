@@ -2,66 +2,121 @@
 {{ form_start(form) }}
 
     <div class="space-y-6">
-        {# Champ Nom #}
-        <div>
-            {{ form_label(form.nom, 'Nom de l\'événement', {'label_attr': {'class': 'block mb-2 text-sm font-bold text-yellow-400'}}) }}
-            {{ form_widget(form.nom, {'attr': {'class': 'w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 text-white focus:border-yellow-500 focus:ring-yellow-500', 'placeholder': 'Ex: Naxxramas 25 HM'}}) }}
-            <div class="text-red-500 text-sm mt-1">{{ form_errors(form.nom) }}</div>
-        </div>
 
-        {# Champ Catégorie #}
-        <div>
-            {{ form_label(form.categorie, 'Type de Raid', {'label_attr': {'class': 'block mb-2 text-sm font-bold text-yellow-400'}}) }}
-            {{ form_widget(form.categorie, {'attr': {'class': 'w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 text-white focus:border-yellow-500 focus:ring-yellow-500', 'id': 'event_category'}}) }}
-            <div class="text-red-500 text-sm mt-1">{{ form_errors(form.categorie) }}</div>
-        </div>
+        {# --- SECTION 1 : INFORMATIONS GÉNÉRALES --- #}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-        {# Champ Description #}
-        <div>
-            {{ form_label(form.description, 'Description', {'label_attr': {'class': 'block mb-2 text-sm font-bold text-yellow-400'}}) }}
-            {{ form_widget(form.description, {'attr': {'class': 'w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 text-white focus:border-yellow-500 focus:ring-yellow-500', 'rows': 4, 'placeholder': 'Stratégies, prérequis, etc.'}}) }}
-            <div class="text-red-500 text-sm mt-1">{{ form_errors(form.description) }}</div>
-        </div>
-
-        <hr class="border-gray-700">
-
-        {# Section Composition du Raid #}
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
-            <div>
-                {{ form_label(form.nbPlacesMax, 'Places Totales', {'label_attr': {'class': 'block mb-2 text-sm font-bold text-yellow-400'}}) }}
-                {{ form_widget(form.nbPlacesMax, {'attr': {'class': 'w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 text-white focus:border-yellow-500 focus:ring-yellow-500', 'id': 'evenement_nbPlacesMax'}}) }}
+            {# Nom #}
+            <div class="md:col-span-2">
+                {{ form_label(form.nom, 'Nom de l\'événement', {'label_attr': {'class': 'block mb-2 text-sm font-bold text-[#daa520]'}}) }}
+                {{ form_widget(form.nom, {'attr': {'class': 'w-full bg-gray-900 border border-[#6d5d52] rounded p-2 text-[#c7b394] focus:border-[#daa520] focus:ring-1 focus:ring-[#daa520] outline-none transition-colors', 'placeholder': 'Ex: Naxxramas 25 HM'}}) }}
+                <div class="text-red-500 text-xs mt-1">{{ form_errors(form.nom) }}</div>
             </div>
+
+            {# Catégorie (Type de Raid) #}
             <div>
-                {{ form_label(form.tanksRequis, 'Tanks', {'label_attr': {'class': 'block mb-2 text-sm font-bold text-yellow-400'}}) }}
-                {{ form_widget(form.tanksRequis, {'attr': {'class': 'w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 text-white focus:border-yellow-500 focus:ring-yellow-500', 'id': 'event_tanks'}}) }}
+                {{ form_label(form.categorie, 'Type de Raid', {'label_attr': {'class': 'block mb-2 text-sm font-bold text-[#daa520]'}}) }}
+                {{ form_widget(form.categorie, {'attr': {'class': 'w-full wow-select rounded p-2', 'id': 'event_category'}}) }}
+                <div class="text-red-500 text-xs mt-1">{{ form_errors(form.categorie) }}</div>
             </div>
+
+            {# Date #}
             <div>
-                {{ form_label(form.soigneursRequis, 'Soigneurs', {'label_attr': {'class': 'block mb-2 text-sm font-bold text-yellow-400'}}) }}
-                {{ form_widget(form.soigneursRequis, {'attr': {'class': 'w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 text-white focus:border-yellow-500 focus:ring-yellow-500', 'id': 'event_heals'}}) }}
+                {{ form_label(form.dateDebut, 'Date et Heure', {'label_attr': {'class': 'block mb-2 text-sm font-bold text-[#daa520]'}}) }}
+                {# On applique un style sombre générique, Symfony gère le reste #}
+                {{ form_widget(form.dateDebut, {'attr': {'class': 'bg-black/40 border border-[#6d5d52] rounded p-2 text-[#c7b394] text-sm focus:border-[#daa520] outline-none'}}) }}
             </div>
-            <div>
-                {{ form_label(form.dpsRequis, 'DPS', {'label_attr': {'class': 'block mb-2 text-sm font-bold text-yellow-400'}}) }}
-                {{ form_widget(form.dpsRequis, {'attr': {'class': 'w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 text-white focus:border-yellow-500 focus:ring-yellow-500', 'id': 'event_dps'}}) }}
+
+            {# Description #}
+            <div class="md:col-span-2">
+                {{ form_label(form.description, 'Description / Stratégie', {'label_attr': {'class': 'block mb-2 text-sm font-bold text-[#daa520]'}}) }}
+                {{ form_widget(form.description, {'attr': {'class': 'w-full bg-black/40 border border-[#6d5d52] rounded p-3 text-sm text-[#c7b394] focus:border-[#daa520] outline-none', 'rows': 4, 'placeholder': 'Précisez les prérequis, la stratégie ou les consommables...'}}) }}
+                <div class="text-red-500 text-xs mt-1">{{ form_errors(form.description) }}</div>
             </div>
         </div>
 
-        {# Champ Date #}
-        <div>
-            {{ form_label(form.dateDebut, 'Date et Heure de l\'événement', {'label_attr': {'class': 'block mb-2 text-sm font-bold text-yellow-400'}}) }}
-            {{ form_widget(form.dateDebut, {'attr': {'class': 'bg-gray-700 border border-gray-600 rounded-lg p-2.5 text-white focus:border-yellow-500 focus:ring-yellow-500'}}) }}
+        {# --- SÉPARATEUR --- #}
+        <div class="relative py-4">
+            <div class="absolute inset-0 flex items-center">
+                <div class="w-full border-t border-[#6d5d52]/50"></div>
+            </div>
+            <div class="relative flex justify-center">
+                <span class="bg-[#151720] px-4 text-xs text-[#8b7355] uppercase tracking-widest font-bold">
+                    Composition du Roster
+                </span>
+            </div>
         </div>
+
+        {# --- SECTION 2 : COMPOSITION (Auto-remplie par JS) --- #}
+        <div class="bg-black/20 p-4 rounded border border-[#6d5d52]/30">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+
+                {# Places Totales #}
+                <div>
+                    {{ form_label(form.nbPlacesMax, 'Total', {'label_attr': {'class': 'block text-center text-xs font-bold text-[#f0e6d2] uppercase mb-1'}}) }}
+                    <div class="relative">
+                        <span class="absolute left-3 top-2 text-gray-500">👥</span>
+                        {{ form_widget(form.nbPlacesMax, {'attr': {'class': 'w-full text-center bg-black/50 border border-[#6d5d52] rounded py-2 pl-6 pr-2 text-white font-bold focus:border-[#daa520] outline-none', 'id': 'evenement_nbPlacesMax'}}) }}
+                    </div>
+                </div>
+
+                {# Tanks #}
+                <div>
+                    {{ form_label(form.tanksRequis, 'Tanks', {'label_attr': {'class': 'block text-center text-xs font-bold text-[#C79C6E] uppercase mb-1'}}) }}
+                    <div class="relative">
+                        <span class="absolute left-3 top-2 text-gray-500" title="Tanks">🛡️</span>
+                        {{ form_widget(form.tanksRequis, {'attr': {'class': 'w-full text-center bg-black/50 border border-[#6d5d52] rounded py-2 pl-6 pr-2 text-white focus:border-[#C79C6E] outline-none', 'id': 'event_tanks'}}) }}
+                    </div>
+                </div>
+
+                {# Heals #}
+                <div>
+                    {{ form_label(form.soigneursRequis, 'Soigneurs', {'label_attr': {'class': 'block text-center text-xs font-bold text-[#F58CBA] uppercase mb-1'}}) }}
+                    <div class="relative">
+                        <span class="absolute left-3 top-2 text-gray-500" title="Soigneurs">💚</span>
+                        {{ form_widget(form.soigneursRequis, {'attr': {'class': 'w-full text-center bg-black/50 border border-[#6d5d52] rounded py-2 pl-6 pr-2 text-white focus:border-[#F58CBA] outline-none', 'id': 'event_heals'}}) }}
+                    </div>
+                </div>
+
+                {# DPS #}
+                <div>
+                    {{ form_label(form.dpsRequis, 'DPS', {'label_attr': {'class': 'block text-center text-xs font-bold text-[#C41F3B] uppercase mb-1'}}) }}
+                    <div class="relative">
+                        <span class="absolute left-3 top-2 text-gray-500" title="DPS">⚔️</span>
+                        {{ form_widget(form.dpsRequis, {'attr': {'class': 'w-full text-center bg-black/50 border border-[#6d5d52] rounded py-2 pl-6 pr-2 text-white focus:border-[#C41F3B] outline-none', 'id': 'event_dps'}}) }}
+                    </div>
+                </div>
+
+            </div>
+            <p class="text-center text-[10px] text-gray-500 mt-2 italic">
+                * Ces valeurs seront automatiquement ajustées si vous sélectionnez un raid 10 ou 25.
+            </p>
+        </div>
+
     </div>
 
-    <div class="mt-8 flex justify-between items-center">
-        <a href="{{ path('app_evenement_index') }}" class="text-gray-400 hover:text-white hover:underline">Retour</a>
-        <button class="wow-button">
-            {{ button_label|default('Créer l\'événement') }}
+    {# --- ZONE DES BOUTONS --- #}
+    <div class="mt-8 pt-6 border-t border-[#6d5d52]/30 flex justify-between items-center">
+
+        {# GAUCHE : Retour Admin (Style Raffiné) #}
+        <a href="{{ path('app_admin_dashboard') }}" class="wow-btn-refined">
+            <span class="arrow">❮</span>
+            <span>Retour Admin</span>
+        </a>
+
+        {# DROITE : Créer (Style Doré avec Icône) #}
+        <button type="submit" class="wow-button inline-flex items-center justify-center gap-2" style="display: inline-flex;">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 -mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+            </svg>
+            <span>{{ button_label|default('Créer l\'événement') }}</span>
         </button>
+
     </div>
 
 {{ form_end(form) }}
 
-{# SCRIPT POUR LA COMPOSITION AUTOMATIQUE (INCLUS DIRECTEMENT) #}
+{# SCRIPT POUR LA COMPOSITION AUTOMATIQUE (INCHANGÉ) #}
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const categorySelect = document.getElementById('event_category');
@@ -69,6 +124,7 @@
         const healsInput = document.getElementById('event_heals');
         const dpsInput = document.getElementById('event_dps');
         const placesInput = document.getElementById('evenement_nbPlacesMax');
+
         if (!categorySelect) return;
 
         categorySelect.addEventListener('change', function() {

@@ -3,33 +3,34 @@
 {% block title %}Ajouter un Personnage{% endblock %}
 
 {% block body %}
-<div class="container mx-auto max-w-2xl">
-    <div class="text-center mb-8">
-        <h1 class="text-4xl font-fantasy header-title">
-            Ajouter un Personnage
-        </h1>
-        <p class="text-gray-400 mt-2">Liez votre personnage World of Warcraft à votre profil.</p>
+<div class="min-h-screen bg-[#0b0d12] text-[#c7b394] pb-20 relative font-sans">
+    {# Fond identique #}
+    <div class="fixed inset-0 z-0 pointer-events-none" style="background-image: url('https://bnetcmsus-a.akamaihd.net/cms/content_entry_media/2g/2G4V985U25I21596153195237.jpg'); background-size: cover; background-position: center;">
+        <div class="absolute inset-0 bg-[#050505]/90 backdrop-blur-[2px]"></div>
     </div>
 
-    <div class="wow-panel">
-        <div class="wow-panel-header">
-            Informations du Personnage
+    <div class="relative z-10 container mx-auto max-w-2xl py-12 px-4">
+        <div class="text-center mb-10">
+            <h1 class="text-4xl font-fantasy font-bold text-[#f0e6d2] drop-shadow-md mb-2">
+                NOUVEAU HÉROS
+            </h1>
+            <p class="text-[#8b7355]">Liez votre personnage World of Warcraft à votre profil de guilde.</p>
         </div>
-        <div class="p-8">
-            {# On inclut le formulaire stylisé #}
-            {# Le `_form.html.twig` que nous avons créé précédemment n'a pas besoin de changer #}
-            {{ include('character/_form.html.twig', {'button_label': 'Ajouter le Personnage'}) }}
-        </div>
-    </div>
 
-    {# ======================================= #}
-    {# --- SECTION DE NAVIGATION EN BAS      --- #}
-    {# ======================================= #}
-    <div class="mt-8 flex justify-between items-center">
-        {# LE NOUVEAU BOUTON DE RETOUR #}
-        <a href="{{ path('app_profile_index') }}" class="text-gray-400 hover:text-white hover:underline transition-colors">
-            &larr; Retour à l'Armurerie
-        </a>
+        <div class="wow-panel">
+            <div class="wow-panel-header">
+                Informations Requises
+            </div>
+            <div class="p-8 bg-[#0b0d12]/50">
+                {{ include('character/_form.html.twig', {'button_label': 'Confirmer l\'ajout'}) }}
+            </div>
+        </div>
+
+        <div class="mt-8 text-center">
+            <a href="{{ path('app_character_index') }}" class="text-[#6d5d52] hover:text-[#daa520] text-sm uppercase tracking-widest transition-colors">
+                &larr; Annuler et Retourner à la liste
+            </a>
+        </div>
     </div>
 </div>
 {% endblock %}

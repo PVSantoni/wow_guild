@@ -10,6 +10,10 @@
             color: #c7b394;
         }
 
+        .wow-button .group-hover\:-translate-x-1 {
+    transform: translateX(-4px);
+}
+
         .wow-panel {
             background: linear-gradient(135deg, rgba(20, 22, 32, 0.95) 0%, rgba(15, 17, 25, 0.98) 100%);
             border: 2px solid #6d5d52;

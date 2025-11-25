@@ -1,13 +1,37 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Edit Evenement{% endblock %}
+{% block title %}Modifier l'Événement{% endblock %}
 
 {% block body %}
-    <h1>Edit Evenement</h1>
+<div class="container mx-auto max-w-3xl py-8">
 
-    {{ include('evenement/_form.html.twig', {'button_label': 'Update'}) }}
+    {# HEADER : TITRE + BOUTON SUPPRIMER #}
+    <div class="flex justify-between items-end mb-8">
+        <div class="text-center flex-grow">
+            <h1 class="text-4xl font-fantasy header-title">
+                Modifier l'Événement
+            </h1>
+            <p class="text-gray-500 text-sm mt-1">Édition de : <span class="text-[#daa520]">{{ evenement.nom }}</span></p>
+        </div>
 
-    <a href="{{ path('app_evenement_index') }}">back to list</a>
+        {# BOUTON SUPPRIMER (En haut à droite pour ne pas gêner le formulaire) #}
+        <div class="mb-2">
+            {{ include('evenement/_delete_form.html.twig') }}
+        </div>
+    </div>
 
-    {{ include('evenement/_delete_form.html.twig') }}
+    {# PANEL FORMULAIRE #}
+    <div class="wow-panel">
+        <div class="wow-panel-header flex justify-between items-center">
+            <span>Configuration</span>
+            <span class="text-xs font-normal text-gray-400">ID: #{{ evenement.id }}</span>
+        </div>
+        <div class="p-6">
+            {# On inclut le formulaire en changeant le texte du bouton #}
+            {# Comme ton _form gère déjà le bouton retour et le submit, c'est parfait #}
+            {{ include('evenement/_form.html.twig', {'button_label': 'Mettre à jour l\'événement'}) }}
+        </div>
+    </div>
+
+</div>
 {% endblock %}

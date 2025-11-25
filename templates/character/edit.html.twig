@@ -3,45 +3,52 @@
 {% block title %}Modifier {{ character.characterName }}{% endblock %}
 
 {% block body %}
-<div class="container mx-auto max-w-2xl">
-    <div class="text-center mb-8">
-        <h1 class="text-4xl font-fantasy header-title">
-            Modifier le Personnage
-        </h1>
-        <p class="text-lg text-yellow-400 mt-2">{{ character.characterName }}</p>
+<div class="min-h-screen bg-[#0b0d12] text-[#c7b394] pb-20 relative font-sans">
+    {# Fond identique #}
+    <div class="fixed inset-0 z-0 pointer-events-none" style="background-image: url('https://bnetcmsus-a.akamaihd.net/cms/content_entry_media/2g/2G4V985U25I21596153195237.jpg'); background-size: cover; background-position: center;">
+         <div class="absolute inset-0 bg-[#050505]/90 backdrop-blur-[2px]"></div>
     </div>
 
-    <div class="wow-panel">
-        <div class="wow-panel-header">
-            Informations du Personnage
+    <div class="relative z-10 container mx-auto max-w-2xl py-12 px-4">
+        <div class="text-center mb-10">
+            <h1 class="text-4xl font-fantasy font-bold text-[#f0e6d2] drop-shadow-md mb-2">
+                MODIFIER LE HÉROS
+            </h1>
+            <p class="text-[#daa520] text-xl font-fantasy tracking-wide">{{ character.characterName }}</p>
         </div>
-        <div class="p-8">
-            {# On réutilise notre formulaire stylisé, en changeant juste le texte du bouton #}
-            {{ include('character/_form.html.twig', {'button_label': 'Mettre à Jour'}) }}
-        </div>
-    </div>
 
-    {# --- Section "Zone de Danger" pour la suppression --- #}
-    <div class="mt-8 wow-panel border-red-500/50 hover:!border-red-500">
-        <div class="p-6">
-            <div class="flex justify-between items-center">
+        {# FORMULAIRE DE MODIFICATION #}
+        <div class="wow-panel mb-12">
+            <div class="wow-panel-header">
+                Mise à jour des données
+            </div>
+            <div class="p-8 bg-[#0b0d12]/50">
+                {{ include('character/_form.html.twig', {'button_label': 'Sauvegarder les modifications'}) }}
+            </div>
+        </div>
+
+        {# ZONE DE DANGER (SUPPRESSION) #}
+        <div class="wow-panel border-red-900/40 hover:border-red-600 transition-colors">
+            <div class="bg-red-900/10 p-6 flex flex-col md:flex-row justify-between items-center gap-4">
                 <div>
-                    <h3 class="font-bold text-red-400">Supprimer ce personnage</h3>
-                    <p class="text-sm text-gray-400">Cette action est irréversible.</p>
+                    <h3 class="font-bold text-red-500 font-fantasy tracking-wide text-lg">ZONE DE DANGER</h3>
+                    <p class="text-xs text-gray-500">La suppression d'un personnage est définitive et retirera ses données de l'armurerie.</p>
                 </div>
-                {# Le formulaire de suppression pointe vers la route 'delete' #}
-                <form method="post" action="{{ path('app_character_delete', {'id': character.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer définitivement {{ character.characterName|e('js') }} ?');">
+
+                <form method="post" action="{{ path('app_character_delete', {'id': character.id}) }}" onsubmit="return confirm('Attention ! Êtes-vous sûr de vouloir supprimer définitivement {{ character.characterName|e('js') }} ?');">
                     <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ character.id) }}">
-                    <button class="wow-button">Supprimer</button>
+                    <button class="wow-button-delete">
+                        <span class="text-lg mr-1">💀</span> Supprimer
+                    </button>
                 </form>
             </div>
         </div>
-    </div>
 
-    <div class="text-center mt-8">
-        <a href="{{ path('app_character_index') }}" class="text-gray-400 hover:text-white hover:underline transition-colors">
-            &larr; Retour à la gestion des personnages
-        </a>
+        <div class="text-center mt-8">
+            <a href="{{ path('app_character_index') }}" class="text-[#6d5d52] hover:text-[#daa520] text-sm uppercase tracking-widest transition-colors">
+                &larr; Retour à la gestion des personnages
+            </a>
+        </div>
     </div>
 </div>
 {% endblock %}

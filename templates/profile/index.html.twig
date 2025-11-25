@@ -3,180 +3,250 @@
 {% block title %}Armurerie - {{ user.activeCharacter.characterName ?? 'Profil' }}{% endblock %}
 
 {% block body %}
-{# On définit une variable de sécurité au cas où le contrôleur ne l'envoie pas #}
+{# Sécurité variable #}
 {% set isOwner = isOwner is defined ? isOwner : (app.user and app.user.id == user.id) %}
 
-<div class="min-h-screen bg-[#0b0d12] text-gray-300 pb-20" style="background-image: url('https://bnetcmsus-a.akamaihd.net/cms/content_entry_media/2g/2G4V985U25I21596153195237.jpg'); background-attachment: fixed; background-size: cover; background-position: center;">
-    <div class="min-h-screen bg-black/85 backdrop-blur-sm">
-        <div class="container mx-auto px-4 py-12">
-            <!-- HEADER -->
-            <header class="border-b-2 border-yellow-800/50 pb-6 mb-12">
-                <h1 class="text-6xl font-fantasy font-bold header-title tracking-widest mb-2">
-                    ⚔ ARMURERIE ⚔
-                </h1>
-                <p class="text-xl header-pseudo tracking-wide text-yellow-500">{{ user.pseudo }}</p>
-            </header>
+{# FOND PRINCIPAL AVEC IMAGE FIXE #}
+<div class="min-h-screen bg-[#0b0d12] text-[#c7b394] pb-20 relative font-sans">
 
-            <div class="grid grid-cols-1 xl:grid-cols-12 gap-8">
-                <!-- SIDEBAR -->
-                <aside class="xl:col-span-3 space-y-6">
-                    <div class="wow-panel">
-                        <div class="wow-panel-header">Informations</div>
-                        <div class="p-6 space-y-6">
-                            <div>
-                                <div class="account-label">Pseudo</div>
-                                <div class="account-value">{{ user.pseudo }}</div>
-                            </div>
+    {# Image de fond obscurcie #}
+    <div class="fixed inset-0 z-0 pointer-events-none"
+         style="background-image: url('https://bnetcmsus-a.akamaihd.net/cms/content_entry_media/2g/2G4V985U25I21596153195237.jpg'); background-size: cover; background-position: center;">
+         <div class="absolute inset-0 bg-[#050505]/90 backdrop-blur-[2px]"></div>
+    </div>
 
-                            {# --- MODIFICATION 1 : EMAIL CACHÉ AUX VISITEURS --- #}
-                            {% if isOwner %}
-                                <div>
-                                    <div class="account-label">Email</div>
-                                    <div class="account-value truncate text-sm">{{ user.email }}</div>
-                                </div>
-                            {% endif %}
+    {# Contenu principal (Z-index pour passer au dessus du fond) #}
+    <div class="relative z-10 container mx-auto px-4 py-12 max-w-[1600px]">
 
-                            <div>
-                                <div class="account-label">Rang</div>
-                                <div class="account-value text-sm text-yellow-400">{{ user.guildRank|default('Membre') }}</div>
-                            </div>
+        <!-- HEADER -->
+        <header class="text-center mb-12 border-b border-[#6d5d52]/50 pb-8">
+            <h1 class="text-5xl md:text-6xl font-fantasy font-bold text-[#f0e6d2] tracking-widest mb-2 drop-shadow-md">
+                ⚔ ARMURERIE ⚔
+            </h1>
+            <p class="text-xl font-fantasy tracking-wide text-[#daa520] uppercase">{{ user.pseudo }}</p>
+        </header>
 
-                            {# --- MODIFICATION 2 : BOUTON GÉRER CACHÉ AUX VISITEURS --- #}
-                            {% if isOwner %}
-                                <div class="flex items-center gap-2 pt-4 border-t border-gray-700">
-                                    <a href="{{ path('app_character_index') }}" class="wow-button w-full block text-center">
-                                        ⚙ Gérer les Personnages
-                                    </a>
-                                </div>
-                            {% endif %}
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-8">
+
+            <!-- SIDEBAR (INFORMATIONS) -->
+            <aside class="xl:col-span-3 space-y-6">
+                <div class="wow-panel">
+                    <div class="wow-panel-header">Informations Compte</div>
+                    <div class="p-6 space-y-5 bg-[#0b0d12]/50">
+                        <div>
+                            <div class="account-label">Pseudo</div>
+                            <div class="account-value text-lg">{{ user.pseudo }}</div>
                         </div>
-                    </div>
-                </aside>
 
-                <!-- MAIN CONTENT -->
-                <main class="xl:col-span-9 space-y-8">
-                    {% if characterData %}
-                        <!-- CHARACTER INFO -->
-                        <section class="wow-panel character-info p-8">
-                            <div class="flex flex-col lg:flex-row items-center lg:items-start gap-8">
-                                <!-- Portrait -->
-                                <div class="character-portrait shrink-0">
-                                    {% if characterMedia and characterMedia.assets[0].value is defined %}
-                                        <img src="{{ characterMedia.assets[0].value }}" alt="{{ characterData.name }}" class="character-portrait-img">
-                                    {% else %}
-                                        <div class="character-portrait-img bg-gray-900 flex items-center justify-center text-7xl text-gray-700">?</div>
-                                    {% endif %}
-                                    <div class="character-level-badge">{{ characterData.level }}</div>
-                                </div>
-
-                                <!-- Infos -->
-                                <div class="flex-grow w-full text-center lg:text-left">
-                                    <h2 class="text-6xl font-fantasy text-yellow-300 font-bold tracking-wide mb-3" style="text-shadow: 0 3px 8px rgba(0,0,0,0.8);">
-                                        {{ characterData.name }}
-                                    </h2>
-                                    <p class="text-2xl text-yellow-500 font-semibold mb-2">
-                                        {{ characterData.character_class.name }} <span class="text-yellow-400">•</span> {{ characterData.active_spec.name }}
-                                    </p>
-                                    <p class="text-sm text-gray-400 uppercase tracking-widest mb-6">
-                                        {{ characterData.race.name }} <span class="text-gray-600">—</span> {{ characterData.realm.name }}
-                                    </p>
-
-                                    <!-- iLvl Box -->
-                                    <div class="inline-block bg-black/50 border-2 border-daa520 rounded-lg px-8 py-4">
-                                        <div class="account-label mb-2">iLvl Moyen</div>
-                                        <div class="character-ilvl">{{ characterData.average_item_level }}</div>
-                                    </div>
-                                </div>
+                        {% if isOwner %}
+                            <div>
+                                <div class="account-label">Email</div>
+                                <div class="account-value truncate text-sm text-gray-400">{{ user.email }}</div>
                             </div>
-                        </section>
+                        {% endif %}
 
-                        <!-- EQUIPMENT TABLE -->
-                        <section class="wow-panel overflow-hidden">
-                            <div class="wow-panel-header flex flex-col md:flex-row justify-between items-start md:items-center gap-3">
-                                <h3 class="text-lg flex items-center gap-3"><span class="text-2xl">⚔</span> COMPARATIF BIS</h3>
-                                <div class="flex items-center gap-3">
-                                    {% if compatibleLists is defined and compatibleLists|length > 0 %}
-                                        {# --- MODIFICATION 3 : LE FORMULAIRE RESTE SUR LA PAGE ACTUELLE --- #}
-                                        <form method="get" action="{{ path(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')) }}" class="flex items-center gap-2 m-0">
-                                            <select name="bis_id" onchange="this.form.submit()" class="bg-[#0b0d12] text-[#daa520] border border-[#8b7355] text-xs font-bold uppercase py-2 px-3 rounded focus:outline-none cursor-pointer hover:border-[#daa520] transition-colors shadow-inner min-w-[200px]">
-                                                {% for list in compatibleLists %}<option value="{{ list.id }}" {{ bisList and bisList.id == list.id ? 'selected' : '' }}>{{ list.name }} ({{ list.specialization }})</option>{% endfor %}
-                                            </select>
-                                        </form>
-                                    {% else %}
-                                        <span class="bis-status bis-status-empty text-red-400 text-sm">⚠ Aucune Liste Trouvée</span>
-                                    {% endif %}
-                                </div>
+                        <div>
+                            <div class="account-label">Rang Guilde</div>
+                            <div class="account-value text-[#daa520] font-fantasy tracking-wider">
+                                {{ user.guildRank|default('Membre') }}
                             </div>
-                            <div class="overflow-x-auto">
-                                <table class="w-full text-left wow-table">
-                                    <thead>
-                                        <tr>
-                                            <th class="w-40">Emplacement</th><th>Équipement Actuel</th><th>Recommandé (BiS)</th><th class="text-center w-20">État</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for slot_key, slot_name in slotOrder %}{% set equipped = equippedItemsBySlot[slot_key] ?? null %}{% set bis = bisItemsBySlot[slot_key] ?? null %}
-                                            {% if equipped or bis %}
-                                                <tr>
-                                                    <td class="text-gray-500 font-bold text-xs uppercase tracking-widest">{{ slot_name }}</td>
-                                                    <td>
-                                                        {% if equipped and equipped.apiDetails is defined %}<a href="https://www.wowhead.com/mop/item={{ equipped.item.id }}" target="_blank" class="item-link wow-item" data-wowhead="item={{ equipped.item.id }}&domain=mop"><img src="{{ equipped.apiDetails.icon_url|default('https://wow.zamimg.com/images/wow/icons/large/inv_misc_questionmark.jpg') }}" alt="{{ equipped.name }}" class="item-icon"><div><div class="item-name">{{ equipped.name }}</div>{% set difficulty = equipped.apiDetails.difficulty|default(null) %}{% if difficulty == 'Héroïque élite' %}<span class="difficulty-text difficulty-elite">Héroïque Élite</span>{% elseif difficulty == 'Héroïque' %}<span class="difficulty-text difficulty-heroic">Héroïque</span>{% else %}<span class="difficulty-text difficulty-normal">Normal</span>{% endif %}</div></a>
-                                                        {% elseif equipped %}<div class="item-name">{{ equipped.name }}</div>
-                                                        {% else %}<div class="item-empty"><div class="item-empty-icon"></div><span>Vide</span></div>{% endif %}
-                                                    </td>
-                                                    <td>
-                                                        {% if bis and bis.apiDetails %}<a href="https://www.wowhead.com/mop/item={{ bis.itemId }}" target="_blank" class="item-link wow-item" data-wowhead="item={{ bis.itemId }}&domain=mop"><img src="{{ bis.apiDetails.icon_url|default('https://wow.zamimg.com/images/wow/icons/large/inv_misc_questionmark.jpg') }}" alt="{{ bis.apiDetails.name }}" class="item-icon"><div><div class="item-name text-quality-epic">{{ bis.apiDetails.name }}</div>{% set difficulty = bis.apiDetails.difficulty|default(null) %}{% if difficulty == 'Héroïque élite' %}<span class="difficulty-text difficulty-elite">Héroïque Élite</span>{% elseif difficulty == 'Héroïque' %}<span class="difficulty-text difficulty-heroic">Héroïque</span>{% else %}<span class="difficulty-text difficulty-normal">Normal</span>{% endif %}</div></a>
-                                                        {% else %}<span class="text-gray-700 italic text-xs opacity-50">-</span>{% endif %}
-                                                    </td>
-                                                    <td class="text-center align-middle">
-                                                        {% if bis %}{% if bis.itemId in validatedBisItemIds %}<div class="status-match">✔</div>{% else %}<div class="status-mismatch">✘</div>{% endif %}{% else %}<span class="text-gray-700 text-xl">•</span>{% endif %}
-                                                    </td>
-                                                </tr>
-                                            {% endif %}
-                                        {% endfor %}
-                                    </tbody>
-                                </table>
-                            </div>
-                        </section>
-                    {% else %}
-                        <!-- EMPTY STATE -->
-                        <div class="wow-panel p-12 text-center">
-                            <div class="mb-6 text-6xl">📋</div>
-                            <h2 class="text-3xl font-fantasy text-yellow-400 mb-3">Profil non configuré</h2>
-                            <p class="text-gray-400 mb-8 max-w-md mx-auto leading-relaxed">
-                                {% if isOwner %}
-                                    Il semble que vous n'ayez pas encore de personnage actif. Configurez-en un pour charger vos données et commencer la comparaison d'équipement !
-                                {% else %}
-                                    Ce joueur n'a pas encore sélectionné de personnage principal. Son armurerie est vide pour le moment.
-                                {% endif %}
-                            </p>
+                        </div>
 
-                            {# --- MODIFICATION 4 : BOUTON CRÉATION CACHÉ AUX VISITEURS --- #}
-                            {% if isOwner %}
-                                <a href="{{ path('app_character_new') }}" class="wow-button">
-                                    ✨ Ajouter mon premier personnage
+                        {% if isOwner %}
+                            <div class="pt-6 mt-2 border-t border-[#6d5d52]/30">
+                                <a href="{{ path('app_character_index') }}" class="wow-btn-refined w-full justify-center text-center group">
+                                    <span class="group-hover:rotate-90 transition-transform duration-300">⚙</span> Gérer Personnages
                                 </a>
-                            {% endif %}
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </aside>
+
+            <!-- MAIN CONTENT -->
+            <main class="xl:col-span-9 space-y-8">
+                {% if characterData %}
+
+                    <!-- BANNIÈRE PERSONNAGE (Style Agenda) -->
+                    <section class="wow-panel relative overflow-hidden group">
+                         {# Fond texture subtil #}
+                        <div class="absolute inset-0 bg-gradient-to-r from-[#0d1b3e] via-[#1c2c5b] to-[#0d1b3e] opacity-80"></div>
+                        <div class="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/black-scales.png')] opacity-30"></div>
+
+                        <div class="relative z-10 p-8 flex flex-col lg:flex-row items-center gap-8">
+                            <!-- Portrait -->
+                            <div class="shrink-0 relative">
+                                <div class="w-24 h-24 rounded-full border-2 border-[#daa520] overflow-hidden shadow-[0_0_15px_rgba(218,165,32,0.3)] bg-black">
+                                    {% if characterMedia and characterMedia.assets[0].value is defined %}
+                                        <img src="{{ characterMedia.assets[0].value }}" alt="{{ characterData.name }}" class="w-full h-full object-cover">
+                                    {% else %}
+                                        <div class="w-full h-full flex items-center justify-center text-4xl text-[#6d5d52] font-fantasy">?</div>
+                                    {% endif %}
+                                </div>
+                                <div class="absolute -bottom-2 -right-2 bg-[#daa520] text-black text-xs font-bold w-8 h-8 flex items-center justify-center rounded-full border-2 border-[#0b0d12]">
+                                    {{ characterData.level }}
+                                </div>
+                            </div>
+
+                            <!-- Infos Texte -->
+                            <div class="flex-grow text-center lg:text-left">
+                                <h2 class="text-4xl lg:text-5xl font-fantasy text-[#f0e6d2] tracking-wide mb-1 drop-shadow-lg">
+                                    {{ characterData.name }}
+                                </h2>
+                                <p class="text-xl text-[#daa520] font-fantasy mb-2">
+                                    {{ characterData.character_class.name }} <span class="text-[#6d5d52] mx-2">•</span> {{ characterData.active_spec.name }}
+                                </p>
+                                <p class="text-sm text-[#8b7355] uppercase tracking-[0.2em]">
+                                    {{ characterData.race.name }} — {{ characterData.realm.name }}
+                                </p>
+                            </div>
+
+                            <!-- iLvl Box -->
+                            <div class="bg-black/40 border border-[#6d5d52] rounded px-6 py-3 text-center min-w-[120px]">
+                                <div class="text-[#8b7355] text-[10px] uppercase tracking-widest mb-1">iLvl Moyen</div>
+                                <div class="text-3xl font-fantasy text-[#f0e6d2]">{{ characterData.average_item_level }}</div>
+                            </div>
                         </div>
-                    {% endif %}
-                </main>
-            </div>
+                    </section>
+
+                    <!-- TABLEAU COMPARATIF -->
+                    <section class="wow-panel">
+                        <div class="wow-panel-header flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-[#151720]">
+                            <h3 class="flex items-center gap-3">
+                                <span class="text-[#daa520] text-xl">⚔</span>
+                                <span>Comparatif BiS</span>
+                            </h3>
+
+                            <div class="flex items-center w-full md:w-auto">
+                                {% if compatibleLists is defined and compatibleLists|length > 0 %}
+                                    <form method="get" action="{{ path(app.request.attributes.get('_route'), app.request.attributes.get('_route_params')) }}" class="m-0 w-full md:w-auto">
+                                        <select name="bis_id" onchange="this.form.submit()" class="wow-select w-full md:w-[250px] py-1.5 px-3 rounded text-xs font-bold uppercase cursor-pointer">
+                                            {% for list in compatibleLists %}
+                                                <option value="{{ list.id }}" {{ bisList and bisList.id == list.id ? 'selected' : '' }}>
+                                                    {{ list.name }} ({{ list.specialization }})
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                    </form>
+                                {% else %}
+                                    <span class="text-red-400 text-xs uppercase tracking-wider border border-red-900/50 bg-red-900/10 px-3 py-1 rounded">
+                                        ⚠ Aucune Liste BiS
+                                    </span>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="overflow-x-auto bg-[#0b0d12]/60">
+                            <table class="wow-table">
+                                <thead>
+                                    <tr>
+                                        <th class="w-32 pl-4">Slot</th>
+                                        <th>Équipement Actuel</th>
+                                        <th>Recommandé (BiS)</th>
+                                        <th class="text-center w-20">État</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for slot_key, slot_name in slotOrder %}
+                                        {% set equipped = equippedItemsBySlot[slot_key] ?? null %}
+                                        {% set bis = bisItemsBySlot[slot_key] ?? null %}
+
+                                        {% if equipped or bis %}
+                                            <tr>
+                                                <td class="pl-4 font-bold text-[#6d5d52] text-xs uppercase tracking-widest">{{ slot_name }}</td>
+
+                                                {# Colonne Equipé #}
+                                                <td>
+                                                    {% if equipped and equipped.apiDetails is defined %}
+                                                        <a href="https://www.wowhead.com/mop/item={{ equipped.item.id }}" target="_blank" class="item-link wow-item" data-wowhead="item={{ equipped.item.id }}&domain=mop">
+                                                            <img src="{{ equipped.apiDetails.icon_url|default('https://wow.zamimg.com/images/wow/icons/large/inv_misc_questionmark.jpg') }}" class="item-icon border-[#6d5d52]">
+                                                            <div>
+                                                                <div class="item-name text-[#a335ee]">{{ equipped.name }}</div>
+                                                                {% set difficulty = equipped.apiDetails.difficulty|default(null) %}
+                                                                {% if difficulty == 'Héroïque élite' %}<span class="difficulty-text difficulty-elite">Héroïque Élite</span>
+                                                                {% elseif difficulty == 'Héroïque' %}<span class="difficulty-text difficulty-heroic">Héroïque</span>
+                                                                {% else %}<span class="difficulty-text difficulty-normal">Normal</span>{% endif %}
+                                                            </div>
+                                                        </a>
+                                                    {% elseif equipped %}
+                                                        <div class="text-[#c7b394] font-bold">{{ equipped.name }}</div>
+                                                    {% else %}
+                                                        <span class="text-gray-600 text-xs italic">Vide</span>
+                                                    {% endif %}
+                                                </td>
+
+                                                {# Colonne BiS #}
+                                                <td>
+                                                    {% if bis and bis.apiDetails %}
+                                                        <a href="https://www.wowhead.com/mop/item={{ bis.itemId }}" target="_blank" class="item-link wow-item opacity-90 hover:opacity-100" data-wowhead="item={{ bis.itemId }}&domain=mop">
+                                                            <img src="{{ bis.apiDetails.icon_url|default('https://wow.zamimg.com/images/wow/icons/large/inv_misc_questionmark.jpg') }}" class="item-icon border-[#daa520]/50">
+                                                            <div>
+                                                                <div class="item-name text-[#daa520]">{{ bis.apiDetails.name }}</div>
+                                                                {% set difficulty = bis.apiDetails.difficulty|default(null) %}
+                                                                {% if difficulty == 'Héroïque élite' %}<span class="difficulty-text difficulty-elite">Héroïque Élite</span>
+                                                                {% elseif difficulty == 'Héroïque' %}<span class="difficulty-text difficulty-heroic">Héroïque</span>
+                                                                {% else %}<span class="difficulty-text difficulty-normal">Normal</span>{% endif %}
+                                                            </div>
+                                                        </a>
+                                                    {% else %}
+                                                        <span class="text-[#6d5d52] opacity-30 text-xl">•</span>
+                                                    {% endif %}
+                                                </td>
+
+                                                {# Colonne Check #}
+                                                <td class="text-center">
+                                                    {% if bis %}
+                                                        {% if bis.itemId in validatedBisItemIds %}
+                                                            <div class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-green-900/30 border border-green-700 text-green-500 shadow-[0_0_10px_rgba(34,197,94,0.2)]">✔</div>
+                                                        {% else %}
+                                                            <div class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-red-900/20 border border-red-900/50 text-red-700">✘</div>
+                                                        {% endif %}
+                                                    {% else %}
+                                                        <span class="text-[#6d5d52] opacity-30">•</span>
+                                                    {% endif %}
+                                                </td>
+                                            </tr>
+                                        {% endif %}
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
+                    </section>
+
+                {% else %}
+                    <!-- EMPTY STATE (Style WoW) -->
+                    <div class="wow-panel p-16 text-center flex flex-col items-center justify-center min-h-[400px]">
+                        <div class="mb-6 text-6xl opacity-20 filter grayscale">📜</div>
+                        <h2 class="text-3xl font-fantasy text-[#daa520] mb-3 tracking-wide">Armurerie Vide</h2>
+                        <p class="text-[#8b7355] mb-8 max-w-md mx-auto leading-relaxed">
+                            {% if isOwner %}
+                                Aucun personnage n'est encore lié à ce profil. Configurez votre personnage principal pour accéder au comparateur d'équipement.
+                            {% else %}
+                                Ce joueur n'a pas encore configuré son armurerie.
+                            {% endif %}
+                        </p>
+
+                        {% if isOwner %}
+                            <a href="{{ path('app_character_new') }}" class="wow-btn-refined">
+                                <span class="text-lg">+</span> Créer mon personnage
+                            </a>
+                        {% endif %}
+                    </div>
+                {% endif %}
+            </main>
         </div>
     </div>
 </div>
 
-{# SCRIPTS JS (Tooltips Wowhead) #}
+{# SCRIPTS JS #}
 <script>const whTooltips = { colorLinks: true, iconizeLinks: false, renameLinks: false };</script>
 <script src="https://wow.zamimg.com/js/tooltips.js"></script>
 <script>
     document.addEventListener('DOMContentLoaded', () => {
-        // Correction de bug pour supprimer les tooltips résiduels si nécessaire
         const killTooltip = () => {
-            const tooltips = document.querySelectorAll('.wowhead-tooltip');
-            tooltips.forEach(t => t.remove());
+            document.querySelectorAll('.wowhead-tooltip').forEach(t => t.remove());
         };
-        const items = document.querySelectorAll('.wow-item');
-        items.forEach(item => {
+        document.querySelectorAll('.wow-item').forEach(item => {
             item.addEventListener('mouseleave', killTooltip);
         });
     });

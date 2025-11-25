@@ -2,71 +2,106 @@
 
 {% block title %}Gestion des Membres{% endblock %}
 
-{% block body %}
-<div class="container mx-auto px-4 py-8">
-    <h1 class="text-3xl font-bold text-white mb-6 border-b border-gray-700 pb-2">
-        Gestion des Membres
-    </h1>
 
-    <div class="bg-gray-800 rounded-lg shadow-lg overflow-x-auto">
-        <table class="min-w-full text-left text-sm text-gray-300">
-            <thead class="bg-gray-900 text-xs text-gray-400 uppercase">
-                <tr>
-                    <th scope="col" class="px-6 py-3">Pseudo</th>
-                    <th scope="col" class="px-6 py-3">Email</th>
-                    <th scope="col" class="px-6 py-3">Rôle Admin</th> {# Colonne renommée pour la clarté #}
-                    <th scope="col" class="px-6 py-3">Rang de Guilde</th> {# NOUVELLE COLONNE #}
-                </tr>
-            </thead>
-            <tbody>
-                {% for user in users %}
-                    <tr class="border-b border-gray-700 hover:bg-gray-700">
-                        <td class="px-6 py-4 font-medium text-white">{{ user.pseudo }}</td>
-                        <td class="px-6 py-4">{{ user.email }}</td>
-                        <td class="px-6 py-4">
-                            {# Logique pour le rôle ADMIN (Promouvoir / Rétrograder) #}
-                            {% if 'ROLE_ADMIN' in user.roles %}
-                                <span class="bg-yellow-500 text-gray-900 text-xs font-semibold px-2.5 py-0.5 rounded">Admin</span>
-                                {% if user.id != app.user.id %}
-                                    <form action="{{ path('app_admin_user_demote', {id: user.id}) }}" method="post" class="inline ml-2">
-                                        <button type="submit" class="font-medium text-red-500 hover:underline text-xs">(Rétrograder)</button>
-                                    </form>
-                                {% endif %}
-                            {% else %}
-                                <span class="bg-blue-500 text-white text-xs font-semibold px-2.5 py-0.5 rounded">Utilisateur</span>
-                                {% if user.id != app.user.id %}
-                                <form action="{{ path('app_admin_user_promote', {id: user.id}) }}" method="post" class="inline ml-2">
-                                    <button type="submit" class="font-medium text-green-500 hover:underline text-xs">(Promouvoir)</button>
-                                </form>
-                                {% endif %}
-                            {% endif %}
-                        </td>
-                        <td class="px-6 py-4">
-                            {# NOUVEAU FORMULAIRE POUR LE RANG DE GUILDE #}
-                            {% if user.id != app.user.id %}
-                                <form action="{{ path('app_admin_user_update_rank', {id: user.id}) }}" method="post" class="flex items-center gap-2">
-                                    <select name="guildRank" class="bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-yellow-500 focus:border-yellow-500 block w-full p-1.5">
-                                        {# On boucle sur notre constante pour créer les options #}
-                                        {% for rank in constant('App\\Entity\\User::RANKS') %}
-                                            <option value="{{ rank }}" {% if rank == user.guildRank %}selected{% endif %}>
-                                                {{ rank }}
-                                            </option>
-                                        {% endfor %}
-                                    </select>
-                                    <button type="submit" class="px-3 py-1.5 text-xs font-medium text-center text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus:ring-4 focus:outline-none focus:ring-blue-800">OK</button>
-                                </form>
-                            {% else %}
-                                <span class="text-gray-500 italic">{{ user.guildRank }} (Vous)</span>
-                            {% endif %}
-                        </td>
-                    </tr>
-                {% else %}
-                    <tr>
-                        <td colspan="4" class="text-center py-4">Aucun utilisateur trouvé.</td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+
+{% block body %}
+<div class="container mx-auto px-4 py-8 max-w-6xl">
+
+    {# TITRE STYLISÉ #}
+    <div class="text-center mb-8">
+        <h1 class="text-4xl font-fantasy header-title">
+            Gestion des Membres
+        </h1>
     </div>
+
+    {# PANEL WOW #}
+    <div class="wow-panel overflow-hidden">
+        <div class="wow-panel-header flex justify-between items-center">
+            <span>Liste de l'effectif</span>
+            <span class="text-xs text-yellow-600 normal-case">{{ users|length }} membres</span>
+        </div>
+
+        <div class="overflow-x-auto">
+            {# On applique la classe .wow-table définie dans ton CSS principal #}
+            <table class="w-full text-left text-sm wow-table">
+                <thead>
+                    <tr>
+                        <th scope="col">Pseudo</th>
+                        <th scope="col">Email</th>
+                        <th scope="col">Rôle Admin</th>
+                        <th scope="col">Rang de Guilde</th>
+                    </tr>
+                </thead>
+                <tbody class="text-gray-300">
+                    {% for user in users %}
+                        <tr>
+                            <td class="font-bold text-[#c7b394]">{{ user.pseudo }}</td>
+                            <td class="text-gray-400">{{ user.email }}</td>
+                            <td>
+                                {# Rôle ADMIN (Promouvoir / Rétrograder) #}
+                                {% if 'ROLE_ADMIN' in user.roles %}
+                                    <span class="bg-yellow-900/50 text-yellow-400 border border-yellow-700 text-xs font-semibold px-2.5 py-0.5 rounded uppercase tracking-wider">Admin</span>
+                                    {% if user.id != app.user.id %}
+                                        <form action="{{ path('app_admin_user_demote', {id: user.id}) }}" method="post" class="inline ml-2">
+                                            <button type="submit" class="font-medium text-red-400 hover:text-red-300 hover:underline text-xs transition-colors" onclick="return confirm('Êtes-vous sûr de vouloir retirer les droits admin ?')">
+                                                (Rétrograder)
+                                            </button>
+                                        </form>
+                                    {% endif %}
+                                {% else %}
+                                    <span class="bg-blue-900/50 text-blue-400 border border-blue-800 text-xs font-semibold px-2.5 py-0.5 rounded uppercase tracking-wider">Membre</span>
+                                    {% if user.id != app.user.id %}
+                                    <form action="{{ path('app_admin_user_promote', {id: user.id}) }}" method="post" class="inline ml-2">
+                                        <button type="submit" class="font-medium text-green-400 hover:text-green-300 hover:underline text-xs transition-colors" onclick="return confirm('Donner les droits administrateur ?')">
+                                            (Promouvoir)
+                                        </button>
+                                    </form>
+                                    {% endif %}
+                                {% endif %}
+                            </td>
+                            <td>
+                                {# FORMULAIRE RANG DE GUILDE #}
+                                {% if user.id != app.user.id %}
+                                    <form action="{{ path('app_admin_user_update_rank', {id: user.id}) }}" method="post" class="flex items-center gap-2">
+                                        <select name="guildRank" class="wow-select text-xs rounded p-1.5 w-40">
+                                            {% for rank in constant('App\\Entity\\User::RANKS') %}
+                                                <option value="{{ rank }}" {% if rank == user.guildRank %}selected{% endif %}>
+                                                    {{ rank }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                        {# Petit bouton OK doré #}
+                                        <button type="submit" class="wow-button" style="padding: 0.2rem 0.8rem; font-size: 0.7rem; border-width: 1px;">
+                                            OK
+                                        </button>
+                                    </form>
+                                {% else %}
+                                    <span class="text-gray-500 italic text-xs">{{ user.guildRank }} (Vous)</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="4" class="text-center py-8 italic text-gray-500">
+                                <div class="flex flex-col items-center gap-2">
+                                    <span class="text-2xl">📜</span>
+                                    Aucun membre trouvé dans les registres.
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    {# BOUTON RETOUR EN BAS À GAUCHE #}
+    <div class="mt-8">
+        <a href="{{ path('app_admin_dashboard') }}" class="wow-btn-refined">
+            <span class="arrow">❮</span>
+            <span>Retour Dashboard</span>
+        </a>
+    </div>
+
 </div>
 {% endblock %}

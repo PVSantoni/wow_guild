@@ -3,83 +3,110 @@
 {% block title %}Nouvelle BiS List{% endblock %}
 
 {% block body %}
-<div class="min-h-screen bg-[#0b0d12] py-12" style="background-image: url('https://bnetcmsus-a.akamaihd.net/cms/content_entry_media/2g/2G4V985U25I21596153195237.jpg'); background-attachment: fixed; background-size: cover;">
-    <div class="container mx-auto px-4 max-w-5xl">
+<div class="container mx-auto px-4 py-8 max-w-3xl">
 
-        <div class="wow-form-card">
-            <div class="flex justify-between items-center mb-6">
-                <h1 class="wow-form-title mb-0">Créer une BiS List</h1>
-                <a href="{{ path('app_bis_list_index') }}" class="text-[#8b7355] hover:text-[#daa520] transition-colors font-fantasy">
-                    ↩ Retour à la liste
-                </a>
-            </div>
+    {# TITRE CENTRÉ #}
+    <div class="text-center mb-8">
+        <h1 class="text-4xl font-fantasy header-title">
+            Créer une BiS List
+        </h1>
+    </div>
 
+    {# PANEL FORMULAIRE #}
+    <div class="wow-panel">
+        <div class="wow-panel-header">
+            Configuration du personnage
+        </div>
+        <div class="p-6">
+            {# Le formulaire est inclus ici #}
             {{ include('bis_list/_form.html.twig') }}
         </div>
+    </div>
+
+    {# BARRE D'ACTIONS (Bas de page) #}
+    <div class="mt-8 flex justify-between items-center">
+
+        {# GAUCHE : Retour (Style Raffiné) #}
+        <a href="{{ path('app_bis_list_index') }}" class="wow-btn-refined">
+            <span class="arrow">❮</span>
+            <span>Retour à la liste</span>
+        </a>
+
+        {# DROITE : Créer (Style Doré) #}
+        {# On utilise du JS pour soumettre le formulaire qui est inclus au-dessus #}
+        {# NOTE: Assure-toi d'avoir retiré le bouton 'Save' dans _form.html.twig #}
+        <button type="button" onclick="document.querySelector('form').submit();" class="wow-button">
+            Enregistrer la liste
+        </button>
 
     </div>
+
 </div>
-{% endblock %}
 
+{# SCRIPT DE FILTRAGE (Placé ici pour charger après le HTML) #}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    const classSelect = document.getElementById('bis_list_characterClass');
-    const specSelect = document.getElementById('bis_list_specialization');
+    document.addEventListener('DOMContentLoaded', function() {
+        // On récupère les éléments
+        const classSelect = document.getElementById('bis_list_characterClass');
+        const specSelect = document.getElementById('bis_list_specialization');
 
-    // On mappe la VALEUR de la classe (ex: MAGE) avec le TEXTE qu'on cherche (ex: (Mage))
-    // Cela permet d'éviter d'afficher "Givre (DK)" quand on sélectionne "Mage" (qui a aussi Givre)
-    const classLabelMapping = {
-        'DEATH_KNIGHT': '(DK)',
-        'DRUID':        '(Druide)',
-        'HUNTER':       '(Chasseur)',
-        'MAGE':         '(Mage)',
-        'MONK':         '(Moine)',
-        'PALADIN':      '(Paladin)',
-        'PRIEST':       '(Prêtre)',
-        'ROGUE':        '(Voleur)',
-        'SHAMAN':       '(Chaman)',
-        'WARLOCK':      '(Démoniste)',
-        'WARRIOR':      '(Guerrier)'
-    };
+        // Sécurité : Si les champs n'existent pas sur la page, on arrête tout pour éviter l'erreur
+        if (!classSelect || !specSelect) return;
 
-    function updateSpecs() {
-        const selectedClassValue = classSelect.value; // Ex: MAGE
-        const textFilter = classLabelMapping[selectedClassValue]; // Ex: (Mage)
+        // Mapping Valeur technique -> Texte affiché dans l'option
+        const classLabelMapping = {
+            'DEATH_KNIGHT': '(DK)',
+            'DRUID':        '(Druide)',
+            'HUNTER':       '(Chasseur)',
+            'MAGE':         '(Mage)',
+            'MONK':         '(Moine)',
+            'PALADIN':      '(Paladin)',
+            'PRIEST':       '(Prêtre)',
+            'ROGUE':        '(Voleur)',
+            'SHAMAN':       '(Chaman)',
+            'WARLOCK':      '(Démoniste)',
+            'WARRIOR':      '(Guerrier)'
+        };
 
-        // 1. On cache tout d'abord
-        // (On laisse l'option vide "Choisir..." visible si elle est sélectionnée)
-        let hasSelection = false;
+        function updateSpecs() {
+            const selectedClassValue = classSelect.value;
+            const textFilter = classLabelMapping[selectedClassValue];
 
-        for (let i = 0; i < specSelect.options.length; i++) {
-            const option = specSelect.options[i];
+            // On parcourt toutes les options du select de Spécialisation
+            for (let i = 0; i < specSelect.options.length; i++) {
+                const option = specSelect.options[i];
 
-            // Si c'est le placeholder (valeur vide), on le laisse
-            if (option.value === "") {
-                continue;
+                // On garde le placeholder (ex: "Choisir une spé") visible
+                if (option.value === "") continue;
+
+                // Si aucune classe n'est sélectionnée, on cache tout (sauf le placeholder)
+                if (!selectedClassValue) {
+                    option.hidden = true; // 'hidden' est plus robuste que style.display pour les options
+                    continue;
+                }
+
+                // Si le texte de l'option contient le filtre (ex: "(Mage)"), on affiche
+                if (textFilter && option.text.includes(textFilter)) {
+                    option.hidden = false;
+                    option.disabled = false;
+                } else {
+                    option.hidden = true;
+                    option.disabled = true;
+                }
             }
 
-            // LOGIQUE : On regarde si le TEXTE de l'option contient le nom de la classe
-            // Ex: "Givre (Mage)" contient "(Mage)" -> ON AFFICHE
-            if (textFilter && option.text.includes(textFilter)) {
-                option.style.display = 'block'; // Afficher
-                option.disabled = false;        // Activer
-            } else {
-                option.style.display = 'none';  // Cacher
-                option.disabled = true;         // Désactiver (pour empêcher la soumission)
+            // Si l'option actuellement sélectionnée devient invisible, on remet à zéro
+            const currentOption = specSelect.options[specSelect.selectedIndex];
+            if (currentOption && currentOption.hidden) {
+                specSelect.value = "";
             }
         }
 
-        // Reset de la valeur si l'option sélectionnée est devenue invisible
-        const currentOption = specSelect.options[specSelect.selectedIndex];
-        if (currentOption && currentOption.style.display === 'none') {
-            specSelect.value = "";
-        }
-    }
-
-    if (classSelect && specSelect) {
+        // Écouteur d'événement
         classSelect.addEventListener('change', updateSpecs);
-        // Lancer au chargement pour corriger l'état initial
+
+        // Lancement initial (au cas où on arrive sur la page avec des valeurs pré-remplies)
         updateSpecs();
-    }
-});
+    });
 </script>
+{% endblock %}

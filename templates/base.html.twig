@@ -3,7 +3,7 @@
     <head>
         <meta charset="UTF-8">
         <title>{% block title %}Le Codex de Guilde{% endblock %}</title>
-        <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 128 128%22><text y=%221.2em%22 font-size=%2296%22>⚫️</text></svg>">
+        <link rel="icon" href="{{ asset('images/logowow.png') }}">
 
         {% block stylesheets %}
             {{ encore_entry_link_tags('app') }}
@@ -15,30 +15,11 @@
     </head>
 
     <body class="bg-gray-900 text-gray-200">
-        <header class="bg-gray-800 shadow-md">
-            <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
-                {# ======================================= #}
-                {#   LA SEULE LIGNE À MODIFIER EST ICI   #}
-                {# ======================================= #}
-                <a href="{{ path('app_home') }}" class="text-2xl font-bold text-yellow-400">
-                    Le Codex de Guilde
-                </a>
-                <div class="flex items-center space-x-4">
-                    {% if is_granted('ROLE_ADMIN') %}
-                        <a href="{{ path('app_admin_dashboard') }}" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Admin</a>
-                    {% endif %}
+        {{ include('partials/_navbar.html.twig') }}
+        <div class="pt-24 min-h-screen">
 
-                    {% if app.user %}
-                        <a href="{{ path('app_guild_roster') }}" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Roster</a>
-                        <a href="{{ path('app_profile_index') }}" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Mon Armurerie</a>
-                        <span class="text-gray-300 hidden md:inline">Bienvenue, {{ app.user.pseudo }}</span>
-                        <a href="{{ path('app_logout') }}" class="text-gray-300 hover:text-yellow-400">Déconnexion</a>
-                    {% else %}
-                        <a href="{{ path('app_login') }}" class="text-gray-300 hover:text-yellow-400">Connexion</a>
-                        <a href="{{ path('app_register') }}" class="bg-yellow-500 hover:bg-yellow-600 text-gray-900 font-bold py-2 px-4 rounded">S'inscrire</a>
-                    {% endif %}
-                </div>
-            </nav>
+        <header class="bg-gray-800 shadow-md">
+
         </header>
 
         <main class="container mx-auto px-6 py-8">

@@ -2,78 +2,146 @@
 
 {% block title %}Liste des BiS{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    {# COULEURS DE CLASSE WOW #}
+    <style>
+        .text-class-death-knight { color: #C41F3B; }
+        .text-class-druid        { color: #FF7D0A; }
+        .text-class-hunter       { color: #ABD473; }
+        .text-class-mage         { color: #40C7EB; }
+        .text-class-monk         { color: #00FF96; }
+        .text-class-paladin      { color: #F58CBA; }
+        .text-class-priest       { color: #FFFFFF; }
+        .text-class-rogue        { color: #FFF569; }
+        .text-class-shaman       { color: #0070DE; }
+        .text-class-warlock      { color: #8787ED; }
+        .text-class-warrior      { color: #C79C6E; }
+    </style>
+{% endblock %}
+
 {% block body %}
-<div class="min-h-screen bg-[#0b0d12] py-12" style="background-image: url('https://bnetcmsus-a.akamaihd.net/cms/content_entry_media/2g/2G4V985U25I21596153195237.jpg'); background-attachment: fixed; background-size: cover; background-position: center;">
-    <div class="container mx-auto px-4 max-w-6xl">
+<div class="container mx-auto px-4 py-8 max-w-6xl">
 
-        <div class="wow-admin-container bg-black/80 p-6 rounded border border-[#444]">
-            <!-- Header du tableau -->
-            <div class="wow-admin-header flex justify-between items-center mb-6 border-b border-[#333] pb-4">
-                <h1 class="text-[#daa520] font-bold text-2xl uppercase font-serif tracking-widest">📚 Registre des BiS Lists</h1>
-                <a href="{{ path('app_bis_list_new') }}" class="btn-create-new bg-[#b8860b] hover:bg-[#8b6914] text-white py-2 px-4 rounded border border-[#daa520] transition">
-                    + Nouvelle Liste
-                </a>
-            </div>
+    {# 1. TITRE #}
+    <div class="text-center mb-8">
+        <h1 class="text-4xl font-fantasy header-title">
+            Registre des BiS Lists
+        </h1>
+    </div>
 
-            <!-- Le tableau -->
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
-                    <thead>
-                        <tr class="text-[#8b7355] border-b border-[#333]">
-                            <th class="p-3">Nom de la liste</th>
-                            <th class="p-3">Classe</th>
-                            <th class="p-3">Spécialisation</th>
-                            <th class="p-3 text-center">Items</th>
-                            <th class="p-3 text-right">Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody class="text-sm">
+    {# 2. PANEL #}
+    <div class="wow-panel">
+
+        {# HEADER #}
+        <div class="wow-panel-header flex justify-between items-center py-2 px-4">
+            <span class="text-lg tracking-wider">Bibliothèque d'équipements</span>
+
+            <a href="{{ path('app_bis_list_new') }}" class="wow-button" style="padding: 0.3rem 0.8rem; font-size: 0.75rem;">
+                + Nouvelle Liste
+            </a>
+        </div>
+
+        {# TABLEAU #}
+        <div class="overflow-x-auto">
+            <table class="w-full wow-table text-left">
+                <thead>
+                    <tr>
+                        <th class="pl-6">Nom de la liste</th>
+                        <th>Classe</th>
+                        <th>Spécialisation</th>
+                        <th class="text-center">Items</th>
+                        <th class="text-right pr-6">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="text-gray-300">
                     {% for bis_list in bis_lists %}
-                        <tr class="border-b border-[#222] hover:bg-[#ffffff05] transition">
-                            <td class="p-3 font-bold text-[#f0e6d2]">
+                        {% set classSlug = bis_list.characterClass|lower|replace({'_': '-', ' ': '-'}) %}
+
+                        <tr class="border-b border-[#6d5d52]/30 transition-colors hover:bg-[#daa520]/5 group">
+
+                            {# Nom #}
+                            <td class="py-4 pl-6 font-bold text-[#f0e6d2] group-hover:text-white transition-colors">
                                 {{ bis_list.name }}
                             </td>
-                            <td class="p-3">
-                                {#
-                                   GÉNÉRATION DYNAMIQUE DE LA CLASSE CSS :
-                                   1. lower : met en minuscule (ex: "MAGE" devient "mage")
-                                   2. replace : change les espaces/underscore en tirets (ex: "DEATH_KNIGHT" -> "death-knight")
-                                   Résultat : class="class-badge type-mage" ou "type-death-knight"
-                                #}
-                                <span class="class-badge type-{{ bis_list.characterClass|lower|replace({' ': '-', '_': '-'}) }}">
-                                    {{ bis_list.characterClass }}
-                                </span>
-                            </td>
-                            <td class="p-3">
-                                <span class="text-gray-400">{{ bis_list.specialization }}</span>
-                            </td>
-                            <td class="p-3 text-center">
-                                <span class="text-xs font-mono bg-black/50 px-2 py-1 rounded border border-gray-700 text-gray-300">
-                                    {{ bis_list.bisItems|length }} / 16
-                                </span>
-                            </td>
-                            <td class="p-3 text-right space-x-2">
-                                <a href="{{ path('app_bis_list_show', {'id': bis_list.id}) }}" class="text-[#40C7EB] hover:underline">Voir</a>
-                                <a href="{{ path('app_bis_list_edit', {'id': bis_list.id}) }}" class="text-[#daa520] hover:underline">Éditer</a>
 
-                                <form method="post" action="{{ path('app_bis_list_delete', {'id': bis_list.id}) }}" onsubmit="return confirm('Supprimer cette liste ?');" class="inline">
-                                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ bis_list.id) }}">
-                                    <button class="text-red-500 hover:text-red-400 font-bold px-2">✕</button>
-                                </form>
+                            {# Classe #}
+                            <td class="font-bold text-class-{{ classSlug }} shadow-black drop-shadow-sm">
+                                {{ bis_list.characterClass|replace({'_': ' '})|title }}
+                            </td>
+
+                            {# Spé #}
+                            <td class="text-gray-400">
+                                {{ bis_list.specialization }}
+                            </td>
+
+                            {# Compteur #}
+                            <td class="text-center">
+                                {% set count = bis_list.bisItems|length %}
+                                <span class="text-xs font-mono px-2 py-1 rounded border
+                                    {{ count >= 16 ? 'border-green-800 bg-green-900/30 text-green-400' : 'border-gray-700 bg-black/40 text-gray-400' }}">
+                                    {{ count }} / 16
+                                </span>
+                            </td>
+
+                            {# ACTIONS (ICÔNES AMÉLIORÉES) #}
+                            <td class="text-right pr-6">
+                                <div class="flex justify-end items-center gap-2">
+
+                                    {# 1. VOIR (Œil Bleu) #}
+                                    <a href="{{ path('app_bis_list_show', {'id': bis_list.id}) }}"
+                                       class="p-2 text-blue-400 hover:text-white transition-all duration-200 hover:scale-125 transform"
+                                       title="Voir les détails">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                        </svg>
+                                    </a>
+
+                                    {# 2. ÉDITER (Crayon Doré) #}
+                                    <a href="{{ path('app_bis_list_edit', {'id': bis_list.id}) }}"
+                                       class="p-2 text-[#daa520] hover:text-white transition-all duration-200 hover:scale-125 transform"
+                                       title="Modifier la liste">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                        </svg>
+                                    </a>
+
+                                    {# 3. SUPPRIMER (Poubelle Rouge) #}
+                                    <form method="post" action="{{ path('app_bis_list_delete', {'id': bis_list.id}) }}" onsubmit="return confirm('Supprimer définitivement cette liste ?');" class="inline">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ bis_list.id) }}">
+                                        <button class="p-2 text-red-500 hover:text-red-300 transition-all duration-200 hover:scale-125 transform" title="Supprimer">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                            </svg>
+                                        </button>
+                                    </form>
+
+                                </div>
                             </td>
                         </tr>
                     {% else %}
                         <tr>
-                            <td colspan="5" class="text-center py-8 text-gray-500 italic">
-                                Le registre est vide... Pour l'instant.
+                            <td colspan="5" class="text-center py-12 text-gray-500 italic">
+                                <div class="flex flex-col items-center gap-2">
+                                    <span class="text-2xl opacity-50">📜</span>
+                                    Le registre est vide... Pour l'instant.
+                                </div>
                             </td>
                         </tr>
                     {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+                </tbody>
+            </table>
         </div>
-
     </div>
+
+    {# 3. RETOUR #}
+    <div class="mt-8">
+        <a href="{{ path('app_admin_dashboard') }}" class="wow-btn-refined">
+            <span class="arrow">❮</span>
+            <span>Retour Admin</span>
+        </a>
+    </div>
+
 </div>
 {% endblock %}

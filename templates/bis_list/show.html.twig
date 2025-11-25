@@ -1,34 +1,82 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}BisList{% endblock %}
+{% block title %}Détails BiS List{% endblock %}
 
 {% block body %}
-    <h1>BisList</h1>
+<div class="container mx-auto px-4 py-8 max-w-4xl">
 
-    <table class="table">
-        <tbody>
-            <tr>
-                <th>Id</th>
-                <td>{{ bis_list.id }}</td>
-            </tr>
-            <tr>
-                <th>Name</th>
-                <td>{{ bis_list.name }}</td>
-            </tr>
-            <tr>
-                <th>CharacterClass</th>
-                <td>{{ bis_list.characterClass }}</td>
-            </tr>
-            <tr>
-                <th>Specialization</th>
-                <td>{{ bis_list.specialization }}</td>
-            </tr>
-        </tbody>
-    </table>
+    {# TITRE CENTRÉ #}
+    <div class="text-center mb-8">
+        <h1 class="text-4xl font-fantasy header-title">
+            Détails de la BiS List
+        </h1>
+    </div>
 
-    <a href="{{ path('app_bis_list_index') }}">back to list</a>
+    {# PANEL D'INFO #}
+    <div class="wow-panel">
+        <div class="wow-panel-header">
+            Fiche technique
+        </div>
 
-    <a href="{{ path('app_bis_list_edit', {'id': bis_list.id}) }}">edit</a>
+        <div class="p-6">
+            {# On utilise une structure Flex/Border simple qui s'accorde avec le thème #}
+            <div class="space-y-4">
 
-    {{ include('bis_list/_delete_form.html.twig') }}
+                {# Ligne : Nom #}
+                <div class="flex justify-between items-center border-b border-[#6d5d52]/30 pb-3">
+                    <span class="text-[#8b7355] font-bold uppercase text-xs tracking-widest">Nom de la Liste</span>
+                    <span class="text-[#f0e6d2] font-bold text-xl font-fantasy">{{ bis_list.name }}</span>
+                </div>
+
+                {# Ligne : Classe #}
+                <div class="flex justify-between items-center border-b border-[#6d5d52]/30 pb-3">
+                    <span class="text-[#8b7355] font-bold uppercase text-xs tracking-widest">Classe</span>
+                    <span class="text-[#c7b394]">{{ bis_list.characterClass }}</span>
+                </div>
+
+                {# Ligne : Spécialisation #}
+                <div class="flex justify-between items-center border-b border-[#6d5d52]/30 pb-3">
+                    <span class="text-[#8b7355] font-bold uppercase text-xs tracking-widest">Spécialisation</span>
+                    <span class="text-[#c7b394]">{{ bis_list.specialization }}</span>
+                </div>
+
+                {# Ligne : ID #}
+                <div class="flex justify-between items-center pt-1">
+                    <span class="text-[#8b7355] font-bold uppercase text-xs tracking-widest">ID Technique</span>
+                    <span class="text-gray-600 font-mono text-xs">#{{ bis_list.id }}</span>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    {# BARRE D'ACTIONS (Bas de page) #}
+    <div class="mt-8 flex justify-between items-center">
+
+        {# GAUCHE : RETOUR (Style Raffiné) #}
+        <a href="{{ path('app_bis_list_index') }}" class="wow-btn-refined">
+            <span class="arrow">❮</span>
+            <span>Retour aux listes</span>
+        </a>
+
+        {# DROITE : ACTIONS (Modifier & Supprimer) #}
+        <div class="flex items-center gap-6">
+
+            {# Supprimer (Lien rouge discret pour ne pas surcharger) #}
+            <form method="post" action="{{ path('app_bis_list_delete', {'id': bis_list.id}) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette liste ? Cette action est irréversible.');">
+                <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ bis_list.id) }}">
+                <button type="submit" class="text-red-500 hover:text-red-400 text-sm font-bold uppercase tracking-wider hover:underline transition-colors">
+                    ❌ Supprimer
+                </button>
+            </form>
+
+            {# Modifier (Bouton Doré Principal) #}
+            <a href="{{ path('app_bis_list_edit', {'id': bis_list.id}) }}" class="wow-button">
+                Modifier la liste
+            </a>
+        </div>
+
+    </div>
+
+</div>
 {% endblock %}

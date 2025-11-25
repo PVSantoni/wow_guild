@@ -2,179 +2,399 @@
 
 {% block title %}{{ evenement.nom }}{% endblock %}
 
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        /* Couleurs de classes WoW pour les bordures et textes */
+        .border-class-DEATH_KNIGHT { border-color: #C41F3B; } .text-class-DEATH_KNIGHT { color: #C41F3B; }
+        .border-class-DRUID { border-color: #FF7D0A; } .text-class-DRUID { color: #FF7D0A; }
+        .border-class-HUNTER { border-color: #ABD473; } .text-class-HUNTER { color: #ABD473; }
+        .border-class-MAGE { border-color: #40C7EB; } .text-class-MAGE { color: #40C7EB; }
+        .border-class-PALADIN { border-color: #F58CBA; } .text-class-PALADIN { color: #F58CBA; }
+        .border-class-PRIEST { border-color: #FFFFFF; } .text-class-PRIEST { color: #FFFFFF; }
+        .border-class-ROGUE { border-color: #FFF569; } .text-class-ROGUE { color: #FFF569; }
+        .border-class-SHAMAN { border-color: #0070DE; } .text-class-SHAMAN { color: #0070DE; }
+        .border-class-WARLOCK { border-color: #8787ED; } .text-class-WARLOCK { color: #8787ED; }
+        .border-class-WARRIOR { border-color: #C79C6E; } .text-class-WARRIOR { color: #C79C6E; }
+        .border-class-MONK { border-color: #00FF96; } .text-class-MONK { color: #00FF96; }
+        .border-class-DEMON_HUNTER { border-color: #A330C9; } .text-class-DEMON_HUNTER { color: #A330C9; }
+        .border-class-EVOKER { border-color: #33937F; } .text-class-EVOKER { color: #33937F; }
+    </style>
+{% endblock %}
+
 {% block body %}
-    {# --- DÉFINITIONS --- #}
-    {% set classColors = {
-        'DEATH_KNIGHT': '#C41F3B', 'DRUID': '#FF7D0A', 'HUNTER': '#ABD473',
-        'MAGE': '#69CCF0', 'PALADIN': '#F58CBA', 'PRIEST': '#FFFFFF',
-        'ROGUE': '#FFF569', 'SHAMAN': '#0070DE', 'WARLOCK': '#9482C9',
-        'WARRIOR': '#C79C6E', 'MONK': '#00FF96', 'DEMON_HUNTER': '#A330C9', 'EVOKER': '#33937F'
-    } %}
+    {# --- VARIABLES D'ICÔNES --- #}
     {% set roleIcons = {
-        'Tank': '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 1.944A11.954 11.954 0 012.166 5C2.056 5.649 2 6.319 2 7c0 5.225 3.34 9.67 8 11.317C14.66 16.67 18 12.225 18 7c0-.682-.057-1.35-.166-2.001A11.954 11.954 0 0110 1.944zM11 14a1 1 0 11-2 0 1 1 0 012 0zm0-7a1 1 0 10-2 0v3a1 1 0 102 0V7z" clip-rule="evenodd" /></svg>',
-        'Soigneur': '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" clip-rule="evenodd" /></svg>',
-        'DPS': '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" clip-rule="evenodd" /></svg>'
+        'Tank': '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-400" viewBox="0 0 20 20" fill="currentColor"><path d="M10 1.944A11.954 11.954 0 012.166 5C2.056 5.649 2 6.319 2 7c0 5.225 3.34 9.67 8 11.317C14.66 16.67 18 12.225 18 7c0-.682-.057-1.35-.166-2.001A11.954 11.954 0 0110 1.944zM11 14a1 1 0 11-2 0 1 1 0 012 0zm0-7a1 1 0 10-2 0v3a1 1 0 102 0V7z" /></svg>',
+        'Soigneur': '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-green-400" viewBox="0 0 20 20" fill="currentColor"><path d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-11a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V7z" /></svg>',
+        'DPS': '<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-red-500" viewBox="0 0 20 20" fill="currentColor"><path d="M13.586 3.586a2 2 0 112.828 2.828l-.793.793-2.828-2.828.793-.793zM11.379 5.793L3 14.172V17h2.828l8.38-8.379-2.83-2.828z" /></svg>'
     } %}
 
-    <div class="container mx-auto">
+    <div class="container mx-auto px-4 py-8 max-w-6xl">
 
-        <div class="text-center mb-8">
-            <h1 class="text-5xl font-fantasy header-title mb-2">{{ evenement.nom }}</h1>
-            <p class="text-gray-400 text-lg">Le {{ evenement.dateDebut|date('l d F Y à H:i') }}</p>
+        {# 1. HEADER (Titre & Date) #}
+        <div class="text-center mb-10">
+            <h1 class="text-5xl font-fantasy header-title mb-2 drop-shadow-md">{{ evenement.nom }}</h1>
+            <div class="inline-block bg-black/40 border border-[#6d5d52] px-4 py-1 rounded-full">
+                <p class="text-[#daa520] font-bold text-lg flex items-center gap-2">
+                    <span>📅</span> {{ evenement.dateDebut|date('l d F Y')|capitalize }}
+                    <span class="text-gray-500 mx-2">|</span>
+                    <span>🕒</span> {{ evenement.dateDebut|date('H:i') }}
+                </p>
+            </div>
         </div>
 
-        <div class="wow-panel mb-8">
-            <div class="wow-panel-header">Description</div>
-            <div class="p-6 text-gray-300">{{ evenement.description|nl2br }}</div>
-        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
 
-        {% if is_granted('ROLE_USER') %}
-            <div class="wow-panel mb-8">
-                <div class="wow-panel-header">Gérer ma participation</div>
-                <div class="p-6">
-                    {% set userInscription = null %}{% if app.user %}{% for inscription in evenement.inscriptions %}{% if inscription.user.id == app.user.id %}{% set userInscription = inscription %}{% endif %}{% endfor %}{% endif %}
-                    {% if userInscription %}
-                        <div class="text-center">
-                            {% set statusColor = 'text-gray-400' %}{% if userInscription.statut == 'Confirmé' %}{% set statusColor = 'text-green-400' %}{% elseif userInscription.statut == 'En attente' %}{% set statusColor = 'text-yellow-400' %}{% endif %}
-                            <p class="text-lg mb-4 {{ statusColor }}">Votre statut : <span class="font-bold">{{ userInscription.statut }}</span>{% if userInscription.playedRole %} en tant que <span class="font-bold">{{ userInscription.playedRole }}</span>{% endif %}</p>
-                            <form action="{{ path('app_evenement_inscription', {id: evenement.id}) }}" method="post" class="inline"><input type="hidden" name="statut" value="Absent"><button type="submit" class="wow-button">Se désinscrire</button></form>
+            {# 2. DESCRIPTION (Gauche - 2/3 largeur) #}
+            <div class="lg:col-span-2 wow-panel h-full">
+                <div class="wow-panel-header">Informations & Stratégie</div>
+                <div class="p-6 text-gray-300 leading-relaxed min-h-[150px]">
+                    {{ evenement.description|nl2br }}
+                </div>
+            </div>
+
+            {# 3. COMPOSITION (Droite - 1/3 largeur) #}
+            <div class="wow-panel h-full">
+                <div class="wow-panel-header">Objectifs Roster</div>
+                <div class="p-6 space-y-5">
+                    {% set confirmedInscriptions = evenement.inscriptions|filter(i => i.statut == 'Confirmé') %}
+                    {% for role in constant('App\\Entity\\Inscription::ROLES') %}
+                        {% set participantsInRole = confirmedInscriptions|filter(i => i.playedRole == role) %}
+                        {% set current = participantsInRole|length %}
+                        {% set required = (role == 'Tank') ? evenement.tanksRequis : ( (role == 'Soigneur') ? evenement.soigneursRequis : evenement.dpsRequis ) %}
+                        {% set percentage = required > 0 ? (current / required) * 100 : 0 %}
+
+                        {# Couleurs dynamiques #}
+                        {% set barColor = 'bg-green-600' %}
+                        {% if percentage >= 100 %}{% set barColor = 'bg-[#daa520]' %}
+                        {% elseif percentage >= 75 %}{% set barColor = 'bg-yellow-600' %}
+                        {% endif %}
+
+                        <div>
+                            <div class="flex justify-between items-center mb-1 text-sm">
+                                <div class="flex items-center gap-2">
+                                    {{ roleIcons[role]|raw }}
+                                    <span class="font-bold text-[#f0e6d2]">{{ role }}s</span>
+                                </div>
+                                <span class="font-mono font-bold {{ current >= required ? 'text-[#daa520]' : 'text-gray-400' }}">
+                                    {{ current }} / {{ required }}
+                                </span>
+                            </div>
+                            <div class="w-full bg-black/60 rounded-full h-3 border border-[#333] shadow-inner">
+                                <div class="h-full rounded-full {{ barColor }} transition-all duration-700 shadow-[0_0_10px_rgba(0,0,0,0.5)]" style="width: {{ percentage > 100 ? 100 : percentage }}%"></div>
+                            </div>
                         </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        {# 4. GESTION DE MA PARTICIPATION #}
+        {% if is_granted('ROLE_USER') %}
+            <div class="wow-panel mb-12 border-2 border-[#daa520]/30">
+                <div class="wow-panel-header bg-gradient-to-r from-[#2a241f] via-[#3d3428] to-[#2a241f] text-center text-lg">
+                    Panneau d'Inscription
+                </div>
+                <div class="p-6">
+                    {# Logique : Déjà inscrit ou pas ? #}
+                    {% set userInscription = null %}
+                    {% if app.user %}
+                        {% for inscription in evenement.inscriptions %}
+                            {% if inscription.user.id == app.user.id %}
+                                {% set userInscription = inscription %}
+                            {% endif %}
+                        {% endfor %}
+                    {% endif %}
+
+                    {% if userInscription %}
+                        {# --- CAS : DÉJÀ INSCRIT --- #}
+                        <div class="flex flex-col items-center justify-center gap-4 py-4">
+                            <div class="text-xl">
+                                Vous êtes inscrit en tant que
+                                <span class="font-bold text-[#daa520]">{{ userInscription.playedRole }}</span>
+                            </div>
+
+                            <div class="flex items-center gap-4">
+                                <div class="px-4 py-2 bg-black/40 border border-[#6d5d52] rounded flex items-center gap-2">
+                                    Statut :
+                                    {% if userInscription.statut == 'Confirmé' %}
+                                        <span class="text-green-400 font-bold flex items-center gap-1">✅ Confirmé</span>
+                                    {% elseif userInscription.statut == 'En attente' %}
+                                        <span class="text-yellow-400 font-bold flex items-center gap-1">⏳ En attente</span>
+                                    {% else %}
+                                        <span class="text-gray-400 font-bold">{{ userInscription.statut }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+
+                            <form action="{{ path('app_evenement_inscription', {id: evenement.id}) }}" method="post" class="mt-2" onsubmit="return confirm('Se désinscrire de l\'événement ?');">
+                                <input type="hidden" name="statut" value="Absent">
+                                <button type="submit" class="text-red-500 hover:text-red-400 hover:underline text-sm font-bold uppercase tracking-wider">
+                                    ❌ Se désinscrire
+                                </button>
+                            </form>
+                        </div>
+
                     {% else %}
+                        {# --- CAS : NON INSCRIT (Choix du rôle) --- #}
                         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                             {% for role in constant('App\\Entity\\Inscription::ROLES') %}
-                                <div class="wow-panel text-center border border-[#8b7355]/50 bg-black/30"><div class="wow-panel-header">{{ role }}</div><div class="p-4"><form action="{{ path('app_evenement_inscription', {id: evenement.id}) }}" method="post"><input type="hidden" name="statut" value="Confirmé"><input type="hidden" name="role" value="{{ role }}"><div class="space-y-4"><div><label for="class-select-{{ role }}" class="wow-label text-left block text-sm mb-1 text-yellow-500">Classe</label><select name="characterClass" id="class-select-{{ role }}" required class="w-full class-select bg-gray-700 border border-gray-600 text-white rounded-lg p-2.5 focus:border-yellow-500 focus:ring-yellow-500"><option value="">Choisissez...</option>{% for class in classes %}<option value="{{ class.apiKey }}">{{ class.name }}</option>{% endfor %}</select></div><div><label for="spec-select-{{ role }}" class="wow-label text-left block text-sm mb-1 text-yellow-500">Spécialisation</label><select name="specialization" id="spec-select-{{ role }}" required class="w-full spec-select bg-gray-700 border border-gray-600 text-white rounded-lg p-2.5 focus:border-yellow-500 focus:ring-yellow-500"><option value="">Choisissez une classe...</option>{% for spec in specializations %}<option value="{{ spec.id }}">{{ spec.name }}</option>{% endfor %}</select></div></div><button type="submit" class="wow-button w-full mt-6">S'inscrire</button></form></div></div>
+                                <div class="wow-panel bg-black/20 hover:bg-black/40 transition-colors duration-300 group">
+                                    <div class="p-4 text-center border-b border-[#6d5d52]/30">
+                                        <div class="flex justify-center mb-2 transform group-hover:scale-110 transition-transform duration-300">
+                                            {{ roleIcons[role]|replace({'class="h-5 w-5': 'class="h-12 w-12'})|raw }}
+                                        </div>
+                                        <h3 class="font-fantasy text-xl text-[#f0e6d2]">{{ role }}</h3>
+                                    </div>
+                                    <div class="p-4">
+                                        <form action="{{ path('app_evenement_inscription', {id: evenement.id}) }}" method="post">
+                                            <input type="hidden" name="statut" value="Confirmé">
+                                            <input type="hidden" name="role" value="{{ role }}">
+
+                                            <div class="space-y-3 mb-4">
+                                                <div>
+                                                    <label for="class-select-{{ role }}" class="block text-[10px] uppercase font-bold text-[#8b7355] mb-1">Classe</label>
+                                                    <select name="characterClass" id="class-select-{{ role }}" required class="class-select w-full wow-select rounded p-2 text-sm">
+                                                        <option value="">Choisir...</option>
+                                                        {% for class in classes %}
+                                                            <option value="{{ class.apiKey }}">{{ class.name }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                                <div>
+                                                    <label for="spec-select-{{ role }}" class="block text-[10px] uppercase font-bold text-[#8b7355] mb-1">Spécialisation</label>
+                                                    <select name="specialization" id="spec-select-{{ role }}" required class="spec-select w-full wow-select rounded p-2 text-sm">
+                                                        <option value="">D'abord la classe...</option>
+                                                        {% for spec in specializations %}
+                                                            <option value="{{ spec.id }}">{{ spec.name }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                </div>
+                                            </div>
+
+                                            <button type="submit" class="wow-button w-full text-sm py-2">
+                                                S'inscrire en {{ role }}
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
                             {% endfor %}
                         </div>
-                        <div class="text-center mt-8"><form action="{{ path('app_evenement_inscription', {id: evenement.id}) }}" method="post" class="inline"><input type="hidden" name="statut" value="Incertain"><button type="submit" class="text-gray-400 hover:text-white hover:underline text-sm">Je ne suis pas sûr (Incertain)</button></form></div>
+
+                        {# Bouton Incertain #}
+                        <div class="text-center mt-6">
+                            <form action="{{ path('app_evenement_inscription', {id: evenement.id}) }}" method="post" class="inline">
+                                <input type="hidden" name="statut" value="Incertain">
+                                <button type="submit" class="text-gray-500 hover:text-gray-300 text-xs hover:underline">
+                                    🤔 Je ne suis pas sûr (S'inscrire en Incertain)
+                                </button>
+                            </form>
+                        </div>
                     {% endif %}
                 </div>
             </div>
         {% endif %}
 
-        {# ======================================================= #}
-        {# SECTION "COMPOSITION DU ROSTER"                         #}
-        {# ======================================================= #}
-        <div class="wow-panel mb-8">
-            <div class="wow-panel-header">Composition du Roster Confirmé</div>
-            <div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-x-8 gap-y-6">
-                {% set confirmedInscriptions = evenement.inscriptions|filter(i => i.statut == 'Confirmé') %}
-                {% for role in constant('App\\Entity\\Inscription::ROLES') %}
-                    {% set participantsInRole = confirmedInscriptions|filter(i => i.playedRole == role) %}{% set current = participantsInRole|length %}{% set required = (role == 'Tank') ? evenement.tanksRequis : ( (role == 'Soigneur') ? evenement.soigneursRequis : evenement.dpsRequis ) %}{% set percentage = required > 0 ? (current / required) * 100 : 0 %}{% set barColor = 'bg-green-600' %}{% set textColor = 'text-green-400' %}{% if percentage >= 100 %}{% set barColor = 'bg-red-600' %}{% set textColor = 'text-red-400' %}{% elseif percentage >= 75 %}{% set barColor = 'bg-yellow-500' %}{% set textColor = 'text-yellow-400' %}{% endif %}
-                    <div>
-                        <div class="flex justify-between items-center mb-1"><div class="flex items-center gap-2">{{ roleIcons[role]|raw }}<span class="font-bold text-white">{{ role }}s</span></div><span class="text-sm font-semibold {{ textColor }}">{{ current }} / {{ required }}</span></div>
-                        <div class="w-full bg-black/50 rounded-full h-2.5 border border-gray-700"><div class="h-2.5 rounded-full {{ barColor }} transition-all duration-500" style="width: {{ percentage }}%"></div></div>
-                    </div>
-                {% endfor %}
-            </div>
-        </div>
+        {# 5. LISTE DES PARTICIPANTS (Grid 3 colonnes) #}
+        <h2 class="text-3xl font-fantasy header-title text-center mb-8">Liste des Participants</h2>
 
-        {# ======================================================= #}
-        {# AFFICHAGE DÉTAILLÉ DES PARTICIPANTS                     #}
-        {# ======================================================= #}
-        <h2 class="text-3xl font-fantasy header-title text-center mb-6">Liste des Participants</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
             {% for role in constant('App\\Entity\\Inscription::ROLES') %}
                 {% set participantsInRole = confirmedInscriptions|filter(i => i.playedRole == role) %}
+
                 <div class="wow-panel h-full flex flex-col">
-                    <div class="wow-panel-header flex justify-between items-center"><div class="flex items-center gap-2">{{ roleIcons[role]|raw }}<span>{{ role }}s</span></div></div>
-                    <div class="p-2 flex-grow bg-black bg-opacity-20"><ul class="space-y-2">
-                        {% for inscription in participantsInRole %}
-                            {% set pColor = '#9CA3AF' %}{% if inscription.specialization %}{% set pColor = classColors[inscription.specialization.characterClass.apiKey]|default('#9CA3AF') %}{% endif %}
-                            <li class="bg-gray-800 border border-gray-700 rounded p-2 flex items-center gap-3 hover:bg-gray-750 transition duration-200">
-                                <div class="w-1.5 h-10 rounded-sm shrink-0" style="background-color: {{ pColor }};"></div>
-                                <div class="flex-grow">
-                                    <div class="flex justify-between items-center">
-                                        {# LIEN PROFIL PUBLIC #}
-                                        <a href="{{ path('app_public_profile', {id: inscription.user.id}) }}"
-                                           class="font-bold text-gray-100 hover:underline"
-                                           style="color: {{ pColor }}; text-shadow: 1px 1px 0 #000;">
-                                            {{ inscription.user.pseudo }}
-                                        </a>
-                                        {% if 'ROLE_ADMIN' in inscription.user.roles %}<span class="text-[10px] text-gray-500 border border-gray-600 px-1 rounded">OFFI</span>{% endif %}
-                                    </div>
-                                    <div class="text-xs text-gray-400 flex items-center gap-1 mt-0.5">{% if inscription.specialization %}<span class="text-gray-300">{{ inscription.specialization.name|replace({ ('(' ~ inscription.specialization.characterClass.name ~ ')') : ''})|trim }}</span><span class="text-gray-600 px-1">•</span><span style="color: {{ pColor }}">{{ inscription.specialization.characterClass.name }}</span>{% else %}<span class="italic text-gray-500">Pas de détails</span>{% endif %}</div>
-                                </div>
-                                {% if is_granted('ROLE_ADMIN') %}<form action="{{ path('app_inscription_update_status', {id: inscription.id}) }}" method="post" class="inline"><select name="status" onchange="this.form.submit()" class="text-xs bg-gray-900 border-gray-700 rounded p-1 focus:ring-yellow-500 focus:border-yellow-500"><option value="Confirmé" selected>Confirmé</option><option value="En attente">Mettre en attente</option></select></form>{% endif %}
-                            </li>
+                    <div class="wow-panel-header flex justify-between items-center py-2">
+                        <div class="flex items-center gap-2">
+                            {{ roleIcons[role]|raw }}
+                            <span>{{ role }}s</span>
+                        </div>
+                        <span class="text-xs font-normal text-gray-400">{{ participantsInRole|length }}</span>
+                    </div>
+
+                    <div class="p-0 flex-grow bg-black/20">
+                        {% if participantsInRole|length > 0 %}
+                            <ul class="divide-y divide-[#6d5d52]/20">
+                                {% for inscription in participantsInRole %}
+                                    {% set className = inscription.specialization ? inscription.specialization.characterClass.apiKey : 'UNKNOWN' %}
+
+                                    <li class="group flex items-center gap-0 hover:bg-[#daa520]/10 transition-colors duration-200">
+                                        {# Bande de couleur de classe à gauche #}
+                                        <div class="w-1.5 h-12 self-stretch bg-gray-600 border-class-{{ className }} bg-current text-class-{{ className }}" style="background-color: currentColor;"></div>
+
+                                        <div class="flex-grow p-2 pl-3">
+                                            <div class="flex justify-between items-center">
+                                                <a href="{{ path('app_public_profile', {id: inscription.user.id}) }}"
+                                                   class="font-bold text-sm text-class-{{ className }} hover:underline hover:brightness-125 transition-all">
+                                                    {{ inscription.user.pseudo }}
+                                                </a>
+                                                {% if 'ROLE_ADMIN' in inscription.user.roles %}
+                                                    <span class="text-[9px] uppercase border border-[#daa520] text-[#daa520] px-1 rounded">GM</span>
+                                                {% endif %}
+                                            </div>
+
+                                            <div class="text-xs text-gray-500 mt-0.5 flex items-center gap-1">
+                                                {% if inscription.specialization %}
+                                                    <span class="text-gray-300">{{ inscription.specialization.name|replace({ ('(' ~ inscription.specialization.characterClass.name ~ ')') : ''})|trim }}</span>
+                                                {% else %}
+                                                    <span class="italic">Spé inconnue</span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+
+                                        {# Actions Admin (Mini select pour changer statut) #}
+                                        {% if is_granted('ROLE_ADMIN') %}
+                                            <div class="pr-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                <form action="{{ path('app_inscription_update_status', {id: inscription.id}) }}" method="post">
+                                                    <button type="submit" name="status" value="En attente" title="Mettre en attente" class="text-yellow-500 hover:text-yellow-300">
+                                                        ⏳
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        {% endif %}
+                                    </li>
+                                {% endfor %}
+                            </ul>
                         {% else %}
-                            <li class="text-gray-500 italic text-sm text-center py-4 border border-dashed border-gray-700 rounded mt-2">Recherche {{ role }}...</li>
-                        {% endfor %}
-                    </ul></div>
+                            <div class="py-8 text-center text-gray-600 text-sm italic">
+                                Recherche {{ role }}...
+                            </div>
+                        {% endif %}
+                    </div>
                 </div>
             {% endfor %}
         </div>
 
-        {# ======================================================= #}
-        {# BANC DE TOUCHE ET INCERTAINS                            #}
-        {# ======================================================= #}
-        {% set standbyInscriptions = evenement.inscriptions|filter(i => i.statut == 'En attente') %}{% set uncertainInscriptions = evenement.inscriptions|filter(i => i.statut == 'Incertain') %}
-        {% if standbyInscriptions is not empty or uncertainInscriptions is not empty %}
-        <div class="mt-8 wow-panel bg-opacity-75">
-            <div class="wow-panel-header text-gray-400 border-gray-700">Remplaçants & Incertains</div>
-            <div class="p-4 space-y-2">
-                {% for inscription in standbyInscriptions %}
-                    <div class="flex justify-between items-center text-sm">
-                        <div class="flex items-center gap-2">
-                            <span class="w-2 h-2 rounded-full bg-yellow-500"></span>
-                            {# LIEN PROFIL PUBLIC (En Attente) #}
-                            <a href="{{ path('app_public_profile', {id: inscription.user.id}) }}" class="text-yellow-400 font-bold hover:underline">
-                                {{ inscription.user.pseudo }}
-                            </a>
-                            <span class="text-gray-500">({{ inscription.playedRole }})</span>
-                        </div>
-                        {% if is_granted('ROLE_ADMIN') %}<div class="flex items-center gap-2"><form action="{{ path('app_inscription_update_status', {id: inscription.id}) }}" method="post" class="inline"><input type="hidden" name="status" value="Confirmé"><button type="submit" class="text-xs bg-green-700 hover:bg-green-600 text-white font-bold py-1 px-2 rounded transition-colors">Confirmer</button></form><form action="{{ path('app_inscription_remove', {id: inscription.id}) }}" method="post" class="inline"><button type="submit" class="text-xs bg-red-800 hover:bg-red-700 text-white font-bold py-1 px-2 rounded transition-colors" onclick="return confirm('Retirer {{ inscription.user.pseudo|e('js') }} de la liste ?')">&times;</button></form></div>{% endif %}
+        {# 6. BANC DE TOUCHE (Standby) #}
+        {% set standbyInscriptions = evenement.inscriptions|filter(i => i.statut == 'En attente') %}
+        {% set uncertainInscriptions = evenement.inscriptions|filter(i => i.statut == 'Incertain') %}
+
+        {% if standbyInscriptions|length > 0 or uncertainInscriptions|length > 0 %}
+            <div class="wow-panel mb-12 opacity-90">
+                <div class="wow-panel-header bg-[#2a241f] text-gray-400">
+                    Banc de touche & Incertains
+                </div>
+                <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-4">
+
+                    {# Colonne En Attente #}
+                    <div class="space-y-2">
+                        <h4 class="text-xs font-bold text-yellow-500 uppercase mb-2">En Attente ({{ standbyInscriptions|length }})</h4>
+                        {% for inscription in standbyInscriptions %}
+                            <div class="flex justify-between items-center bg-black/40 p-2 rounded border border-dashed border-gray-700">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-yellow-500">⏳</span>
+                                    <a href="{{ path('app_public_profile', {id: inscription.user.id}) }}" class="text-gray-300 font-bold hover:text-white text-sm">
+                                        {{ inscription.user.pseudo }}
+                                    </a>
+                                    <span class="text-xs text-gray-500">({{ inscription.playedRole }})</span>
+                                </div>
+                                {% if is_granted('ROLE_ADMIN') %}
+                                    <div class="flex gap-2">
+                                        <form action="{{ path('app_inscription_update_status', {id: inscription.id}) }}" method="post">
+                                            <button type="submit" name="status" value="Confirmé" class="text-[10px] bg-green-900 text-green-300 px-2 py-0.5 rounded hover:bg-green-800">OK</button>
+                                        </form>
+                                        <form action="{{ path('app_inscription_remove', {id: inscription.id}) }}" method="post" onsubmit="return confirm('Kicker ?');">
+                                            <button class="text-[10px] text-red-500 hover:text-red-300">✕</button>
+                                        </form>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
                     </div>
-                {% endfor %}
-                {% for inscription in uncertainInscriptions %}
-                    <div class="flex justify-between items-center text-sm">
-                        <div class="flex items-center gap-2">
-                            <span class="w-2 h-2 rounded-full bg-gray-600"></span>
-                            {# LIEN PROFIL PUBLIC (Incertain) #}
-                            <a href="{{ path('app_public_profile', {id: inscription.user.id}) }}" class="text-gray-400 hover:text-white hover:underline">
-                                {{ inscription.user.pseudo }}
-                            </a>
-                        </div>
-                        {% if is_granted('ROLE_ADMIN') %}<div class="flex items-center gap-2"><form action="{{ path('app_inscription_update_status', {id: inscription.id}) }}" method="post" class="inline"><input type="hidden" name="status" value="Confirmé"><button type="submit" class="text-xs bg-green-700 hover:bg-green-600 text-white font-bold py-1 px-2 rounded transition-colors">Confirmer</button></form><form action="{{ path('app_inscription_remove', {id: inscription.id}) }}" method="post" class="inline"><button type="submit" class="text-xs bg-red-800 hover:bg-red-700 text-white font-bold py-1 px-2 rounded transition-colors" onclick="return confirm('Retirer {{ inscription.user.pseudo|e('js') }} de la liste ?')">&times;</button></form></div>{% endif %}
+
+                    {# Colonne Incertains #}
+                    <div class="space-y-2">
+                        <h4 class="text-xs font-bold text-gray-500 uppercase mb-2">Incertains ({{ uncertainInscriptions|length }})</h4>
+                        {% for inscription in uncertainInscriptions %}
+                            <div class="flex justify-between items-center bg-black/40 p-2 rounded border border-dashed border-gray-700">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-gray-600">❓</span>
+                                    <span class="text-gray-500 text-sm">{{ inscription.user.pseudo }}</span>
+                                </div>
+                                {% if is_granted('ROLE_ADMIN') %}
+                                    <form action="{{ path('app_inscription_remove', {id: inscription.id}) }}" method="post" onsubmit="return confirm('Retirer ?');">
+                                        <button class="text-[10px] text-red-500 hover:text-red-300">✕</button>
+                                    </form>
+                                {% endif %}
+                            </div>
+                        {% endfor %}
                     </div>
-                {% endfor %}
+                </div>
             </div>
-        </div>
         {% endif %}
 
-        {# ======================================================= #}
-        {# BOUTONS DE NAVIGATION                                   #}
-        {# ======================================================= #}
-        <hr class="my-8 border-gray-700">
-        <div class="flex items-center justify-center space-x-4 pb-12">
-            <a href="{{ path('app_evenement_index') }}" class="wow-button">Voir tous les événements</a>
+        {# 7. NAVIGATION #}
+        <div class="mt-8 flex justify-between items-center border-t border-[#6d5d52]/30 pt-6">
+
+            {# GAUCHE : Retour #}
+            <a href="{{ path('app_evenement_index') }}" class="wow-btn-refined">
+                <span class="arrow">❮</span>
+                <span>Retour au calendrier</span>
+            </a>
+
+            {# DROITE : Actions Admin #}
             {% if is_granted('ROLE_ADMIN') %}
-                <a href="{{ path('app_evenement_edit', {'id': evenement.id}) }}" class="wow-button">Modifier l'Événement</a>
-                {{ include('evenement/_delete_form.html.twig') }}
+                <div class="flex items-center gap-4">
+                    <a href="{{ path('app_evenement_edit', {'id': evenement.id}) }}" class="wow-button">
+                        ⚙️ Gérer l'événement
+                    </a>
+                </div>
             {% endif %}
         </div>
+
     </div>
 
+    {# SCRIPT DE FILTRAGE CLASSE/SPÉ (INCHANGÉ MAIS NETTOYÉ) #}
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            const classLabelFilters = { 'WARRIOR': '(Guerrier)', 'PALADIN': '(Paladin)', 'HUNTER': '(Chasseur)', 'ROGUE': '(Voleur)', 'PRIEST': '(Prêtre)', 'DEATH_KNIGHT': '(Chevalier de la mort)', 'SHAMAN': '(Chaman)', 'MAGE': '(Mage)', 'WARLOCK': '(Démoniste)', 'DRUID': '(Druide)', 'MONK': '(Moine)'};
+            // Mapping des noms de classes API -> Texte affiché dans le select (ex: 'WARRIOR' -> 'Guerrier')
+            // Adapte ces valeurs selon ce qui s'affiche réellement dans tes <option> de classe !
+            const classLabelFilters = {
+                'WARRIOR': '(Guerrier)', 'PALADIN': '(Paladin)', 'HUNTER': '(Chasseur)',
+                'ROGUE': '(Voleur)', 'PRIEST': '(Prêtre)', 'DEATH_KNIGHT': '(DK)',
+                'SHAMAN': '(Chaman)', 'MAGE': '(Mage)', 'WARLOCK': '(Démoniste)',
+                'DRUID': '(Druide)', 'MONK': '(Moine)', 'DEMON_HUNTER': '(DH)', 'EVOKER': '(Evocateur)'
+            };
+
             const inscriptionForms = document.querySelectorAll('form[action*="/inscription"]');
+
             inscriptionForms.forEach(form => {
                 const classSelect = form.querySelector('.class-select');
                 const specSelect = form.querySelector('.spec-select');
                 if (!classSelect || !specSelect) return;
+
                 const updateSpecs = () => {
-                    const selectedClass = classSelect.value;
-                    const textFilter = classLabelFilters[selectedClass];
+                    const selectedClassKey = classSelect.value; // ex: 'MAGE'
+                    // Astuce : On cherche si le texte de l'option de spé contient le nom de la classe
+                    // Tu devras peut-être ajuster cette logique selon comment tes Spécialisations sont nommées en BDD
+                    const filterText = classLabelFilters[selectedClassKey];
+
                     for (let option of specSelect.options) {
                         if (option.value === "") continue;
-                        const isVisible = textFilter && option.text.includes(textFilter);
+
+                        // Si aucune classe sélectionnée, on cache tout
+                        if (!selectedClassKey) {
+                            option.style.display = 'none';
+                            continue;
+                        }
+
+                        // Vérification simple : est-ce que le texte de la spé contient le nom de la classe ?
+                        // Ex: "Givre (Mage)" contient "(Mage)" ou "Mage"
+                        const isVisible = filterText && option.text.includes(filterText);
+
                         option.style.display = isVisible ? 'block' : 'none';
                         option.disabled = !isVisible;
                     }
+
+                    // Reset si l'option choisie devient invisible
                     const currentOption = specSelect.options[specSelect.selectedIndex];
-                    if (currentOption && currentOption.style.display === 'none') { specSelect.value = ""; }
+                    if (currentOption && currentOption.style.display === 'none') {
+                        specSelect.value = "";
+                    }
                 };
+
                 classSelect.addEventListener('change', updateSpecs);
+                // On lance une fois au chargement
                 updateSpecs();
             });
         });

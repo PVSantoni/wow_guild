@@ -3,53 +3,102 @@
 {% block title %}Gérer les Événements{% endblock %}
 
 {% block body %}
-<div class="container mx-auto px-4 py-8">
-    <div class="flex justify-between items-center mb-6">
+<div class="container mx-auto px-4 py-8 max-w-6xl">
+
+    {# TITRE CENTRÉ #}
+    <div class="text-center mb-8">
         <h1 class="text-4xl font-fantasy header-title">
             Gestion des Événements
         </h1>
-        <a href="{{ path('app_admin_dashboard') }}" class="wow-button">Retour au Dashboard</a>
     </div>
 
+    {# LE TABLEAU DANS LE PANEL #}
     <div class="wow-panel">
-        <table class="w-full wow-table">
-            <thead>
-                <tr>
-                    <th>Événement</th>
-                    <th>Date</th>
-                    <th>Inscrits</th>
-                    <th class="text-right">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for event in evenements %}
-                    {% set isPast = event.dateDebut < date('now') %}
-                    <tr class="{{ isPast ? 'opacity-60' : '' }}">
-                        <td>
-                            <span class="font-bold text-lg text-yellow-400">{{ event.nom }}</span>
-                            {% if isPast %}
-                                <span class="text-xs ml-2 bg-gray-600 text-gray-300 px-2 py-0.5 rounded-full align-middle">Terminé</span>
-                            {% endif %}
-                        </td>
+        <div class="wow-panel-header flex justify-between items-center">
+            <span>Calendrier des Raids</span>
+            <span class="text-xs text-yellow-600 normal-case">{{ evenements|length }} événements</span>
+        </div>
 
-                        <td>{{ event.dateDebut|date('d/m/Y H:i') }}</td>
-
-                        <td>{{ event.inscriptions|length }} / {{ event.nbPlacesMax }}</td>
-
-                        <td class="text-right">
-                            <a href="{{ path('app_admin_evenement_roster', {id: event.id}) }}" class="font-medium text-blue-400 hover:text-blue-300 hover:underline mr-4">Gérer Roster</a>
-                            <a href="{{ path('app_evenement_edit', {id: event.id}) }}" class="font-medium text-yellow-400 hover:text-yellow-300 hover:underline">Modifier</a>
-                        </td>
-                    </tr>
-                {% else %}
+        <div class="overflow-x-auto">
+            <table class="w-full wow-table text-left">
+                <thead>
                     <tr>
-                        <td colspan="4" class="text-center p-8 text-gray-500 italic">
-                            Aucun événement n'a été créé pour le moment.
-                        </td>
+                        <th class="pl-6">Événement</th>
+                        <th>Date</th>
+                        <th>Inscrits</th>
+                        <th class="text-right pr-6">Actions</th>
                     </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                </thead>
+                <tbody class="text-gray-300">
+                    {% for event in evenements %}
+                        {% set isPast = event.dateDebut < date('now') %}
+
+                        {# Si l'event est passé, on réduit l'opacité et on grise un peu #}
+                        <tr class="border-b border-[#6d5d52]/30 transition-colors hover:bg-[#daa520]/5 {{ isPast ? 'opacity-50 grayscale' : '' }}">
+
+                            <td class="py-4 pl-6">
+                                <div class="font-bold text-lg text-[#c7b394] mb-1">
+                                    {{ event.nom }}
+                                </div>
+                                {% if isPast %}
+                                    <span class="text-[10px] uppercase tracking-widest border border-gray-600 text-gray-500 px-2 py-0.5 rounded bg-black/30">
+                                        Terminé
+                                    </span>
+                                {% endif %}
+                            </td>
+
+                            <td class="text-[#8b7355] font-fantasy tracking-wide">
+                                {{ event.dateDebut|date('d/m/Y') }}
+                                <span class="text-xs ml-1 font-sans text-gray-500 block">{{ event.dateDebut|date('H:i') }}</span>
+                            </td>
+
+                            <td>
+                                {# Indicateur visuel simple #}
+                                <span class="{{ event.inscriptions|length >= event.nbPlacesMax ? 'text-green-400' : 'text-gray-400' }} font-bold">
+                                    {{ event.inscriptions|length }}
+                                </span>
+                                <span class="text-gray-600 text-sm">/</span>
+                                <span class="text-yellow-700 text-sm">{{ event.nbPlacesMax }}</span>
+                            </td>
+
+                            <td class="text-right pr-6">
+                                <div class="flex justify-end gap-4 items-center">
+                                    {# Lien Roster #}
+                                    <a href="{{ path('app_admin_evenement_roster', {id: event.id}) }}"
+                                       class="text-sm font-bold text-blue-400 hover:text-blue-300 transition-colors flex items-center gap-1 group">
+                                       <span class="group-hover:scale-110 transition-transform">⚔️</span> Roster
+                                    </a>
+
+                                    {# Lien Modifier #}
+                                    <a href="{{ path('app_evenement_edit', {id: event.id}) }}"
+                                       class="text-sm font-bold text-[#daa520] hover:text-[#ffd700] transition-colors">
+                                       ✎ Modifier
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                    {% else %}
+                        <tr>
+                            <td colspan="4" class="text-center py-12 text-gray-500 italic">
+                                <div class="flex flex-col items-center gap-2">
+                                    <span class="text-2xl opacity-50">📜</span>
+                                    Aucun événement n'a été créé pour le moment.
+                                </div>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     </div>
+
+    {# BOUTON RETOUR EN BAS A GAUCHE #}
+    <div class="mt-8">
+        <a href="{{ path('app_admin_dashboard') }}" class="wow-btn-refined">
+            <span class="arrow">❮</span>
+            <span>Retour Dashboard</span>
+        </a>
+    </div>
+
 </div>
 {% endblock %}

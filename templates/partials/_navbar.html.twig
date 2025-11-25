@@ -1,0 +1,198 @@
+{# templates/partials/_navbar.html.twig #}
+
+{# On s'assure d'avoir la police Cinzel chargée si ce n'est pas fait ailleurs, sinon tu peux retirer cette ligne #}
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;700&display=swap" rel="stylesheet">
+
+<nav class="fixed top-0 w-full z-50 transition-all duration-300 bg-[#050505]/95 backdrop-blur-md border-b border-[#6d5d52] shadow-[0_4px_20px_rgba(0,0,0,0.9)]">
+
+    {# Ligne dorée fine décorative tout en haut #}
+    <div class="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-[#daa520] to-transparent opacity-50"></div>
+
+    <div class="max-w-[1800px] mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex items-center justify-between h-20">
+
+            {# ======================= #}
+            {# 1. LOGO & MARQUE        #}
+            {# ======================= #}
+            <div class="flex-shrink-0 flex items-center group cursor-pointer">
+                <a href="{{ path('app_home') }}" class="flex items-center gap-4">
+                    {# Icône Logo (Style Emblème de Classe) #}
+                    <div class="relative w-12 h-12 flex items-center justify-center bg-gradient-to-b from-[#2a241f] to-[#0b0d12] rounded border border-[#6d5d52] shadow-[inset_0_0_10px_rgba(0,0,0,0.8)] group-hover:border-[#daa520] group-hover:shadow-[0_0_15px_rgba(218,165,32,0.3)] transition-all duration-300 transform group-hover:scale-105 overflow-hidden">
+
+            {# REMPLACE 'logo.png' PAR LE NOM RÉEL DE TON FICHIER #}
+            <img src="{{ asset('images/logowow.png') }}"
+                alt="Logo Guilde"
+                class="w-full h-full object-contain p-1">
+
+        </div>
+
+                    {# Texte Titre #}
+                    <div class="flex flex-col">
+                        <span class="font-[Cinzel] font-bold text-2xl tracking-[0.15em] text-[#f0e6d2] group-hover:text-white transition-colors leading-none drop-shadow-md">
+                            GUILD<span class="text-[#daa520]">MANAGER</span>
+                        </span>
+                        <span class="text-[10px] text-[#6d5d52] uppercase tracking-[0.3em] pl-0.5 group-hover:text-[#8b7355] transition-colors">
+                            Roster & Events
+                        </span>
+                    </div>
+                </a>
+            </div>
+
+            {# ======================= #}
+            {# 2. MENU DESKTOP         #}
+            {# ======================= #}
+            <div class="hidden md:block">
+                <div class="ml-10 flex items-center space-x-1">
+                    {% set route = app.request.get('_route') %}
+
+                    {# Macro pour les liens #}
+                    {% macro nav_link(label, path_name, current_route, check_string) %}
+                        <a href="{{ path(path_name) }}"
+                        class="relative px-5 py-2.5 mx-1 text-sm font-bold uppercase tracking-widest font-[Cinzel] transition-all duration-300 group
+                        {{ check_string in current_route ? 'text-[#f0e6d2]' : 'text-[#8b7355] hover:text-[#daa520]' }}">
+
+                            {{ label }}
+
+                            {# Ligne du bas (Active) #}
+                            <span class="absolute bottom-0 left-0 w-full h-[2px] bg-gradient-to-r from-transparent via-[#daa520] to-transparent transform scale-x-0 transition-transform duration-300 origin-center
+                                {{ check_string in current_route ? 'scale-x-100' : 'group-hover:scale-x-75' }}">
+                            </span>
+
+                            {# Glow de fond subtil #}
+                            <span class="absolute inset-0 bg-[#daa520]/5 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                        </a>
+                    {% endmacro %}
+
+                    {# Utilisation de la macro #}
+                    {{ _self.nav_link('Accueil', 'app_home', route, 'app_home') }}
+                    {{ _self.nav_link('Guilde', 'app_guild_roster', route, 'roster') }}
+                    {{ _self.nav_link('Calendrier', 'app_evenement_index', route, 'evenement') }}
+
+                    {# Lien ADMIN #}
+                    {% if is_granted('ROLE_ADMIN') %}
+                        <a href="{{ path('app_admin_dashboard') }}"
+                        class="ml-4 px-4 py-1.5 border border-red-900/50 bg-red-950/20 rounded text-xs font-bold uppercase tracking-widest text-red-500 hover:text-red-300 hover:border-red-600 hover:bg-red-900/40 transition-all shadow-[0_0_10px_rgba(220,38,38,0.1)]">
+                            Admin
+                        </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            {# ======================= #}
+            {# 3. SECTION UTILISATEUR  #}
+            {# ======================= #}
+            <div class="hidden md:block">
+                <div class="ml-4 flex items-center md:ml-6">
+                    {% if app.user %}
+                        {# DROPDOWN #}
+                        <div class="relative ml-3 group/dropdown">
+
+                            {# Bouton Trigger #}
+                            <button type="button" class="flex items-center gap-3 pl-3 pr-1 py-1 rounded border border-[#6d5d52]/50 bg-[#151720] hover:border-[#daa520] hover:bg-[#1a1c25] transition-all duration-300 shadow-lg group-hover/dropdown:shadow-[0_0_15px_rgba(0,0,0,0.5)]">
+                                <div class="flex flex-col items-end mr-1">
+                                    <span class="text-xs font-bold text-[#c7b394] font-[Cinzel] group-hover/dropdown:text-[#f0e6d2]">{{ app.user.pseudo }}</span>
+                                    <span class="text-[9px] text-[#6d5d52] uppercase tracking-wider">Connecté</span>
+                                </div>
+
+                                <div class="h-9 w-9 rounded bg-[#2a241f] border border-[#6d5d52] flex items-center justify-center text-[#daa520] font-[Cinzel] font-bold text-lg shadow-inner group-hover/dropdown:border-[#daa520] transition-colors">
+                                    {{ app.user.pseudo|slice(0,1)|upper }}
+                                </div>
+                            </button>
+
+                            {# CONTENU DU DROPDOWN (Style Tooltip WoW) #}
+                            <div class="origin-top-right absolute right-0 mt-3 w-64 rounded bg-[#0b0d12]/95 backdrop-blur-xl border border-[#6d5d52] shadow-[0_0_20px_rgba(0,0,0,1)] ring-1 ring-[#daa520]/20 transform scale-95 opacity-0 invisible group-hover/dropdown:scale-100 group-hover/dropdown:opacity-100 group-hover/dropdown:visible transition-all duration-200 z-50">
+
+                                {# Header Dropdown #}
+                                <div class="px-4 py-3 border-b border-[#6d5d52]/30 bg-gradient-to-r from-[#daa520]/10 to-transparent">
+                                    <p class="text-[10px] uppercase tracking-widest text-[#daa520] font-bold mb-1">Personnage</p>
+                                    <p class="text-sm font-medium text-[#f0e6d2] truncate font-[Cinzel]">{{ app.user.email }}</p>
+                                </div>
+
+                                <div class="py-2">
+                                    <a href="{{ path('app_profile_index') }}" class="flex items-center px-4 py-2.5 text-sm text-[#8b7355] hover:text-[#f0e6d2] hover:bg-[#daa520]/10 transition-colors group/item">
+                                        <span class="w-6 h-6 flex items-center justify-center mr-3 rounded bg-black/40 border border-[#6d5d52]/50 group-hover/item:border-[#daa520]">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+                                        </span>
+                                        Mon Armurerie (Profil)
+                                    </a>
+
+                                    {% if is_granted('ROLE_ADMIN') %}
+                                        <a href="{{ path('app_admin_dashboard') }}" class="flex items-center px-4 py-2.5 text-sm text-[#8b7355] hover:text-[#f0e6d2] hover:bg-[#daa520]/10 transition-colors group/item">
+                                            <span class="w-6 h-6 flex items-center justify-center mr-3 rounded bg-black/40 border border-[#6d5d52]/50 group-hover/item:border-[#daa520]">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+                                            </span>
+                                            Administration
+                                        </a>
+                                    {% endif %}
+                                </div>
+
+                                <div class="border-t border-[#6d5d52]/30 bg-red-950/10 py-2">
+                                    <a href="{{ path('app_logout') }}" class="flex items-center px-4 py-2 text-sm text-red-400/80 hover:text-red-400 hover:bg-red-900/20 transition-colors">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" /></svg>
+                                        Déconnexion
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="flex items-center gap-3">
+                            <a href="{{ path('app_login') }}" class="text-[#8b7355] hover:text-[#f0e6d2] px-3 py-2 rounded text-sm font-bold uppercase tracking-wider transition-colors">Connexion</a>
+                            <a href="{{ path('app_register') }}" class="bg-[#daa520]/10 border border-[#daa520] text-[#daa520] hover:bg-[#daa520] hover:text-black px-4 py-2 rounded text-sm font-bold uppercase tracking-widest transition-all shadow-[0_0_10px_rgba(218,165,32,0.1)] hover:shadow-[0_0_20px_rgba(218,165,32,0.4)]">
+                                S'inscrire
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            {# ======================= #}
+            {# 4. BOUTON MOBILE        #}
+            {# ======================= #}
+            <div class="-mr-2 flex md:hidden">
+                <button type="button" class="bg-black/50 border border-[#6d5d52] inline-flex items-center justify-center p-2 rounded hover:text-[#daa520] hover:border-[#daa520] focus:outline-none transition-all" aria-controls="mobile-menu" aria-expanded="false" id="mobile-menu-btn">
+                    <span class="sr-only">Menu</span>
+                    <svg class="block h-6 w-6 text-[#8b7355]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    {# ======================= #}
+    {# 5. MENU MOBILE          #}
+    {# ======================= #}
+    <div class="hidden md:hidden bg-[#0b0d12] border-b border-[#6d5d52]" id="mobile-menu">
+        <div class="px-2 pt-2 pb-3 space-y-1">
+            <a href="{{ path('app_home') }}" class="text-[#c7b394] hover:text-[#daa520] hover:bg-[#daa520]/10 block px-3 py-3 rounded text-base font-bold font-[Cinzel] tracking-wide border-b border-[#6d5d52]/30">Accueil</a>
+            <a href="{{ path('app_guild_roster') }}" class="text-[#c7b394] hover:text-[#daa520] hover:bg-[#daa520]/10 block px-3 py-3 rounded text-base font-bold font-[Cinzel] tracking-wide border-b border-[#6d5d52]/30">Guilde</a>
+            <a href="{{ path('app_evenement_index') }}" class="text-[#c7b394] hover:text-[#daa520] hover:bg-[#daa520]/10 block px-3 py-3 rounded text-base font-bold font-[Cinzel] tracking-wide border-b border-[#6d5d52]/30">Calendrier</a>
+
+            {% if app.user %}
+                <div class="mt-4 border-t border-[#6d5d52]/50 pt-4 px-3">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="h-8 w-8 rounded bg-[#2a241f] border border-[#6d5d52] flex items-center justify-center text-[#daa520] font-bold">
+                            {{ app.user.pseudo|slice(0,1)|upper }}
+                        </div>
+                        <span class="text-[#f0e6d2] font-bold">{{ app.user.pseudo }}</span>
+                    </div>
+                    <a href="{{ path('app_profile_index') }}" class="text-[#daa520] hover:bg-[#daa520]/10 block px-3 py-2 rounded text-base font-medium">Mon Profil</a>
+                    <a href="{{ path('app_logout') }}" class="text-red-400 hover:bg-red-900/20 block px-3 py-2 rounded text-base font-medium">Déconnexion</a>
+                </div>
+            {% else %}
+                <div class="mt-4 border-t border-[#6d5d52]/50 pt-4 flex flex-col gap-2 px-3">
+                    <a href="{{ path('app_login') }}" class="text-center w-full block border border-[#6d5d52] text-[#c7b394] py-2 rounded uppercase font-bold text-sm">Connexion</a>
+                    <a href="{{ path('app_register') }}" class="text-center w-full block bg-[#daa520] text-black py-2 rounded uppercase font-bold text-sm">S'inscrire</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</nav>
+
+<script>
+    // Script menu mobile
+    document.getElementById('mobile-menu-btn').addEventListener('click', function() {
+        const menu = document.getElementById('mobile-menu');
+        menu.classList.toggle('hidden');
+    });
+</script>
