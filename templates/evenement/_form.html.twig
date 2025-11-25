@@ -1,42 +1,89 @@
-{# Ce formulaire est conçu pour fonctionner avec form_start, form_end et form_row dans le template parent si besoin #}
+{# templates/evenement/_form.html.twig #}
 {{ form_start(form) }}
 
-    {# On affiche les erreurs générales du formulaire s'il y en a #}
-    {{ form_errors(form) }}
-
-    {# Champ Nom #}
-    <div class="mb-4">
-        {{ form_label(form.nom, 'Nom de l\'événement', {'label_attr': {'class': 'block mb-2 text-sm font-bold text-yellow-400'}}) }}
-        {{ form_widget(form.nom, {'attr': {'class': 'bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-yellow-500 focus:border-yellow-500 block w-full p-2.5'}}) }}
-    </div>
-
-    {# Champ Catégorie #}
-    <div class="mb-4">
-        {{ form_label(form.categorie, 'Catégorie', {'label_attr': {'class': 'block mb-2 text-sm font-bold text-yellow-400'}}) }}
-        {{ form_widget(form.categorie, {'attr': {'class': 'bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-yellow-500 focus:border-yellow-500 block w-full p-2.5'}}) }}
-    </div>
-
-    {# Champ Description #}
-    <div class="mb-4">
-        {{ form_label(form.description, 'Description', {'label_attr': {'class': 'block mb-2 text-sm font-bold text-yellow-400'}}) }}
-        {{ form_widget(form.description, {'attr': {'class': 'bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-yellow-500 focus:border-yellow-500 block w-full p-2.5', 'rows': 5}}) }}
-    </div>
-
-    {# Ligne avec Date et Nombre de places #}
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-4">
+    <div class="space-y-6">
+        {# Champ Nom #}
         <div>
-            {{ form_label(form.dateDebut, 'Date et Heure', {'label_attr': {'class': 'block mb-2 text-sm font-bold text-yellow-400'}}) }}
-            {{ form_widget(form.dateDebut, {'attr': {'class': 'bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-yellow-500 focus:border-yellow-500 block w-full p-2.5'}}) }}
+            {{ form_label(form.nom, 'Nom de l\'événement', {'label_attr': {'class': 'block mb-2 text-sm font-bold text-yellow-400'}}) }}
+            {{ form_widget(form.nom, {'attr': {'class': 'w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 text-white focus:border-yellow-500 focus:ring-yellow-500', 'placeholder': 'Ex: Naxxramas 25 HM'}}) }}
+            <div class="text-red-500 text-sm mt-1">{{ form_errors(form.nom) }}</div>
         </div>
+
+        {# Champ Catégorie #}
         <div>
-            {{ form_label(form.nbPlacesMax, 'Nombre de places', {'label_attr': {'class': 'block mb-2 text-sm font-bold text-yellow-400'}}) }}
-            {{ form_widget(form.nbPlacesMax, {'attr': {'class': 'bg-gray-700 border border-gray-600 text-white text-sm rounded-lg focus:ring-yellow-500 focus:border-yellow-500 block w-full p-2.5'}}) }}
+            {{ form_label(form.categorie, 'Type de Raid', {'label_attr': {'class': 'block mb-2 text-sm font-bold text-yellow-400'}}) }}
+            {{ form_widget(form.categorie, {'attr': {'class': 'w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 text-white focus:border-yellow-500 focus:ring-yellow-500', 'id': 'event_category'}}) }}
+            <div class="text-red-500 text-sm mt-1">{{ form_errors(form.categorie) }}</div>
+        </div>
+
+        {# Champ Description #}
+        <div>
+            {{ form_label(form.description, 'Description', {'label_attr': {'class': 'block mb-2 text-sm font-bold text-yellow-400'}}) }}
+            {{ form_widget(form.description, {'attr': {'class': 'w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 text-white focus:border-yellow-500 focus:ring-yellow-500', 'rows': 4, 'placeholder': 'Stratégies, prérequis, etc.'}}) }}
+            <div class="text-red-500 text-sm mt-1">{{ form_errors(form.description) }}</div>
+        </div>
+
+        <hr class="border-gray-700">
+
+        {# Section Composition du Raid #}
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+            <div>
+                {{ form_label(form.nbPlacesMax, 'Places Totales', {'label_attr': {'class': 'block mb-2 text-sm font-bold text-yellow-400'}}) }}
+                {{ form_widget(form.nbPlacesMax, {'attr': {'class': 'w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 text-white focus:border-yellow-500 focus:ring-yellow-500', 'id': 'evenement_nbPlacesMax'}}) }}
+            </div>
+            <div>
+                {{ form_label(form.tanksRequis, 'Tanks', {'label_attr': {'class': 'block mb-2 text-sm font-bold text-yellow-400'}}) }}
+                {{ form_widget(form.tanksRequis, {'attr': {'class': 'w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 text-white focus:border-yellow-500 focus:ring-yellow-500', 'id': 'event_tanks'}}) }}
+            </div>
+            <div>
+                {{ form_label(form.soigneursRequis, 'Soigneurs', {'label_attr': {'class': 'block mb-2 text-sm font-bold text-yellow-400'}}) }}
+                {{ form_widget(form.soigneursRequis, {'attr': {'class': 'w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 text-white focus:border-yellow-500 focus:ring-yellow-500', 'id': 'event_heals'}}) }}
+            </div>
+            <div>
+                {{ form_label(form.dpsRequis, 'DPS', {'label_attr': {'class': 'block mb-2 text-sm font-bold text-yellow-400'}}) }}
+                {{ form_widget(form.dpsRequis, {'attr': {'class': 'w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 text-white focus:border-yellow-500 focus:ring-yellow-500', 'id': 'event_dps'}}) }}
+            </div>
+        </div>
+
+        {# Champ Date #}
+        <div>
+            {{ form_label(form.dateDebut, 'Date et Heure de l\'événement', {'label_attr': {'class': 'block mb-2 text-sm font-bold text-yellow-400'}}) }}
+            {{ form_widget(form.dateDebut, {'attr': {'class': 'bg-gray-700 border border-gray-600 rounded-lg p-2.5 text-white focus:border-yellow-500 focus:ring-yellow-500'}}) }}
         </div>
     </div>
 
-    {# Le bouton de soumission est maintenant un wow-button ! #}
-    <button class="wow-button w-full mt-6">
-        {{ button_label|default('Enregistrer') }}
-    </button>
+    <div class="mt-8 flex justify-between items-center">
+        <a href="{{ path('app_evenement_index') }}" class="text-gray-400 hover:text-white hover:underline">Retour</a>
+        <button class="wow-button">
+            {{ button_label|default('Créer l\'événement') }}
+        </button>
+    </div>
 
 {{ form_end(form) }}
+
+{# SCRIPT POUR LA COMPOSITION AUTOMATIQUE (INCLUS DIRECTEMENT) #}
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const categorySelect = document.getElementById('event_category');
+        const tanksInput = document.getElementById('event_tanks');
+        const healsInput = document.getElementById('event_heals');
+        const dpsInput = document.getElementById('event_dps');
+        const placesInput = document.getElementById('evenement_nbPlacesMax');
+        if (!categorySelect) return;
+
+        categorySelect.addEventListener('change', function() {
+            const selectedText = this.options[this.selectedIndex].text;
+            if (selectedText.includes('10')) {
+                placesInput.value = 10;
+                tanksInput.value = 2;
+                healsInput.value = 2;
+                dpsInput.value = 6;
+            } else if (selectedText.includes('25')) {
+                placesInput.value = 25;
+                tanksInput.value = 3;
+                healsInput.value = 5;
+                dpsInput.value = 17;
+            }
+        });
+    });
+</script>

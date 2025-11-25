@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use App\Entity\BisList; // Important pour les constantes de classes
+use App\Entity\BisList;
 use App\Entity\User;
 use App\Repository\BisListRepository;
 use App\Service\BattleNetApiService;
@@ -13,16 +13,47 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[IsGranted('ROLE_USER')]
+#[Route('/profil')] // Préfixe pour toutes les routes ici
 class ProfileController extends AbstractController
 {
-    #[Route('/profil', name: 'app_profile_index')]
+    // =========================================================================
+    // ROUTE 1 : MON PROFIL (Celle du menu "Mon Armurerie")
+    // =========================================================================
+    #[Route('/', name: 'app_profile_index')]
     public function index(
         BattleNetApiService $battleNetApiService,
         BisListRepository $bisListRepository,
         Request $request
     ): Response {
+        // On appelle la fonction magique avec l'utilisateur connecté ($this->getUser())
         /** @var User $user */
         $user = $this->getUser();
+        return $this->renderProfile($user, $battleNetApiService, $bisListRepository, $request);
+    }
+
+    // =========================================================================
+    // ROUTE 2 : PROFIL PUBLIC (Celle quand on clique sur un pseudo)
+    // =========================================================================
+    #[Route('/{id}', name: 'app_public_profile', methods: ['GET'])]
+    public function show(
+        User $user, // Symfony trouve l'user grâce à l'ID dans l'URL
+        BattleNetApiService $battleNetApiService,
+        BisListRepository $bisListRepository,
+        Request $request
+    ): Response {
+        // On appelle la MEME fonction magique, mais avec l'utilisateur demandé ($user)
+        return $this->renderProfile($user, $battleNetApiService, $bisListRepository, $request);
+    }
+
+    // =========================================================================
+    // LA LOGIQUE COMMUNE (Privée, ne peut pas être appelée depuis l'URL)
+    // =========================================================================
+    private function renderProfile(
+        User $user,
+        BattleNetApiService $battleNetApiService,
+        BisListRepository $bisListRepository,
+        Request $request
+    ): Response {
         $activeCharacter = $user->getActiveCharacter();
 
         // Initialisation
@@ -42,7 +73,7 @@ class ProfileController extends AbstractController
             'MAIN_HAND' => 'Main droite', 'OFF_HAND' => 'Main gauche', 'RANGED' => 'À distance',
         ];
 
-        // --- MAPPING TECHNIQUE ---
+        // --- MAPPING TECHNIQUE (J'ai compressé pour la lisibilité, c'est ton code exact) ---
         $slotMapping = [
             'TÊTE' => 'HEAD', 'TETE' => 'HEAD', 'HEAD' => 'HEAD', 'CASQUE' => 'HEAD',
             'COU' => 'NECK', 'COLLIER' => 'NECK', 'NECK' => 'NECK',
@@ -64,162 +95,130 @@ class ProfileController extends AbstractController
         ];
 
         if ($activeCharacter) {
-            $characterData = $battleNetApiService->getCharacterProfile(
-                $activeCharacter->getCharacterName(),
-                $activeCharacter->getCharacterRealmSlug(),
-                $activeCharacter->getCharacterRegion() ?? 'eu'
-            );
+            try {
+                $characterData = $battleNetApiService->getCharacterProfile(
+                    $activeCharacter->getCharacterName(),
+                    $activeCharacter->getCharacterRealmSlug(),
+                    $activeCharacter->getCharacterRegion() ?? 'eu'
+                );
 
-            if ($characterData) {
-                // 1. Gestion des Médias (Avatar)
-                if (isset($characterData['media']['href'])) {
-                    $characterMedia = $battleNetApiService->getCharacterMedia($characterData['media']['href']);
-                }
+                if ($characterData) {
+                    // 1. Médias
+                    if (isset($characterData['media']['href'])) {
+                        $characterMedia = $battleNetApiService->getCharacterMedia($characterData['media']['href']);
+                    }
 
-                // 2. Gestion de l'équipement porté
-                if (isset($characterData['equipment']['href'])) {
-                    $characterEquipment = $battleNetApiService->getCharacterEquipment($characterData['equipment']['href']);
-                    if ($characterEquipment && isset($characterEquipment['equipped_items'])) {
-                        foreach ($characterEquipment['equipped_items'] as &$item) {
-                            if (isset($item['item']['id'])) {
-                                $item['apiDetails'] = $battleNetApiService->getItemInfo($item['item']['id']);
-                                if (empty($item['apiDetails']['icon_url']) && isset($item['media']['id'])) {
-                                    $item['apiDetails']['icon_url'] = $battleNetApiService->getItemMediaUrl($item['media']['id']);
+                    // 2. Équipement
+                    if (isset($characterData['equipment']['href'])) {
+                        $characterEquipment = $battleNetApiService->getCharacterEquipment($characterData['equipment']['href']);
+                        if ($characterEquipment && isset($characterEquipment['equipped_items'])) {
+                            foreach ($characterEquipment['equipped_items'] as &$item) {
+                                if (isset($item['item']['id'])) {
+                                    $item['apiDetails'] = $battleNetApiService->getItemInfo($item['item']['id']);
+                                    if (empty($item['apiDetails']['icon_url']) && isset($item['media']['id'])) {
+                                        $item['apiDetails']['icon_url'] = $battleNetApiService->getItemMediaUrl($item['media']['id']);
+                                    }
+                                }
+                                $slotName = $item['slot']['type'];
+                                if ($slotName === 'BACK') $slotName = 'CLOAK';
+                                $equippedItemsBySlot[$slotName] = $item;
+                            }
+                        }
+                    }
+
+                    // 3. Logique BiS Lists
+                    $apiClassName = $characterData['character_class']['name'] ?? null;
+                    $apiSpecName  = $characterData['active_spec']['name'] ?? null;
+
+                    if ($apiClassName) {
+                        $dbClass = isset(BisList::CLASSES_CHOICES[$apiClassName]) ? BisList::CLASSES_CHOICES[$apiClassName] : strtoupper($apiClassName);
+
+                        $compatibleLists = $bisListRepository->findBy(['characterClass' => $dbClass]);
+
+                        $requestedBisId = $request->query->get('bis_id');
+                        if ($requestedBisId) {
+                            $candidate = $bisListRepository->find($requestedBisId);
+                            if ($candidate && $candidate->getCharacterClass() === $dbClass) {
+                                $bisList = $candidate;
+                            }
+                        }
+
+                        if (!$bisList && count($compatibleLists) > 0) {
+                            $activeSpecLower = strtolower($apiSpecName ?? '');
+                            foreach ($compatibleLists as $list) {
+                                $listSpecLower = strtolower($list->getSpecialization());
+                                if ($activeSpecLower && ($listSpecLower === $activeSpecLower || str_contains($listSpecLower, $activeSpecLower))) {
+                                    $bisList = $list;
+                                    break;
+                                }
+                                if (($activeSpecLower === 'givre' && $listSpecLower === 'frost') ||
+                                    ($activeSpecLower === 'frost' && $listSpecLower === 'givre')
+                                ) {
+                                    $bisList = $list;
+                                    break;
                                 }
                             }
-                            $slotName = $item['slot']['type'];
-                            if ($slotName === 'BACK') $slotName = 'CLOAK';
-                            $equippedItemsBySlot[$slotName] = $item;
-                        }
-                    }
-                }
-
-                // =========================================================
-                // 3. LOGIQUE DE RÉCUPÉRATION DES LISTES (C'est ici que ça se joue)
-                // =========================================================
-                $apiClassName = $characterData['character_class']['name'] ?? null; // ex: "Mage"
-                $apiSpecName  = $characterData['active_spec']['name'] ?? null;   // ex: "Givre"
-
-                if ($apiClassName) {
-                    // A. On normalise le nom de la classe (ex: "Mage" devient "MAGE")
-                    $dbClass = null;
-                    if (isset(BisList::CLASSES_CHOICES[$apiClassName])) {
-                        $dbClass = BisList::CLASSES_CHOICES[$apiClassName];
-                    } else {
-                        $dbClass = strtoupper($apiClassName);
-                    }
-
-                    // B. On récupère TOUTES les listes de cette classe.
-                    // IMPORTANT : On ne filtre PAS par spécialisation ici.
-                    // Cela permet de voir les listes "Frost" même si on est "Givre".
-                    $compatibleLists = $bisListRepository->findBy([
-                        'characterClass' => $dbClass
-                    ]);
-
-                    // C. On regarde si l'utilisateur a cliqué sur une liste
-                    $requestedBisId = $request->query->get('bis_id');
-                    if ($requestedBisId) {
-                        $candidate = $bisListRepository->find($requestedBisId);
-                        // On vérifie juste que c'est bien une liste de Mage
-                        if ($candidate && $candidate->getCharacterClass() === $dbClass) {
-                            $bisList = $candidate;
+                            if (!$bisList) $bisList = $compatibleLists[0];
                         }
                     }
 
-                    // D. Fallback : Si aucune liste n'est sélectionnée
-                    if (!$bisList && count($compatibleLists) > 0) {
-                        // On essaie de trouver une liste dont le nom de spé ressemble à la spé actuelle
-                        // (ex: "givre" dans "mage givre pve")
-                        $activeSpecLower = strtolower($apiSpecName ?? '');
-                        foreach ($compatibleLists as $list) {
-                            $listSpecLower = strtolower($list->getSpecialization());
-
-                            // Logique floue pour matcher "Frost/Givre" ou "Fire/Feu"
-                            if ($activeSpecLower && ($listSpecLower === $activeSpecLower || str_contains($listSpecLower, $activeSpecLower))) {
-                                $bisList = $list;
-                                break;
-                            }
-                            // Mapping manuel rapide FR/EN pour les cas courants
-                            if (($activeSpecLower === 'givre' && $listSpecLower === 'frost') ||
-                                ($activeSpecLower === 'frost' && $listSpecLower === 'givre')) {
-                                $bisList = $list;
-                                break;
-                            }
-                        }
-
-                        // Si toujours rien trouvé, on prend la première de la pile
-                        if (!$bisList) {
-                            $bisList = $compatibleLists[0];
-                        }
-                    }
-                }
-                // =========================================================
-
-                // 4. Traitement des items de la liste BiS choisie
-                if ($bisList) {
-                    $pendingGenericItems = [];
-                    foreach ($bisList->getBisItems() as $bisItem) {
-                        $rawSlot = $bisItem->getSlot();
-                        $upperSlot = mb_strtoupper($rawSlot, 'UTF-8');
-                        if (isset($slotMapping[$upperSlot])) {
-                            $technicalKey = $slotMapping[$upperSlot];
-                            if (str_contains($technicalKey, '_')) {
-                                $bisItem->apiDetails = $battleNetApiService->getItemInfo($bisItem->getItemId());
-                                $bisItemsBySlot[$technicalKey] = $bisItem;
+                    // 4. Traitement Items BiS
+                    if ($bisList) {
+                        $pendingGenericItems = [];
+                        foreach ($bisList->getBisItems() as $bisItem) {
+                            $rawSlot = $bisItem->getSlot();
+                            $upperSlot = mb_strtoupper($rawSlot, 'UTF-8');
+                            if (isset($slotMapping[$upperSlot])) {
+                                $technicalKey = $slotMapping[$upperSlot];
+                                if (str_contains($technicalKey, '_')) {
+                                    $bisItem->apiDetails = $battleNetApiService->getItemInfo($bisItem->getItemId());
+                                    $bisItemsBySlot[$technicalKey] = $bisItem;
+                                } else {
+                                    $pendingGenericItems[] = $bisItem;
+                                }
                             } else {
                                 $pendingGenericItems[] = $bisItem;
                             }
-                        } else {
-                            $pendingGenericItems[] = $bisItem;
                         }
-                    }
-                    foreach ($pendingGenericItems as $bisItem) {
-                        $rawSlot = $bisItem->getSlot();
-                        $upperSlot = mb_strtoupper($rawSlot, 'UTF-8');
-                        $localSlotMapping = $slotMapping + ['ANNEAU' => 'FINGER', 'BAGUE' => 'FINGER', 'FINGER' => 'FINGER', 'BIJOU' => 'TRINKET', 'TRINKET' => 'TRINKET'];
-                        $technicalKey = $localSlotMapping[$upperSlot] ?? $upperSlot;
-                        $bisItem->apiDetails = $battleNetApiService->getItemInfo($bisItem->getItemId());
-                        if ($technicalKey === 'FINGER') {
-                            if (!isset($bisItemsBySlot['FINGER_1'])) {
-                                $bisItemsBySlot['FINGER_1'] = $bisItem;
-                            } elseif (!isset($bisItemsBySlot['FINGER_2'])) {
-                                $bisItemsBySlot['FINGER_2'] = $bisItem;
-                            }
-                        } elseif ($technicalKey === 'TRINKET') {
-                            if (!isset($bisItemsBySlot['TRINKET_1'])) {
-                                $bisItemsBySlot['TRINKET_1'] = $bisItem;
-                            } elseif (!isset($bisItemsBySlot['TRINKET_2'])) {
-                                $bisItemsBySlot['TRINKET_2'] = $bisItem;
-                            }
-                        } else {
-                            if (!isset($bisItemsBySlot[$technicalKey])) {
-                                $bisItemsBySlot[$technicalKey] = $bisItem;
+                        foreach ($pendingGenericItems as $bisItem) {
+                            $rawSlot = $bisItem->getSlot();
+                            $upperSlot = mb_strtoupper($rawSlot, 'UTF-8');
+                            $localSlotMapping = $slotMapping + ['ANNEAU' => 'FINGER', 'BAGUE' => 'FINGER', 'FINGER' => 'FINGER', 'BIJOU' => 'TRINKET', 'TRINKET' => 'TRINKET'];
+                            $technicalKey = $localSlotMapping[$upperSlot] ?? $upperSlot;
+                            $bisItem->apiDetails = $battleNetApiService->getItemInfo($bisItem->getItemId());
+
+                            if ($technicalKey === 'FINGER') {
+                                if (!isset($bisItemsBySlot['FINGER_1'])) $bisItemsBySlot['FINGER_1'] = $bisItem;
+                                elseif (!isset($bisItemsBySlot['FINGER_2'])) $bisItemsBySlot['FINGER_2'] = $bisItem;
+                            } elseif ($technicalKey === 'TRINKET') {
+                                if (!isset($bisItemsBySlot['TRINKET_1'])) $bisItemsBySlot['TRINKET_1'] = $bisItem;
+                                elseif (!isset($bisItemsBySlot['TRINKET_2'])) $bisItemsBySlot['TRINKET_2'] = $bisItem;
+                            } else {
+                                if (!isset($bisItemsBySlot[$technicalKey])) $bisItemsBySlot[$technicalKey] = $bisItem;
                             }
                         }
                     }
                 }
+            } catch (\Exception $e) {
+                // En cas d'erreur API, on ne fait rien de spécial, on affiche juste la page vide
             }
         }
 
-        // 5. Validation (Checkmarks)
+        // 5. Validation
         $allBisItemIds = [];
         if ($bisList) {
-            foreach ($bisList->getBisItems() as $item) {
-                $allBisItemIds[] = $item->getItemId();
-            }
+            foreach ($bisList->getBisItems() as $item) $allBisItemIds[] = $item->getItemId();
         }
         $allBisItemIds = array_unique($allBisItemIds);
 
         $validatedBisItemIds = [];
         foreach ($equippedItemsBySlot as $item) {
             $equippedId = $item['item']['id'] ?? null;
-            if ($equippedId && in_array($equippedId, $allBisItemIds)) {
-                $validatedBisItemIds[] = $equippedId;
-            }
+            if ($equippedId && in_array($equippedId, $allBisItemIds)) $validatedBisItemIds[] = $equippedId;
         }
 
         return $this->render('profile/index.html.twig', [
-            'user' => $user,
+            'user' => $user, // L'utilisateur visité (peut être moi ou un autre)
             'characterData' => $characterData,
             'characterMedia' => $characterMedia,
             'bisList' => $bisList,
@@ -229,6 +228,8 @@ class ProfileController extends AbstractController
             'bisItemsBySlot' => $bisItemsBySlot,
             'validatedBisItemIds' => $validatedBisItemIds,
             'activeCharacter' => $activeCharacter,
+            // Variable bonus pour le template : "Est-ce que c'est MON profil ?"
+            'isOwner' => ($user === $this->getUser())
         ]);
     }
 }

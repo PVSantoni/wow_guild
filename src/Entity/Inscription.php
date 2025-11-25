@@ -3,7 +3,9 @@
 namespace App\Entity;
 
 use App\Repository\InscriptionRepository;
+use App\Entity\Specialization;
 use Doctrine\ORM\Mapping as ORM;
+
 
 #[ORM\Entity(repositoryClass: InscriptionRepository::class)]
 class Inscription
@@ -14,6 +16,8 @@ class Inscription
         'Soigneur',
         'DPS'
     ];
+
+    const STATUTS = ['Confirmé', 'Incertain', 'En attente', 'Absent'];
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -34,6 +38,10 @@ class Inscription
     // --> AJOUT 2 : La nouvelle propriété pour le rôle joué
     #[ORM\Column(length: 50, nullable: true)] // On la met nullable au début pour ne pas causer d'erreurs avec les anciennes inscriptions
     private ?string $playedRole = null;
+
+    #[ORM\ManyToOne] // Une inscription a une seule spécialisation
+    #[ORM\JoinColumn(nullable: true)] // On la rend nullable pour les inscriptions "Incertain"
+    private ?Specialization $specialization = null;
 
     public function getId(): ?int
     {
@@ -82,6 +90,17 @@ class Inscription
     public function setPlayedRole(?string $playedRole): static
     {
         $this->playedRole = $playedRole;
+        return $this;
+    }
+
+    public function getSpecialization(): ?Specialization
+    {
+        return $this->specialization;
+    }
+
+    public function setSpecialization(?Specialization $specialization): static
+    {
+        $this->specialization = $specialization;
         return $this;
     }
 }

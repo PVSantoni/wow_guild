@@ -3,25 +3,21 @@
 {% block title %}Créer un Nouvel Événement{% endblock %}
 
 {% block body %}
-    <div class="container mx-auto max-w-3xl">
-        <h1 class="text-4xl font-fantasy header-title text-center mb-8">
+<div class="container mx-auto max-w-3xl">
+    <div class="text-center mb-8">
+        <h1 class="text-4xl font-fantasy header-title">
             Créer un Nouvel Événement
         </h1>
+    </div>
 
-        <div class="wow-panel">
-            <div class="wow-panel-header">
-                Détails de l'événement
-            </div>
-            <div class="p-6">
-                {# Le formulaire stylisé sera inclus ici #}
-                {{ include('evenement/_form.html.twig') }}
-            </div>
+    <div class="wow-panel">
+        <div class="wow-panel-header">
+            Détails de l'événement
         </div>
-
-        <div class="text-center mt-6">
-            <a href="{{ path('app_evenement_index') }}" class="text-gray-400 hover:text-yellow-400 hover:underline">
-                Retour au calendrier
-            </a>
+        <div class="p-6">
+            {# On inclut le formulaire qui sera stylisé dans son propre fichier #}
+            {{ include('evenement/_form.html.twig') }}
         </div>
     </div>
+</div>
 {% endblock %}

@@ -1,0 +1,55 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gérer les Événements{% endblock %}
+
+{% block body %}
+<div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-6">
+        <h1 class="text-4xl font-fantasy header-title">
+            Gestion des Événements
+        </h1>
+        <a href="{{ path('app_admin_dashboard') }}" class="wow-button">Retour au Dashboard</a>
+    </div>
+
+    <div class="wow-panel">
+        <table class="w-full wow-table">
+            <thead>
+                <tr>
+                    <th>Événement</th>
+                    <th>Date</th>
+                    <th>Inscrits</th>
+                    <th class="text-right">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for event in evenements %}
+                    {% set isPast = event.dateDebut < date('now') %}
+                    <tr class="{{ isPast ? 'opacity-60' : '' }}">
+                        <td>
+                            <span class="font-bold text-lg text-yellow-400">{{ event.nom }}</span>
+                            {% if isPast %}
+                                <span class="text-xs ml-2 bg-gray-600 text-gray-300 px-2 py-0.5 rounded-full align-middle">Terminé</span>
+                            {% endif %}
+                        </td>
+
+                        <td>{{ event.dateDebut|date('d/m/Y H:i') }}</td>
+
+                        <td>{{ event.inscriptions|length }} / {{ event.nbPlacesMax }}</td>
+
+                        <td class="text-right">
+                            <a href="{{ path('app_admin_evenement_roster', {id: event.id}) }}" class="font-medium text-blue-400 hover:text-blue-300 hover:underline mr-4">Gérer Roster</a>
+                            <a href="{{ path('app_evenement_edit', {id: event.id}) }}" class="font-medium text-yellow-400 hover:text-yellow-300 hover:underline">Modifier</a>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td colspan="4" class="text-center p-8 text-gray-500 italic">
+                            Aucun événement n'a été créé pour le moment.
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

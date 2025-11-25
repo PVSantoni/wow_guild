@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
+use App\Entity\Evenement;
 
 #[IsGranted('ROLE_ADMIN')]
 final class AdminController extends AbstractController
@@ -18,21 +19,29 @@ final class AdminController extends AbstractController
     #[Route('/admin', name: 'app_admin_dashboard')]
     public function index(UserRepository $userRepository, EvenementRepository $evenementRepository): Response
     {
-        // =============================================================
-        // LA LOGIQUE DE CETTE MÉTHODE EST RESTAURÉE CORRECTEMENT ICI
-        // =============================================================
         $totalUsers = $userRepository->count([]);
 
-        $upcomingEvents = $evenementRepository->createQueryBuilder('e')
+        // --> MODIFICATION 1 : On renomme la variable pour plus de clarté
+        // On récupère les 5 derniers événements créés/à venir
+        $recentEvents = $evenementRepository->createQueryBuilder('e')
+            // --> MODIFICATION 2 : On supprime le filtre de date '.where()'
+            ->orderBy('e.dateDebut', 'DESC') // <-- On trie par date décroissante (le plus récent en premier)
+            ->setMaxResults(5)
+            ->getQuery()
+            ->getResult();
+
+        // On garde le calcul spécifique pour la carte "Événements à Venir"
+        $upcomingEventsCount = $evenementRepository->createQueryBuilder('e')
             ->select('count(e.id)')
-            ->where('e.dateDebut > :now')
+            ->where('e.dateDebut >= :now')
             ->setParameter('now', new \DateTime())
             ->getQuery()
             ->getSingleScalarResult();
 
         return $this->render('admin/index.html.twig', [
             'totalUsers' => $totalUsers,
-            'upcomingEvents' => $upcomingEvents,
+            'recentEvents' => $recentEvents, // <-- On envoie la nouvelle variable
+            'upcomingEventsCount' => $upcomingEventsCount, // <-- On envoie le compte correct
         ]);
     }
 
@@ -90,5 +99,37 @@ final class AdminController extends AbstractController
         }
 
         return $this->redirectToRoute('app_admin_users');
+    }
+
+    #[Route('/admin/evenement/{id}/roster', name: 'app_admin_evenement_roster')]
+    public function rosterManagement(Evenement $evenement): Response
+    {
+        // On récupère les inscriptions et on les trie par statut
+        $inscriptions = $evenement->getInscriptions()->toArray();
+        usort($inscriptions, function ($a, $b) {
+            $order = ['Confirmé' => 1, 'En attente' => 2, 'Incertain' => 3];
+            return $order[$a->getStatut()] <=> $order[$b->getStatut()];
+        });
+
+        return $this->render('admin/roster_management.html.twig', [
+            'evenement' => $evenement,
+            'inscriptions' => $inscriptions,
+        ]);
+    }
+
+    #[Route('/admin/evenements', name: 'app_admin_evenement_list')]
+    #[Route('/admin/evenements', name: 'app_admin_evenement_list')]
+    public function listEvenements(EvenementRepository $evenementRepository): Response
+    {
+        // On récupère TOUS les événements, triés du plus récent au plus ancien
+        $evenements = $evenementRepository->createQueryBuilder('e')
+            // --> On supprime le filtre de date '.where()'
+            ->orderBy('e.dateDebut', 'DESC') // <-- On trie par date décroissante
+            ->getQuery()
+            ->getResult();
+
+        return $this->render('admin/evenement_list.html.twig', [
+            'evenements' => $evenements,
+        ]);
     }
 }

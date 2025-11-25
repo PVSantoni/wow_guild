@@ -13,7 +13,7 @@ class CategorieFixtures extends Fixture implements FixtureGroupInterface
     // On ajoute cette méthode pour définir le groupe
     public static function getGroups(): array
     {
-        return ['categories']; // Le nom du groupe est 'categories'
+        return ['categories']; // On utilise le même nom partout
     }
 
     public function load(ObjectManager $manager): void

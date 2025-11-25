@@ -1,0 +1,78 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion Roster: {{ evenement.nom }}{% endblock %}
+
+{% block body %}
+<div class="container mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-4xl font-fantasy header-title">
+                Gestion du Roster
+            </h1>
+            <p class="text-lg text-yellow-400">{{ evenement.nom }}</p>
+        </div>
+        <a href="{{ path('app_admin_evenement_list') }}" class="wow-button">Retour à la liste</a>
+    </div>
+
+    <div class="wow-panel">
+        <table class="w-full wow-table">
+            <thead>
+                <tr>
+                    {# --- CORRECTIONS D'ALIGNEMENT APPLIQUÉES ICI --- #}
+                    <th class="text-left">Joueur</th>
+                    <th class="text-left">Classe / Spécialisation</th>
+                    <th class="text-center">Rôle</th>
+                    <th class="text-center">Statut</th>
+                    <th class="text-center">Actions</th> {# Centré pour une meilleure lisibilité des boutons #}
+                </tr>
+            </thead>
+            <tbody>
+                {% for inscription in inscriptions %}
+                    <tr>
+                        <td class="font-bold text-lg text-white text-left">{{ inscription.user.pseudo }}</td>
+
+                        <td class="text-left"> {# Assure l'alignement à gauche #}
+                            {% if inscription.specialization %}
+                                {{ inscription.specialization.characterClass.name }}
+                                <span class="text-gray-400">/</span>
+                                <span class="italic text-yellow-500">{{ inscription.specialization.name|replace({ ('(' ~ inscription.specialization.characterClass.name ~ ')') : ''})|trim }}</span>
+                            {% else %}
+                                <span class="text-gray-500">N/A</span>
+                            {% endif %}
+                        </td>
+
+                        <td class="text-center"> {# Assure l'alignement au centre #}
+                            {{ inscription.playedRole|default('N/A') }}
+                        </td>
+
+                        <td class="text-center"> {# Assure l'alignement au centre #}
+                            {% set statusColor = inscription.statut == 'Confirmé' ? 'bg-green-600/50 text-green-300 border-green-500/50' : (inscription.statut == 'En attente' ? 'bg-yellow-600/50 text-yellow-300 border-yellow-500/50' : 'bg-gray-600/50 text-gray-300 border-gray-500/50') %}
+                            <span class="px-2 py-1 text-xs font-semibold rounded border {{ statusColor }}">{{ inscription.statut }}</span>
+                        </td>
+
+                        <td class="text-center space-x-3"> {# Assure l'alignement au centre #}
+                            {% if inscription.statut != 'Confirmé' %}
+                                <form action="{{ path('app_inscription_update_status', {id: inscription.id}) }}" method="post" class="inline">
+                                    <input type="hidden" name="status" value="Confirmé">
+                                    <button type="submit" class="font-medium text-green-400 hover:text-green-300 hover:underline">Confirmer</button>
+                                </form>
+                            {% endif %}
+                            {% if inscription.statut != 'En attente' and inscription.statut != 'Incertain' %}
+                                <form action="{{ path('app_inscription_update_status', {id: inscription.id}) }}" method="post" class="inline">
+                                    <input type="hidden" name="status" value="En attente">
+                                    <button type="submit" class="font-medium text-yellow-400 hover:text-yellow-300 hover:underline">Mettre en attente</button>
+                                </form>
+                            {% endif %}
+                            <form action="{{ path('app_inscription_remove', {id: inscription.id}) }}" method="post" class="inline">
+                                <button type="submit" class="font-medium text-red-500 hover:text-red-400 hover:underline" onclick="return confirm('Retirer l\'inscription de {{ inscription.user.pseudo|e('js') }} ?')">Supprimer</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% else %}
+                    <tr><td colspan="5" class="text-center p-8 text-gray-500 italic">Aucun inscrit pour cet événement.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

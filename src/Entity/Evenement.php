@@ -28,10 +28,19 @@ class Evenement
     #[ORM\Column]
     private ?int $nbPlacesMax = null;
 
+    #[ORM\Column]
+    private ?int $tanksRequis = null; // Plus de valeur par défaut ici
+
+    #[ORM\Column]
+    private ?int $soigneursRequis = null;
+
+    #[ORM\Column]
+    private ?int $dpsRequis = null;
+
     /**
      * @var Collection<int, Inscription>
      */
-    #[ORM\OneToMany(targetEntity: Inscription::class, mappedBy: 'evenement')]
+    #[ORM\OneToMany(targetEntity: Inscription::class, mappedBy: 'evenement', cascade: ['remove'])]
     private Collection $inscriptions;
 
     // LA RELATION CORRIGÉE EST ICI
@@ -135,6 +144,42 @@ class Evenement
     public function setCategorie(?Categorie $categorie): static
     {
         $this->categorie = $categorie;
+
+        return $this;
+    }
+
+    public function getTanksRequis(): ?int
+    {
+        return $this->tanksRequis;
+    }
+
+    public function setTanksRequis(int $tanksRequis): static
+    {
+        $this->tanksRequis = $tanksRequis;
+
+        return $this;
+    }
+
+    public function getSoigneursRequis(): ?int
+    {
+        return $this->soigneursRequis;
+    }
+
+    public function setSoigneursRequis(int $soigneursRequis): static
+    {
+        $this->soigneursRequis = $soigneursRequis;
+
+        return $this;
+    }
+
+    public function getDpsRequis(): ?int
+    {
+        return $this->dpsRequis;
+    }
+
+    public function setDpsRequis(int $dpsRequis): static
+    {
+        $this->dpsRequis = $dpsRequis;
 
         return $this;
     }

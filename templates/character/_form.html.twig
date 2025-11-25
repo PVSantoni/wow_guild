@@ -1,0 +1,33 @@
+{# templates/character/_form.html.twig #}
+{{ form_start(form) }}
+
+    <div class="space-y-6">
+        {# Champ Nom du Personnage #}
+        <div>
+            {{ form_label(form.characterName, 'Nom du Personnage', {'label_attr': {'class': 'block mb-2 text-sm font-bold text-yellow-400'}}) }}
+            {{ form_widget(form.characterName, {'attr': {'class': 'w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 text-white focus:border-yellow-500 focus:ring-yellow-500', 'placeholder': 'Ex: Arthas'}}) }}
+            <div class="text-red-500 text-sm mt-1">{{ form_errors(form.characterName) }}</div>
+        </div>
+
+        {# Ligne avec Serveur et Région #}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                {{ form_label(form.characterRealmSlug, 'Slug du Serveur', {'label_attr': {'class': 'block mb-2 text-sm font-bold text-yellow-400'}}) }}
+                {{ form_widget(form.characterRealmSlug, {'attr': {'class': 'w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 text-white focus:border-yellow-500 focus:ring-yellow-500', 'placeholder': 'Ex: hyjal'}}) }}
+                <div class="text-red-500 text-sm mt-1">{{ form_errors(form.characterRealmSlug) }}</div>
+            </div>
+            <div>
+                {{ form_label(form.characterRegion, 'Région', {'label_attr': {'class': 'block mb-2 text-sm font-bold text-yellow-400'}}) }}
+                {{ form_widget(form.characterRegion, {'attr': {'class': 'w-full bg-gray-700 border border-gray-600 rounded-lg p-2.5 text-white focus:border-yellow-500 focus:ring-yellow-500'}}) }}
+                <div class="text-red-500 text-sm mt-1">{{ form_errors(form.characterRegion) }}</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-8 flex justify-end">
+        <button class="wow-button">
+            {{ button_label|default('Enregistrer') }}
+        </button>
+    </div>
+
+{{ form_end(form) }}

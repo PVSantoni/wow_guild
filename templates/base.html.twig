@@ -17,7 +17,10 @@
     <body class="bg-gray-900 text-gray-200">
         <header class="bg-gray-800 shadow-md">
             <nav class="container mx-auto px-6 py-4 flex justify-between items-center">
-                <a href="{{ path('app_evenement_index') }}" class="text-2xl font-bold text-yellow-400">
+                {# ======================================= #}
+                {#   LA SEULE LIGNE À MODIFIER EST ICI   #}
+                {# ======================================= #}
+                <a href="{{ path('app_home') }}" class="text-2xl font-bold text-yellow-400">
                     Le Codex de Guilde
                 </a>
                 <div class="flex items-center space-x-4">
@@ -26,12 +29,8 @@
                     {% endif %}
 
                     {% if app.user %}
-                        <!-- ========================= -->
-                        <!-- NOUVEAU LIEN AJOUTÉ ICI -->
-                        <!-- ========================= -->
                         <a href="{{ path('app_guild_roster') }}" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Roster</a>
-
-                        <a href="{{ path('app_profile_index') }}" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Mon Profil</a>
+                        <a href="{{ path('app_profile_index') }}" class="text-gray-300 hover:bg-gray-700 hover:text-white px-3 py-2 rounded-md text-sm font-medium">Mon Armurerie</a>
                         <span class="text-gray-300 hidden md:inline">Bienvenue, {{ app.user.pseudo }}</span>
                         <a href="{{ path('app_logout') }}" class="text-gray-300 hover:text-yellow-400">Déconnexion</a>
                     {% else %}

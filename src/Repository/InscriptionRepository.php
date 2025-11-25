@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\Inscription;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use App\Entity\Evenement;
 
 /**
  * @extends ServiceEntityRepository<Inscription>
@@ -14,6 +15,20 @@ class InscriptionRepository extends ServiceEntityRepository
     public function __construct(ManagerRegistry $registry)
     {
         parent::__construct($registry, Inscription::class);
+    }
+
+    public function countConfirmedByRole(Evenement $evenement, string $role): int
+    {
+        return $this->createQueryBuilder('i')
+            ->select('count(i.id)')
+            ->andWhere('i.evenement = :evenement')
+            ->andWhere('i.statut = :statut')
+            ->andWhere('i.playedRole = :role')
+            ->setParameter('evenement', $evenement)
+            ->setParameter('statut', 'Confirmé')
+            ->setParameter('role', $role)
+            ->getQuery()
+            ->getSingleScalarResult();
     }
 
     //    /**

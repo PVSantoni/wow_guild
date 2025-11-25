@@ -1,52 +1,86 @@
-{# templates/guild/roster.html.twig #}
-
 {% extends 'base.html.twig' %}
 
 {% block title %}Roster de la Guilde{% endblock %}
 
 {% block body %}
-    <div class="container mx-auto px-4 py-8">
-        <h1 class="text-4xl font-fantasy header-title mb-6 text-center">
-            Roster de la Guilde
+    <div class="container mx-auto px-4 py-12">
+        <h1 class="text-5xl font-fantasy header-title mb-10 text-center text-yellow-500 drop-shadow-md">
+            L'Armée de la Guilde
         </h1>
 
-        <div class="wow-panel">
-            <table class="w-full wow-table">
-                <thead>
-                    <tr>
-                        <th>Pseudo</th>
-                        <th>Personnage Actif</th>
-                        <th>Rang de Guilde</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for member in members %}
-                        <tr>
-                            <td>
-                                <span class="font-bold text-lg">{{ member.pseudo }}</span>
-                            </td>
-                            <td>
-                                {% if member.activeCharacter %}
-                                    {# On utilise les noms de propriétés de VOTRE entité Character #}
-                                    <span class="font-fantasy">{{ member.activeCharacter.characterName }}</span>
-                                    <span class="text-gray-400">- {{ member.activeCharacter.characterRealmSlug|capitalize }}</span>
-                                {% else %}
-                                    <span class="text-gray-500 italic">Aucun personnage actif</span>
-                                {% endif %}
-                            </td>
-                            <td>
-                                <span class="font-bold">{{ member.guildRank }}</span>
-                            </td>
+        <div class="wow-panel overflow-hidden rounded-lg shadow-xl border border-gray-700">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-black/60 border-b-2 border-[#bfa670] text-yellow-500 uppercase tracking-widest text-sm">
+                            <th class="p-4 font-fantasy tracking-wide">Pseudo</th>
+                            <th class="p-4 font-fantasy tracking-wide">Personnage Principal</th>
+                            <th class="p-4 font-fantasy tracking-wide text-center">Rang</th>
                         </tr>
-                    {% else %}
-                        <tr>
-                            <td colspan="3" class="text-center py-8 text-gray-500 italic">
-                                Aucun membre trouvé.
-                            </td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody class="text-gray-300 divide-y divide-gray-700 bg-gray-900/40">
+                        {% for member in members %}
+                            <tr class="hover:bg-white/5 transition-colors duration-200">
+                                {# --- COLONNE 1 : PSEUDO --- #}
+                                <td class="p-4 align-middle">
+                                    <div class="flex items-center gap-3">
+                                        {# Avatar générique #}
+                                        <div class="w-10 h-10 rounded-full bg-gray-800 border border-gray-600 flex items-center justify-center text-gray-500">
+                                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                            </svg>
+                                        </div>
+
+                                        {# LE LIEN VERS LE PROFIL PUBLIC #}
+                                        <a href="{{ path('app_public_profile', {id: member.id}) }}" class="font-bold text-lg text-white hover:text-yellow-400 hover:underline transition-colors">
+                                            {{ member.pseudo }}
+                                        </a>
+                                    </div>
+                                </td>
+
+                                {# --- COLONNE 2 : PERSONNAGE --- #}
+                                <td class="p-4 align-middle">
+                                    {% if member.activeCharacter %}
+                                        <div class="flex flex-col">
+                                            <span class="font-bold text-[#f8b700] text-lg leading-tight">
+                                                {{ member.activeCharacter.characterName }}
+                                            </span>
+                                            <span class="text-xs text-gray-500 uppercase tracking-wide">
+                                                {{ member.activeCharacter.characterRealmSlug|capitalize }}
+                                            </span>
+                                        </div>
+                                    {% else %}
+                                        <span class="text-gray-600 italic text-sm">Non renseigné</span>
+                                    {% endif %}
+                                </td>
+
+                                {# --- COLONNE 3 : RANG --- #}
+                                <td class="p-4 align-middle text-center">
+                                    {% set rankColor = 'bg-gray-700 text-gray-300 border-gray-600' %}
+                                    {% if member.guildRank == 'GM' or member.guildRank == 'Guild Master' %}
+                                        {% set rankColor = 'bg-yellow-900/50 text-yellow-400 border-yellow-600' %}
+                                    {% elseif member.guildRank == 'Officier' %}
+                                        {% set rankColor = 'bg-blue-900/50 text-blue-300 border-blue-600' %}
+                                    {% elseif member.guildRank == 'Raider' %}
+                                        {% set rankColor = 'bg-red-900/50 text-red-300 border-red-600' %}
+                                    {% endif %}
+
+                                    <span class="inline-block px-3 py-1 rounded-full text-xs font-bold border {{ rankColor }}">
+                                        {{ member.guildRank }}
+                                    </span>
+                                </td>
+                            </tr>
+                        {% else %}
+                            <tr>
+                                <td colspan="3" class="text-center py-12 text-gray-500 italic">
+                                    <p class="text-xl">Le néant...</p>
+                                    <p class="text-sm">Aucun membre n'a été trouvé dans la base de données.</p>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 {% endblock %}

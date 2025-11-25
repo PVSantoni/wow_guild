@@ -2,45 +2,42 @@
 
 namespace App\Controller;
 
-use App\Entity\Inscription;
-use App\Repository\InscriptionRepository;
 use App\Entity\Evenement;
+use App\Entity\Inscription;
 use App\Form\EvenementType;
+use App\Repository\CategorieRepository;
+use App\Repository\CharacterClassRepository;
 use App\Repository\EvenementRepository;
+use App\Repository\InscriptionRepository;
+use App\Repository\SpecializationRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\IsGranted;
-use App\Repository\CategorieRepository;
 
-#[Route('/evenement')]
+// NOTE : Le préfixe de route global a été supprimé pour éviter les conflits.
+// Chaque méthode définit sa route complète.
 final class EvenementController extends AbstractController
 {
-
-    #[Route('/', name: 'app_evenement_index', methods: ['GET'])]
-    // Route pour la page filtrée (ex: /evenements/categorie/1)
-    #[Route('/categorie/{id}', name: 'app_evenement_filter_category', methods: ['GET'])]
+    /**
+     * Affiche la liste des événements, potentiellement filtrée par catégorie.
+     */
+    #[Route('/evenements', name: 'app_evenement_index', methods: ['GET'])]
+    #[Route('/evenements/categorie/{id}', name: 'app_evenement_filter_category', methods: ['GET'])]
     public function index(
         EvenementRepository $evenementRepository,
         CategorieRepository $categorieRepository,
-        int $id = null // Ce paramètre sera rempli par la 2ème route
+        int $id = null
     ): Response {
-        // La logique PHP à l'intérieur ne change PAS
         $categories = $categorieRepository->findAll();
 
         if ($id) {
-            // Si un ID est fourni, on ne cherche que les événements de cette catégorie
             $evenements = $evenementRepository->findBy(['categorie' => $id], ['dateDebut' => 'ASC']);
         } else {
-            // Sinon, on prend tous les événements à venir
-            $evenements = $evenementRepository->createQueryBuilder('e')
-                ->where('e.dateDebut > :now')
-                ->setParameter('now', new \DateTime())
-                ->orderBy('e.dateDebut', 'ASC')
-                ->getQuery()
-                ->getResult();
+            // Affiche tous les événements, passés et futurs, pour la liste publique
+            $evenements = $evenementRepository->findBy([], ['dateDebut' => 'ASC']);
         }
 
         return $this->render('evenement/index.html.twig', [
@@ -49,7 +46,10 @@ final class EvenementController extends AbstractController
         ]);
     }
 
-    #[Route('/new', name: 'app_evenement_new', methods: ['GET', 'POST'])]
+    /**
+     * Gère la création d'un nouvel événement (accessible aux admins).
+     */
+    #[Route('/evenement/new', name: 'app_evenement_new', methods: ['GET', 'POST'])]
     #[IsGranted('ROLE_ADMIN')]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
@@ -61,6 +61,7 @@ final class EvenementController extends AbstractController
             $entityManager->persist($evenement);
             $entityManager->flush();
 
+            $this->addFlash('success', 'L\'événement a été créé avec succès.');
             return $this->redirectToRoute('app_evenement_index', [], Response::HTTP_SEE_OTHER);
         }
 
@@ -70,15 +71,27 @@ final class EvenementController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_evenement_show', methods: ['GET'])]
-    public function show(Evenement $evenement): Response
-    {
+    /**
+     * Affiche la page de détail d'un événement.
+     */
+    #[Route('/evenement/{id}', name: 'app_evenement_show', methods: ['GET'])]
+    public function show(
+        Evenement $evenement,
+        CharacterClassRepository $classRepository,
+        SpecializationRepository $specRepository
+    ): Response {
         return $this->render('evenement/show.html.twig', [
             'evenement' => $evenement,
+            'classes' => $classRepository->findBy([], ['name' => 'ASC']),
+            'specializations' => $specRepository->findAll(),
         ]);
     }
 
-    #[Route('/{id}/edit', name: 'app_evenement_edit', methods: ['GET', 'POST'])] #[IsGranted('ROLE_ADMIN')]
+    /**
+     * Gère la modification d'un événement existant (accessible aux admins).
+     */
+    #[Route('/evenement/{id}/edit', name: 'app_evenement_edit', methods: ['GET', 'POST'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function edit(Request $request, Evenement $evenement, EntityManagerInterface $entityManager): Response
     {
         $form = $this->createForm(EvenementType::class, $evenement);
@@ -87,6 +100,7 @@ final class EvenementController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $entityManager->flush();
 
+            $this->addFlash('success', 'L\'événement a été mis à jour.');
             return $this->redirectToRoute('app_evenement_index', [], Response::HTTP_SEE_OTHER);
         }
 
@@ -96,76 +110,140 @@ final class EvenementController extends AbstractController
         ]);
     }
 
-    #[Route('/{id}', name: 'app_evenement_delete', methods: ['POST'])] #[IsGranted('ROLE_ADMIN')]
+    /**
+     * Gère la suppression d'un événement (accessible aux admins).
+     */
+    #[Route('/evenement/{id}', name: 'app_evenement_delete', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function delete(Request $request, Evenement $evenement, EntityManagerInterface $entityManager): Response
     {
-        if ($this->isCsrfTokenValid('delete' . $evenement->getId(), $request->getPayload()->getString('_token'))) {
+        if ($this->isCsrfTokenValid('delete' . $evenement->getId(), $request->request->get('_token'))) {
             $entityManager->remove($evenement);
             $entityManager->flush();
+            $this->addFlash('success', 'L\'événement a été supprimé.');
         }
 
         return $this->redirectToRoute('app_evenement_index', [], Response::HTTP_SEE_OTHER);
     }
 
-    #[Route('/{id}/inscription', name: 'app_evenement_inscription', methods: ['POST'])]
+    /**
+     * Gère l'inscription, la désinscription et le changement de statut d'un utilisateur à un événement.
+     */
+    #[Route('/evenement/{id}/inscription', name: 'app_evenement_inscription', methods: ['POST'])]
+    #[IsGranted('ROLE_USER')]
     public function inscription(
         Request $request,
         Evenement $evenement,
         EntityManagerInterface $entityManager,
-        InscriptionRepository $inscriptionRepository
+        InscriptionRepository $inscriptionRepository,
+        SpecializationRepository $specRepository
     ): Response {
-        // 1. S'assurer que l'utilisateur est connecté
-        $this->denyAccessUnlessGranted('IS_AUTHENTICATED_FULLY');
         /** @var \App\Entity\User $user */
         $user = $this->getUser();
-
-        // 2. Récupérer le statut ET LE RÔLE envoyés par le formulaire
         $statut = $request->request->get('statut');
-        $role = $request->request->get('role'); // <-- NOUVEAU
+        $inscription = $inscriptionRepository->findOneBy(['user' => $user, 'evenement' => $evenement]);
 
-        // 3. Vérifier que le statut est valide
-        if (!in_array($statut, ['Confirmé', 'Incertain', 'Absent'])) {
-            $this->addFlash('error', 'Statut non valide.');
-            return $this->redirectToRoute('app_evenement_show', ['id' => $evenement->getId()]);
-        }
-
-        // 3bis. Vérifier que le rôle est valide (sauf si on se désinscrit)
-        if ($statut !== 'Absent' && !in_array($role, Inscription::ROLES)) {
-            $this->addFlash('error', 'Rôle non valide.');
-            return $this->redirectToRoute('app_evenement_show', ['id' => $evenement->getId()]);
-        }
-
-        // 4. Chercher si une inscription existe déjà
-        $inscription = $inscriptionRepository->findOneBy([
-            'user' => $user,
-            'evenement' => $evenement
-        ]);
-
-        // Si le statut est "Absent", on supprime l'inscription
         if ($statut === 'Absent') {
             if ($inscription) {
                 $entityManager->remove($inscription);
                 $this->addFlash('success', 'Votre désinscription a été prise en compte.');
             }
         } else {
-            // Si l'inscription n'existe pas, on la crée
             if (!$inscription) {
                 $inscription = new Inscription();
                 $inscription->setUser($user);
                 $inscription->setEvenement($evenement);
             }
-            // On met à jour le statut ET LE RÔLE
-            $inscription->setStatut($statut);
-            $inscription->setPlayedRole($role); // <-- NOUVEAU
 
+            if ($statut === 'Incertain') {
+                $inscription->setStatut('Incertain');
+                $inscription->setPlayedRole(null);
+                $inscription->setSpecialization(null);
+                $this->addFlash('info', 'Votre statut a été mis à jour en "Incertain".');
+            }
+
+            if ($statut === 'Confirmé') {
+                $role = $request->request->get('role');
+                $specializationId = $request->request->get('specialization');
+
+                if (!in_array($role, Inscription::ROLES)) {
+                    $this->addFlash('error', 'Le rôle sélectionné est invalide.');
+                    return $this->redirectToRoute('app_evenement_show', ['id' => $evenement->getId()]);
+                }
+
+                $specEntity = $specRepository->find($specializationId);
+                if (!$specEntity) {
+                    $this->addFlash('error', 'La spécialisation sélectionnée est invalide.');
+                    return $this->redirectToRoute('app_evenement_show', ['id' => $evenement->getId()]);
+                }
+
+                $confirmedCount = $inscriptionRepository->countConfirmedByRole($evenement, $role, $user);
+                $requiredPlaces = 0;
+                switch ($role) {
+                    case 'Tank':
+                        $requiredPlaces = $evenement->getTanksRequis();
+                        break;
+                    case 'Soigneur':
+                        $requiredPlaces = $evenement->getSoigneursRequis();
+                        break;
+                    case 'DPS':
+                        $requiredPlaces = $evenement->getDpsRequis();
+                        break;
+                }
+
+                if ($confirmedCount < $requiredPlaces) {
+                    $inscription->setStatut('Confirmé');
+                    $this->addFlash('success', 'Votre inscription en tant que ' . $role . ' a bien été enregistrée !');
+                } else {
+                    $inscription->setStatut('En attente');
+                    $this->addFlash('info', 'Le rôle ' . $role . ' est complet. Vous avez été placé(e) sur le banc de touche.');
+                }
+                $inscription->setPlayedRole($role);
+                $inscription->setSpecialization($specEntity);
+            }
             $entityManager->persist($inscription);
-            $this->addFlash('success', 'Votre inscription en tant que ' . $role . ' a bien été enregistrée !');
         }
 
-        // 5. On sauvegarde en base de données
+        $entityManager->flush();
+        return $this->redirectToRoute('app_evenement_show', ['id' => $evenement->getId()]);
+    }
+
+    /**
+     * Permet à un admin de changer le statut d'une inscription (Confirmer, Mettre en attente).
+     */
+    #[Route('/inscription/{id}/update-status', name: 'app_inscription_update_status', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function updateInscriptionStatus(Request $request, Inscription $inscription, EntityManagerInterface $entityManager): Response
+    {
+        $newStatus = $request->request->get('status');
+        $evenementId = $inscription->getEvenement()->getId();
+
+        if (in_array($newStatus, Inscription::STATUTS)) {
+            $inscription->setStatut($newStatus);
+            $entityManager->flush();
+            $this->addFlash('success', 'Le statut de ' . $inscription->getUser()->getPseudo() . ' a été mis à jour.');
+        } else {
+            $this->addFlash('error', 'Statut invalide.');
+        }
+
+        return $this->redirectToRoute('app_evenement_show', ['id' => $evenementId]);
+    }
+
+    /**
+     * Permet à un admin de supprimer l'inscription d'un joueur.
+     */
+    #[Route('/inscription/{id}/remove', name: 'app_inscription_remove', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN')]
+    public function removeInscription(Inscription $inscription, EntityManagerInterface $entityManager): Response
+    {
+        $evenementId = $inscription->getEvenement()->getId();
+        $pseudo = $inscription->getUser()->getPseudo();
+
+        $entityManager->remove($inscription);
         $entityManager->flush();
 
-        // 6. On redirige vers la page de l'événement
-        return $this->redirectToRoute('app_evenement_show', ['id' => $evenement->getId()]);
+        $this->addFlash('success', 'L\'inscription de ' . $pseudo . ' a bien été supprimée.');
+
+        return $this->redirectToRoute('app_evenement_show', ['id' => $evenementId]);
     }
 }
